@@ -379,6 +379,8 @@ import {
   GetPwmInvestmentPlanDetailParamsV5,
   GetPwmInvestmentPlanOrdersParamsV5,
   GetPwmPendingInvestmentPlanDetailParamsV5,
+  GetReferralCommissionRecordsParamsV5,
+  GetReferralUserInvitationsParamsV5,
   GetRenewOrderInfoFixedParamsV5,
   GetRepaymentHistoryFixedParamsV5,
   GetRepaymentHistoryFlexibleParamsV5,
@@ -528,7 +530,11 @@ import {
   RedeemFixedTermEarnResultV5,
   RedeemPwmInvestmentPlanParamsV5,
   RedeemPwmInvestmentPlanResultV5,
+  ReferralCampaignRewardsResultV5,
   ReferralCodesResultV5,
+  ReferralCommissionRecordsResultV5,
+  ReferralUserIdentityProfileV5,
+  ReferralUserInvitationsResultV5,
   ReinvestLiquidityMiningParamsV5,
   ReinvestLiquidityMiningResultV5,
   RenewBorrowOrderFixedParamsV5,
@@ -3019,6 +3025,61 @@ export class RestClientV5 extends BaseRestClient {
 
   getReferralCode(): Promise<APIResponseV3WithTime<ReferralCodesResultV5>> {
     return this.getPrivate('/v5/user/invitation/code');
+  }
+
+  /**
+   * Query referral commission records for the authenticated inviter.
+   *
+   * The inviter comes from the API key. Do not send an inviter user ID.
+   * Response `userId` is a masked invitee ID. A JSON body is required; pass
+   * `{}` or omit `params` when no filter is needed. Property names follow the
+   * proto camelCase names. Gateway serialization is not independently verified.
+   */
+  getReferralCommissionRecords(
+    params?: GetReferralCommissionRecordsParamsV5,
+  ): Promise<APIResponseV3WithTime<ReferralCommissionRecordsResultV5>> {
+    return this.postPrivate('/v5/referral/commission/records', params ?? {});
+  }
+
+  /**
+   * Get referral rules and configured campaign tasks for the current site.
+   *
+   * Static configuration only. This does not return task progress, reward
+   * claims, or payouts. `tasks` entries are JSON strings
+   * (`ReferralCampaignTaskPayloadV5`). Send an empty JSON object.
+   */
+  getReferralCampaignRewards(): Promise<
+    APIResponseV3WithTime<ReferralCampaignRewardsResultV5>
+  > {
+    return this.postPrivate('/v5/referral/campaign/rewards', {});
+  }
+
+  /**
+   * Get the authenticated user's referral identity and available commission.
+   *
+   * `inviterAffiliateUserId` and `inviterUserId` are relationship flags
+   * (`1` or `0`), not user IDs. `commissionInfo` is present only when an M1
+   * inviter record matches this user and the commission query succeeds.
+   * Send an empty JSON object. Gateway serialization, including int64 and
+   * enum representation, is not independently verified.
+   */
+  getReferralUserIdentityProfile(): Promise<
+    APIResponseV3WithTime<ReferralUserIdentityProfileV5>
+  > {
+    return this.postPrivate('/v5/referral/user/identity-profile', {});
+  }
+
+  /**
+   * Query invitation records for the authenticated referral user.
+   *
+   * Do not send the caller's user ID. A JSON body is required; pass `{}` or
+   * omit `params` when no filter is needed. Gateway serialization is not
+   * independently verified.
+   */
+  getReferralUserInvitations(
+    params?: GetReferralUserInvitationsParamsV5,
+  ): Promise<APIResponseV3WithTime<ReferralUserInvitationsResultV5>> {
+    return this.postPrivate('/v5/referral/user/invitations', params ?? {});
   }
 
   /**
