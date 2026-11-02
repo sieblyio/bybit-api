@@ -121,6 +121,17 @@ export interface RenewFixedRateBorrowParamsV5 {
   qty?: string;
 }
 
+export interface GetFixedRateBorrowInterestAccruedParamsV5 {
+  orderId?: string;
+  orderCurrency?: string;
+  limit?: string;
+  cursor?: string;
+}
+
+export interface CancelFixedRateBorrowOrderParamsV5 {
+  orderId: string;
+}
+
 export interface GetFlexibleAvailableInventoryParamsV5 {
   currency: string;
 }

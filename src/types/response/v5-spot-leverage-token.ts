@@ -213,6 +213,16 @@ export interface FixedRateBorrowQuoteV5 {
   qty: string;
 }
 
+export interface FixedRateBorrowInterestAccruedV5 {
+  refId: string;
+  currency: string;
+  orderId: string;
+  loanAmt: string;
+  interest: string;
+  interestRate: string;
+  ts: string;
+}
+
 export interface FlexibleAvailableInventoryV5 {
   currency: string;
   availableInventory: string;
