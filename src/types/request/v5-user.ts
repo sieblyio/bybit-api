@@ -86,6 +86,66 @@ export interface GetFriendReferralsParamsV5 {
   cursor?: string;
 }
 
+/**
+ * Referral product line.
+ *
+ * 0 unknown, 1 spot, 2 contracts, 3 options, 4 USDC perpetual, 6 TradeFi, 9 Alpha.
+ * Unrecognized response values are returned as 0.
+ */
+export type ReferralProductLineV5 = 0 | 1 | 2 | 3 | 4 | 6 | 9;
+
+/**
+ * Invitee status (`friendStatus`).
+ *
+ * 0 unknown, 1 signed up, 2 first deposit, 3 first trade, 4 qualified,
+ * 5 not qualified, 6 historical invitation, 7 boost in progress,
+ * 8 boost qualified, 9 boost failed, 10 boost user signed up.
+ */
+export type ReferralFriendStatusV5 = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+
+/**
+ * POST /v5/referral/commission/records
+ *
+ * All fields are optional. Send `{}` when no filter is needed. An empty
+ * `userIdList` does not filter by invitee. `page` 0 is treated as 1.
+ * `pageSize` 0 or greater than 200 is treated as 10.
+ * Times are `YYYY-MM-DD HH:mm:ss`. Property names are the proto camelCase
+ * names; gateway serialization is not independently verified.
+ */
+export interface GetReferralCommissionRecordsParamsV5 {
+  /** Invitee IDs. An empty list does not filter by invitee. */
+  userIdList?: number[];
+  /** Start time, `YYYY-MM-DD HH:mm:ss`. An unparsable value is sent downstream as `""`. */
+  startTime?: string;
+  /** End time, `YYYY-MM-DD HH:mm:ss`. An unparsable value is sent downstream as `""`. */
+  endTime?: string;
+  /** One-based page. `0` is treated as `1`. */
+  page?: number;
+  /** Page size. `0` or a value greater than 200 is treated as 10. */
+  pageSize?: number;
+  productLine?: ReferralProductLineV5;
+}
+
+/**
+ * POST /v5/referral/user/invitations
+ *
+ * All fields are optional. An empty `userIdList` does not filter by invitee.
+ * Invalid or empty times are passed downstream as `0`.
+ */
+export interface GetReferralUserInvitationsParamsV5 {
+  /** Invitee IDs. An empty list does not filter by invitee. */
+  userIdList?: number[];
+  /** `YYYY-MM-DD HH:mm:ss`. Invalid or empty values are passed downstream as `0`. */
+  startTime?: string;
+  /** `YYYY-MM-DD HH:mm:ss`. Invalid or empty values are passed downstream as `0`. */
+  endTime?: string;
+  /** Page number. `0` is treated as `1`. */
+  page?: number;
+  /** Page size. `0` or a value greater than 200 is treated as 10. */
+  pageSize?: number;
+  friendStatus?: ReferralFriendStatusV5;
+}
+
 /** Sign Agreement. Only master account.
  * - `category` (legacy): 2 = metals (XAU/XAG perps; stock perps share this); 3 = crude oil. New enum values are not added here; prefer `categoryV2`.
  * - `categoryV2` (recommended): 1 = metals; 2 = crude oil. Additional values may be added by the API; use a numeric literal or variable.
