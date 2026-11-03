@@ -91,6 +91,7 @@ import {
   CancelAllRFQResultV5,
   CancelBorrowOrderFixedParamsV5,
   CancelEventQuoteParamsV5,
+  CancelFixedRateBorrowOrderParamsV5,
   CancelOrderParamsV5,
   CancelRFQParamsV5,
   CancelRFQQuoteItemV5,
@@ -126,6 +127,7 @@ import {
   ConvertHistoryRecordV5,
   ConvertQuoteV5,
   ConvertStatusV5,
+  CorporateActionV5,
   CreateBorrowOrderFixedParamsV5,
   CreateBorrowOrderFixedV5,
   CreateP2PAdParamsV5,
@@ -202,6 +204,7 @@ import {
   FixedLoanAvailableInventoryV5,
   FixedRateAvailableInventoryV5,
   FixedRateBorrowContractInfoV5,
+  FixedRateBorrowInterestAccruedV5,
   FixedRateBorrowOrderInfoV5,
   FixedRateBorrowParamsV5,
   FixedRateBorrowQuoteV5,
@@ -279,6 +282,7 @@ import {
   GetCollateralCoinsParamsV5,
   GetCompletedLoanOrderHistoryParamsV5,
   GetConvertHistoryParamsV5,
+  GetCorporateActionsParamsV5,
   GetDeliveryPriceParamsV5,
   GetDeliveryRecordParamsV5,
   GetDepositRecordParamsV5,
@@ -309,6 +313,7 @@ import {
   GetFixedLoanAvailableInventoryParamsV5,
   GetFixedRateAvailableInventoryParamsV5,
   GetFixedRateBorrowContractInfoParamsV5,
+  GetFixedRateBorrowInterestAccruedParamsV5,
   GetFixedRateBorrowOrderInfoParamsV5,
   GetFixedRateBorrowOrderQuoteParamsV5,
   GetFixedTermEarnOrderListParamsV5,
@@ -1279,6 +1284,15 @@ export class RestClientV5 extends BaseRestClient {
     params?: GetOptionBaseCoinsParamsV5,
   ): Promise<APIResponseV3WithTime<OptionBaseCoinsResultV5>> {
     return this.get('/v5/market/option-base-coins', params);
+  }
+
+  getCorporateActions(params?: GetCorporateActionsParamsV5): Promise<
+    APIResponseV3WithTime<{
+      list: CorporateActionV5[];
+      nextPageCursor: string;
+    }>
+  > {
+    return this.get('/v5/market/corporate-action', params);
   }
 
   /**
@@ -3748,6 +3762,29 @@ export class RestClientV5 extends BaseRestClient {
     params: RenewFixedRateBorrowParamsV5,
   ): Promise<APIResponseV3WithTime<string>> {
     return this.postPrivate('/v5/spot-margin-trade/fixedborrow-renew', params);
+  }
+
+  getFixedRateBorrowInterestAccrued(
+    params?: GetFixedRateBorrowInterestAccruedParamsV5,
+  ): Promise<
+    APIResponseV3WithTime<{
+      list: FixedRateBorrowInterestAccruedV5[];
+      nextPageCursor: string;
+    }>
+  > {
+    return this.getPrivate(
+      '/v5/spot-margin-trade/fixedborrow-interest-accrued',
+      params,
+    );
+  }
+
+  cancelFixedRateBorrowOrder(
+    params: CancelFixedRateBorrowOrderParamsV5,
+  ): Promise<APIResponseV3WithTime<{}>> {
+    return this.postPrivate(
+      '/v5/spot-margin-trade/fixedborrow-order-cancel',
+      params,
+    );
   }
 
   getFlexibleAvailableInventory(

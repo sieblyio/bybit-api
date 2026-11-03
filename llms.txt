@@ -8443,157 +8443,6 @@ export interface GetP2PChatMessagesParamsV5 {
 /** AES encrypted session ID. */
 
 ================
-File: src/types/request/v5-spot-leverage-token.ts
-================
-import { LTOrderTypeV5 } from '../shared-v5';
-⋮----
-export interface PurchaseSpotLeveragedTokenParamsV5 {
-  ltCoin: string;
-  amount: string;
-  serialNo?: string;
-}
-⋮----
-export interface RedeemSpotLeveragedTokenParamsV5 {
-  ltCoin: string;
-  quantity: string;
-  serialNo?: string;
-}
-⋮----
-export interface GetSpotLeveragedTokenOrderHistoryParamsV5 {
-  ltCoin?: string;
-  orderId?: string;
-  startTime?: number;
-  endTime?: number;
-  limit?: number;
-  ltOrderType?: LTOrderTypeV5;
-  serialNo?: string;
-}
-⋮----
-export interface GetVIPMarginDataParamsV5 {
-  vipLevel?: string;
-  currency?: string;
-}
-⋮----
-export interface GetSpotMarginCurrencyDataParamsV5 {
-  currency?: string;
-}
-⋮----
-// Spot Margin Trade (UTA) endpoints
-export interface ManualBorrowParamsV5 {
-  coin: string;
-  amount: string;
-}
-⋮----
-export interface GetMaxBorrowableAmountParamsV5 {
-  currency: string;
-}
-⋮----
-export interface GetPositionTiersParamsV5 {
-  currency?: string;
-}
-⋮----
-export interface GetCoinStateParamsV5 {
-  currency?: string;
-}
-⋮----
-export interface GetAvailableAmountToRepayParamsV5 {
-  currency: string;
-}
-⋮----
-export interface SetSpotMarginLeverageParamsV5 {
-  leverage: string;
-  currency?: string;
-}
-⋮----
-export interface ManualRepayWithoutConversionParamsV5 {
-  coin: string;
-  amount?: string;
-  /**
-   * ALL: fixed + floating (floating first); FIXED: fixed only; FLEXIBLE: floating only. Default: FLEXIBLE.
-   */
-  repaymentType?: 'ALL' | 'FIXED' | 'FLEXIBLE';
-}
-⋮----
-/**
-   * ALL: fixed + floating (floating first); FIXED: fixed only; FLEXIBLE: floating only. Default: FLEXIBLE.
-   */
-⋮----
-export interface GetAutoRepayModeParamsV5 {
-  currency?: string; // Coin name, uppercase only. If not passed, returns all currencies
-}
-⋮----
-currency?: string; // Coin name, uppercase only. If not passed, returns all currencies
-⋮----
-export interface SetAutoRepayModeParamsV5 {
-  currency?: string; // Coin name, uppercase only. If not passed, enables for all currencies
-  autoRepayMode: '0' | '1'; // 0: Off, 1: On
-}
-⋮----
-currency?: string; // Coin name, uppercase only. If not passed, enables for all currencies
-autoRepayMode: '0' | '1'; // 0: Off, 1: On
-⋮----
-export interface GetSpotMarginLiabilityInfoParamsV5 {
-  currency: string;
-}
-⋮----
-export interface FixedRateBorrowParamsV5 {
-  orderCurrency: string;
-  orderAmount: string;
-  /** e.g. 0.02 = 2% p.a. */
-  annualRate: string;
-  /** 7, 14, 30, 90, 180 (days) */
-  term: string;
-  /** 1: auto repayment; 2: transfer to flexible loan */
-  repayType?: '1' | '2';
-}
-⋮----
-/** e.g. 0.02 = 2% p.a. */
-⋮----
-/** 7, 14, 30, 90, 180 (days) */
-⋮----
-/** 1: auto repayment; 2: transfer to flexible loan */
-⋮----
-export interface GetFixedRateBorrowOrderInfoParamsV5 {
-  orderId?: string;
-  orderCurrency?: string;
-  state?: string;
-  term?: string;
-  limit?: string;
-  cursor?: string;
-}
-⋮----
-export interface GetFixedRateBorrowContractInfoParamsV5 {
-  orderId?: string;
-  orderCurrency?: string;
-  term?: string;
-  limit?: string;
-  cursor?: string;
-}
-⋮----
-export interface GetFixedRateBorrowOrderQuoteParamsV5 {
-  orderCurrency: string;
-  term?: string;
-  orderBy?: 'apy' | 'term' | 'quantity';
-  sort?: 0 | 1;
-  limit?: number;
-}
-⋮----
-export interface RenewFixedRateBorrowParamsV5 {
-  loanId: string;
-  qty?: string;
-}
-⋮----
-export interface GetFlexibleAvailableInventoryParamsV5 {
-  currency: string;
-}
-⋮----
-export interface GetFixedRateAvailableInventoryParamsV5 {
-  currency: string;
-  term: string;
-  annualRate: string;
-}
-
-================
 File: src/types/request/v5-trade.ts
 ================
 import {
@@ -10442,6 +10291,168 @@ token: string; // Coin name
 quantity: string; // The qty to be repaid
 
 ================
+File: src/types/request/v5-spot-leverage-token.ts
+================
+import { LTOrderTypeV5 } from '../shared-v5';
+⋮----
+export interface PurchaseSpotLeveragedTokenParamsV5 {
+  ltCoin: string;
+  amount: string;
+  serialNo?: string;
+}
+⋮----
+export interface RedeemSpotLeveragedTokenParamsV5 {
+  ltCoin: string;
+  quantity: string;
+  serialNo?: string;
+}
+⋮----
+export interface GetSpotLeveragedTokenOrderHistoryParamsV5 {
+  ltCoin?: string;
+  orderId?: string;
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+  ltOrderType?: LTOrderTypeV5;
+  serialNo?: string;
+}
+⋮----
+export interface GetVIPMarginDataParamsV5 {
+  vipLevel?: string;
+  currency?: string;
+}
+⋮----
+export interface GetSpotMarginCurrencyDataParamsV5 {
+  currency?: string;
+}
+⋮----
+// Spot Margin Trade (UTA) endpoints
+export interface ManualBorrowParamsV5 {
+  coin: string;
+  amount: string;
+}
+⋮----
+export interface GetMaxBorrowableAmountParamsV5 {
+  currency: string;
+}
+⋮----
+export interface GetPositionTiersParamsV5 {
+  currency?: string;
+}
+⋮----
+export interface GetCoinStateParamsV5 {
+  currency?: string;
+}
+⋮----
+export interface GetAvailableAmountToRepayParamsV5 {
+  currency: string;
+}
+⋮----
+export interface SetSpotMarginLeverageParamsV5 {
+  leverage: string;
+  currency?: string;
+}
+⋮----
+export interface ManualRepayWithoutConversionParamsV5 {
+  coin: string;
+  amount?: string;
+  /**
+   * ALL: fixed + floating (floating first); FIXED: fixed only; FLEXIBLE: floating only. Default: FLEXIBLE.
+   */
+  repaymentType?: 'ALL' | 'FIXED' | 'FLEXIBLE';
+}
+⋮----
+/**
+   * ALL: fixed + floating (floating first); FIXED: fixed only; FLEXIBLE: floating only. Default: FLEXIBLE.
+   */
+⋮----
+export interface GetAutoRepayModeParamsV5 {
+  currency?: string; // Coin name, uppercase only. If not passed, returns all currencies
+}
+⋮----
+currency?: string; // Coin name, uppercase only. If not passed, returns all currencies
+⋮----
+export interface SetAutoRepayModeParamsV5 {
+  currency?: string; // Coin name, uppercase only. If not passed, enables for all currencies
+  autoRepayMode: '0' | '1'; // 0: Off, 1: On
+}
+⋮----
+currency?: string; // Coin name, uppercase only. If not passed, enables for all currencies
+autoRepayMode: '0' | '1'; // 0: Off, 1: On
+⋮----
+export interface GetSpotMarginLiabilityInfoParamsV5 {
+  currency: string;
+}
+⋮----
+export interface FixedRateBorrowParamsV5 {
+  orderCurrency: string;
+  orderAmount: string;
+  /** e.g. 0.02 = 2% p.a. */
+  annualRate: string;
+  /** 7, 14, 30, 90, 180 (days) */
+  term: string;
+  /** 1: auto repayment; 2: transfer to flexible loan */
+  repayType?: '1' | '2';
+}
+⋮----
+/** e.g. 0.02 = 2% p.a. */
+⋮----
+/** 7, 14, 30, 90, 180 (days) */
+⋮----
+/** 1: auto repayment; 2: transfer to flexible loan */
+⋮----
+export interface GetFixedRateBorrowOrderInfoParamsV5 {
+  orderId?: string;
+  orderCurrency?: string;
+  state?: string;
+  term?: string;
+  limit?: string;
+  cursor?: string;
+}
+⋮----
+export interface GetFixedRateBorrowContractInfoParamsV5 {
+  orderId?: string;
+  orderCurrency?: string;
+  term?: string;
+  limit?: string;
+  cursor?: string;
+}
+⋮----
+export interface GetFixedRateBorrowOrderQuoteParamsV5 {
+  orderCurrency: string;
+  term?: string;
+  orderBy?: 'apy' | 'term' | 'quantity';
+  sort?: 0 | 1;
+  limit?: number;
+}
+⋮----
+export interface RenewFixedRateBorrowParamsV5 {
+  loanId: string;
+  qty?: string;
+}
+⋮----
+export interface GetFixedRateBorrowInterestAccruedParamsV5 {
+  orderId?: string;
+  orderCurrency?: string;
+  limit?: string;
+  cursor?: string;
+}
+⋮----
+export interface CancelFixedRateBorrowOrderParamsV5 {
+  orderId: string;
+}
+⋮----
+export interface GetFlexibleAvailableInventoryParamsV5 {
+  currency: string;
+}
+⋮----
+export interface GetFixedRateAvailableInventoryParamsV5 {
+  currency: string;
+  term: string;
+  annualRate: string;
+}
+
+================
 File: src/types/request/v5-user.ts
 ================
 import { PermissionsV5 } from '../shared-v5';
@@ -11133,257 +11144,6 @@ currency: string; // Coin to borrow
 maxLoan: string; // Maximum borrowable amount based on current collateral
 notionalUsd: string; // Notional USD value
 remainingQuota: string; // Remaining individual platform borrowing limit (shared between main and sub accounts)
-
-================
-File: src/types/response/v5-spot-leverage-token.ts
-================
-import {
-  LeverageTokenStatusV5,
-  LTOrderStatusV5,
-  LTOrderTypeV5,
-} from '../shared-v5';
-⋮----
-export interface LeverageTokenInfoV5 {
-  ltCoin: string;
-  ltName: string;
-  maxPurchase: string;
-  minPurchase: string;
-  maxPurchaseDaily: string;
-  maxRedeem: string;
-  minRedeem: string;
-  maxRedeemDaily: string;
-  purchaseFeeRate: string;
-  redeemFeeRate: string;
-  ltStatus: LeverageTokenStatusV5;
-  fundFee: string;
-  fundFeeTime: string;
-  manageFeeRate: string;
-  manageFeeTime: string;
-  value: string;
-  netValue: string;
-  total: string;
-}
-⋮----
-export interface LeveragedTokenMarketResultV5 {
-  ltCoin: string;
-  nav: string;
-  navTime: string;
-  circulation: string;
-  basket: string;
-  leverage: string;
-}
-⋮----
-export interface PurchaseSpotLeveragedTokenResultV5 {
-  ltCoin: string;
-  ltOrderStatus: LTOrderStatusV5;
-  execQty: string;
-  execAmt: string;
-  amount: string;
-  purchaseId: string;
-  serialNo: string;
-  valueCoin: string;
-}
-export interface RedeemSpotLeveragedTokenResultV5 {
-  ltCoin: string;
-  ltOrderStatus: LTOrderStatusV5;
-  quantity: string;
-  execQty: string;
-  execAmt: string;
-  redeemId: string;
-  serialNo: string;
-  valueCoin: string;
-}
-⋮----
-export interface SpotLeveragedTokenOrderHistoryV5 {
-  ltCoin: string;
-  orderId: string;
-  ltOrderType: LTOrderTypeV5;
-  orderTime: number;
-  updateTime: number;
-  ltOrderStatus: LTOrderStatusV5;
-  fee: string;
-  amount: string;
-  value: string;
-  valueCoin: string;
-  serialNo: string;
-}
-⋮----
-export interface VIPMarginDataV5 {
-  vipCoinList: {
-    list: {
-      borrowable: boolean;
-      collateralRatio: string;
-      currency: string;
-      hourlyBorrowRate: string;
-      liquidationOrder: string;
-      marginCollateral: boolean;
-      maxBorrowingAmount: string;
-    }[];
-    vipLevel: string;
-  }[];
-}
-⋮----
-export interface SpotMarginCurrencyDataV5 {
-  currency: string;
-  flexibleManualBorrowable: boolean;
-  minFlexibleManualBorrowQty: string;
-  flexibleManualBorrowAccuracy: string;
-  fixedManualBorrowable: boolean;
-  minFixedManualBorrowQty: string;
-  fixedManualBorrowAccuracy: string;
-  fixedInterestRateAccuracy: string;
-  minFixedInterestRate: string;
-  maxFixedInterestRate: string;
-}
-⋮----
-export interface SpotMarginStateV5 {
-  spotLeverage: string;
-  spotMarginMode: '1' | '0';
-  effectiveLeverage: string;
-}
-⋮----
-// Spot Margin Trade (UTA) response types
-export interface ManualBorrowResultV5 {
-  coin: string;
-  amount: string;
-}
-⋮----
-export interface MaxBorrowableAmountV5 {
-  currency: string;
-  /**
-   * Maximum borrowable amount. Can be `"0"` when spot margin mode is off, or
-   * when no collateral coins are enabled. The app can still show a borrow
-   * amount after a collateral coin is selected. Undocumented; Bybit API staff
-   * confirmed this on 15 Oct 2026. Check `getSpotMarginState()`,
-   * `setCollateralCoin()` (`POST /v5/account/set-collateral-switch`), and
-   * `toggleSpotMarginTrade()` first.
-   */
-  maxLoan: string;
-}
-⋮----
-/**
-   * Maximum borrowable amount. Can be `"0"` when spot margin mode is off, or
-   * when no collateral coins are enabled. The app can still show a borrow
-   * amount after a collateral coin is selected. Undocumented; Bybit API staff
-   * confirmed this on 15 Oct 2026. Check `getSpotMarginState()`,
-   * `setCollateralCoin()` (`POST /v5/account/set-collateral-switch`), and
-   * `toggleSpotMarginTrade()` first.
-   */
-⋮----
-export interface PositionTierV5 {
-  tier: string;
-  borrowLimit: string;
-  positionMMR: string;
-  positionIMR: string;
-  maxLeverage: string;
-}
-⋮----
-export interface CurrencyPositionTiersV5 {
-  currency: string;
-  positionTiersRatioList: PositionTierV5[];
-}
-⋮----
-export interface CoinStateV5 {
-  currency: string;
-  spotLeverage: string;
-}
-⋮----
-export interface AvailableAmountToRepayV5 {
-  currency: string;
-  lossLessRepaymentAmount: string;
-}
-⋮----
-export interface ManualRepayWithoutConversionResultV5 {
-  /**
-   * Result status:
-   * - P: Processing
-   * - SU: Success
-   * - FA: Failed
-   */
-  resultStatus: 'P' | 'SU' | 'FA';
-}
-⋮----
-/**
-   * Result status:
-   * - P: Processing
-   * - SU: Success
-   * - FA: Failed
-   */
-⋮----
-export interface AutoRepayModeItemV5 {
-  currency: string; // Coin name, uppercase only
-  autoRepayMode: '0' | '1'; // 0: Off, 1: On
-}
-⋮----
-currency: string; // Coin name, uppercase only
-autoRepayMode: '0' | '1'; // 0: Off, 1: On
-⋮----
-export interface AutoRepayModeResultV5 {
-  data: AutoRepayModeItemV5[];
-}
-⋮----
-export interface SpotMarginLiabilityInfoV5 {
-  currency: string;
-  totalBorrowAmount: string;
-  fixedBorrowAmount: string;
-  flexibleBorrowAmount: string;
-  spotTotalBorrow: string;
-  derivativesBorrow: string;
-}
-⋮----
-export interface FixedRateBorrowResultV5 {
-  orderId: string;
-}
-⋮----
-export interface FixedRateBorrowOrderInfoV5 {
-  annualRate: string;
-  orderId: string;
-  orderTime: string;
-  filledQty: string;
-  orderQty: string;
-  orderCurrency: string;
-  state: number;
-  term: number;
-  repayType: string;
-  strategyType: 'PARTIAL' | 'FULL';
-}
-⋮----
-export interface FixedRateBorrowContractInfoV5 {
-  annualRate: string;
-  borrowCurrency: string;
-  borrowTime: string;
-  interestPaid: string;
-  loanId: string;
-  orderId: string;
-  repaymentTime: string;
-  residualPenaltyInterest: string;
-  residualPrincipal: string;
-  status: number;
-  term: string;
-  repayType: string;
-  strategyType: 'PARTIAL' | 'FULL';
-}
-⋮----
-export interface FixedRateBorrowQuoteV5 {
-  orderCurrency: string;
-  term: number;
-  annualRate: string;
-  qty: string;
-}
-⋮----
-export interface FlexibleAvailableInventoryV5 {
-  currency: string;
-  availableInventory: string;
-  updateTime: string;
-}
-⋮----
-export interface FixedRateAvailableInventoryV5 {
-  currency: string;
-  term: string;
-  annualRate: string;
-  availableInventory: string;
-  updateTime: string;
-}
 
 ================
 File: src/websocket-client.ts
@@ -12355,6 +12115,267 @@ export interface ClosedOptionsPositionV5 {
   openTime: number;
   avgEntryPrice: string;
   totalPnl: string;
+}
+
+================
+File: src/types/response/v5-spot-leverage-token.ts
+================
+import {
+  LeverageTokenStatusV5,
+  LTOrderStatusV5,
+  LTOrderTypeV5,
+} from '../shared-v5';
+⋮----
+export interface LeverageTokenInfoV5 {
+  ltCoin: string;
+  ltName: string;
+  maxPurchase: string;
+  minPurchase: string;
+  maxPurchaseDaily: string;
+  maxRedeem: string;
+  minRedeem: string;
+  maxRedeemDaily: string;
+  purchaseFeeRate: string;
+  redeemFeeRate: string;
+  ltStatus: LeverageTokenStatusV5;
+  fundFee: string;
+  fundFeeTime: string;
+  manageFeeRate: string;
+  manageFeeTime: string;
+  value: string;
+  netValue: string;
+  total: string;
+}
+⋮----
+export interface LeveragedTokenMarketResultV5 {
+  ltCoin: string;
+  nav: string;
+  navTime: string;
+  circulation: string;
+  basket: string;
+  leverage: string;
+}
+⋮----
+export interface PurchaseSpotLeveragedTokenResultV5 {
+  ltCoin: string;
+  ltOrderStatus: LTOrderStatusV5;
+  execQty: string;
+  execAmt: string;
+  amount: string;
+  purchaseId: string;
+  serialNo: string;
+  valueCoin: string;
+}
+export interface RedeemSpotLeveragedTokenResultV5 {
+  ltCoin: string;
+  ltOrderStatus: LTOrderStatusV5;
+  quantity: string;
+  execQty: string;
+  execAmt: string;
+  redeemId: string;
+  serialNo: string;
+  valueCoin: string;
+}
+⋮----
+export interface SpotLeveragedTokenOrderHistoryV5 {
+  ltCoin: string;
+  orderId: string;
+  ltOrderType: LTOrderTypeV5;
+  orderTime: number;
+  updateTime: number;
+  ltOrderStatus: LTOrderStatusV5;
+  fee: string;
+  amount: string;
+  value: string;
+  valueCoin: string;
+  serialNo: string;
+}
+⋮----
+export interface VIPMarginDataV5 {
+  vipCoinList: {
+    list: {
+      borrowable: boolean;
+      collateralRatio: string;
+      currency: string;
+      hourlyBorrowRate: string;
+      liquidationOrder: string;
+      marginCollateral: boolean;
+      maxBorrowingAmount: string;
+    }[];
+    vipLevel: string;
+  }[];
+}
+⋮----
+export interface SpotMarginCurrencyDataV5 {
+  currency: string;
+  flexibleManualBorrowable: boolean;
+  minFlexibleManualBorrowQty: string;
+  flexibleManualBorrowAccuracy: string;
+  fixedManualBorrowable: boolean;
+  minFixedManualBorrowQty: string;
+  fixedManualBorrowAccuracy: string;
+  fixedInterestRateAccuracy: string;
+  minFixedInterestRate: string;
+  maxFixedInterestRate: string;
+}
+⋮----
+export interface SpotMarginStateV5 {
+  spotLeverage: string;
+  spotMarginMode: '1' | '0';
+  effectiveLeverage: string;
+}
+⋮----
+// Spot Margin Trade (UTA) response types
+export interface ManualBorrowResultV5 {
+  coin: string;
+  amount: string;
+}
+⋮----
+export interface MaxBorrowableAmountV5 {
+  currency: string;
+  /**
+   * Maximum borrowable amount. Can be `"0"` when spot margin mode is off, or
+   * when no collateral coins are enabled. The app can still show a borrow
+   * amount after a collateral coin is selected. Undocumented; Bybit API staff
+   * confirmed this on 15 Oct 2026. Check `getSpotMarginState()`,
+   * `setCollateralCoin()` (`POST /v5/account/set-collateral-switch`), and
+   * `toggleSpotMarginTrade()` first.
+   */
+  maxLoan: string;
+}
+⋮----
+/**
+   * Maximum borrowable amount. Can be `"0"` when spot margin mode is off, or
+   * when no collateral coins are enabled. The app can still show a borrow
+   * amount after a collateral coin is selected. Undocumented; Bybit API staff
+   * confirmed this on 15 Oct 2026. Check `getSpotMarginState()`,
+   * `setCollateralCoin()` (`POST /v5/account/set-collateral-switch`), and
+   * `toggleSpotMarginTrade()` first.
+   */
+⋮----
+export interface PositionTierV5 {
+  tier: string;
+  borrowLimit: string;
+  positionMMR: string;
+  positionIMR: string;
+  maxLeverage: string;
+}
+⋮----
+export interface CurrencyPositionTiersV5 {
+  currency: string;
+  positionTiersRatioList: PositionTierV5[];
+}
+⋮----
+export interface CoinStateV5 {
+  currency: string;
+  spotLeverage: string;
+}
+⋮----
+export interface AvailableAmountToRepayV5 {
+  currency: string;
+  lossLessRepaymentAmount: string;
+}
+⋮----
+export interface ManualRepayWithoutConversionResultV5 {
+  /**
+   * Result status:
+   * - P: Processing
+   * - SU: Success
+   * - FA: Failed
+   */
+  resultStatus: 'P' | 'SU' | 'FA';
+}
+⋮----
+/**
+   * Result status:
+   * - P: Processing
+   * - SU: Success
+   * - FA: Failed
+   */
+⋮----
+export interface AutoRepayModeItemV5 {
+  currency: string; // Coin name, uppercase only
+  autoRepayMode: '0' | '1'; // 0: Off, 1: On
+}
+⋮----
+currency: string; // Coin name, uppercase only
+autoRepayMode: '0' | '1'; // 0: Off, 1: On
+⋮----
+export interface AutoRepayModeResultV5 {
+  data: AutoRepayModeItemV5[];
+}
+⋮----
+export interface SpotMarginLiabilityInfoV5 {
+  currency: string;
+  totalBorrowAmount: string;
+  fixedBorrowAmount: string;
+  flexibleBorrowAmount: string;
+  spotTotalBorrow: string;
+  derivativesBorrow: string;
+}
+⋮----
+export interface FixedRateBorrowResultV5 {
+  orderId: string;
+}
+⋮----
+export interface FixedRateBorrowOrderInfoV5 {
+  annualRate: string;
+  orderId: string;
+  orderTime: string;
+  filledQty: string;
+  orderQty: string;
+  orderCurrency: string;
+  state: number;
+  term: number;
+  repayType: string;
+  strategyType: 'PARTIAL' | 'FULL';
+}
+⋮----
+export interface FixedRateBorrowContractInfoV5 {
+  annualRate: string;
+  borrowCurrency: string;
+  borrowTime: string;
+  interestPaid: string;
+  loanId: string;
+  orderId: string;
+  repaymentTime: string;
+  residualPenaltyInterest: string;
+  residualPrincipal: string;
+  status: number;
+  term: string;
+  repayType: string;
+  strategyType: 'PARTIAL' | 'FULL';
+}
+⋮----
+export interface FixedRateBorrowQuoteV5 {
+  orderCurrency: string;
+  term: number;
+  annualRate: string;
+  qty: string;
+}
+⋮----
+export interface FixedRateBorrowInterestAccruedV5 {
+  refId: string;
+  currency: string;
+  orderId: string;
+  loanAmt: string;
+  interest: string;
+  interestRate: string;
+  ts: string;
+}
+⋮----
+export interface FlexibleAvailableInventoryV5 {
+  currency: string;
+  availableInventory: string;
+  updateTime: string;
+}
+⋮----
+export interface FixedRateAvailableInventoryV5 {
+  currency: string;
+  term: string;
+  annualRate: string;
+  availableInventory: string;
+  updateTime: string;
 }
 
 ================
@@ -15036,6 +15057,608 @@ File: src/types/request/index.ts
 
 
 ================
+File: src/types/response/index.ts
+================
+
+
+================
+File: src/types/shared-v5.ts
+================
+export type CategoryV5 = 'spot' | 'linear' | 'inverse' | 'option';
+/** Public WS subscribe/routing category. Event Contract uses `'event'`; REST `CategoryV5` does not. */
+export type WSCategoryV5 = CategoryV5 | 'event';
+export type ContractTypeV5 =
+  | 'InversePerpetual'
+  | 'LinearPerpetual'
+  | 'InverseFutures';
+export type CopyTradingV5 = 'none' | 'both' | 'utaOnly' | 'normalOnly';
+⋮----
+export type InstrumentStatusV5 =
+  | 'PreLaunch'
+  | 'PendingOpen'
+  | 'Trading'
+  | 'Settling'
+  | 'Delivering'
+  | 'Closed';
+⋮----
+/**
+ * Region / product class returned as `symbolType` on instruments-info (and account instruments-info).
+ * For `category=linear`, includes e.g. `stock`, `forex`, `commodity`, `xstocks`. Spot may return `''`.
+ */
+export type InstrumentSymbolTypeV5 =
+  | ''
+  | 'stock'
+  | 'forex'
+  | 'commodity'
+  | 'xstocks';
+⋮----
+export type MarginTradingV5 = 'none' | 'both' | 'utaOnly' | 'normalSpotOnly';
+⋮----
+/** Product type for strategy APIs (create / list). */
+export type StrategyCategoryV5 =
+  | 'UTA_USDT'
+  | 'UTA_USDC'
+  | 'UTA_USDC_FUTURE'
+  | 'UTA_SPOT'
+  | 'UTA_INVERSE'
+  | 'UTA_INVERSE_FUTURE'
+  | 'UTA_USDT_FUTURE';
+⋮----
+export type StrategyTypeV5 = 'twap' | 'chaseOrder' | 'iceberg' | 'pov';
+⋮----
+export type StrategyPreferV5 =
+  | 'limit'
+  | 'priceSpeedBalance'
+  | 'fastestExecution'
+  | 'quickExecution';
+⋮----
+/** POV strategy execution mode */
+export type PovModeV5 =
+  | 'TradedVolume'
+  | 'OppositeSideLiquidity'
+  | 'SameSideLiquidity';
+⋮----
+export type OrderFilterV5 = 'Order' | 'tpslOrder' | 'StopOrder';
+export type OrderSideV5 = 'Buy' | 'Sell';
+export type OrderTypeV5 = 'Market' | 'Limit';
+export type OrderTimeInForceV5 = 'GTC' | 'IOC' | 'FOK' | 'PostOnly' | 'RPI';
+export type OrderTriggerByV5 = 'LastPrice' | 'IndexPrice' | 'MarkPrice';
+export type OCOTriggerTypeV5 =
+  | 'OcoTriggerByUnknown'
+  | 'OcoTriggerTp'
+  | 'OcoTriggerBySl';
+⋮----
+export type OrderSMPTypeV5 =
+  | 'None'
+  | 'CancelMaker'
+  | 'CancelTaker'
+  | 'CancelBoth';
+⋮----
+export type OrderStatusV5 =
+  | 'Created'
+  | 'New'
+  | 'Rejected'
+  | 'PartiallyFilled'
+  | 'PartiallyFilledCanceled'
+  | 'Filled'
+  | 'Cancelled'
+  | 'Untriggered'
+  | 'Triggered'
+  | 'Deactivated'
+  | 'Active';
+⋮----
+/**
+ * Defines the types of order creation mechanisms.
+ */
+export type OrderCreateTypeV5 =
+  /** Represents an order created by a user. */
+  | 'CreateByUser'
+  /** Represents an order created by an admin closing. */
+  | 'CreateByAdminClosing'
+  /** Futures conditional order. */
+  | 'CreateByStopOrder'
+  /** Futures take profit order. */
+  | 'CreateByTakeProfit'
+  /** Futures partial take profit order. */
+  | 'CreateByPartialTakeProfit'
+  /** Futures stop loss order. */
+  | 'CreateByStopLoss'
+  /** Futures partial stop loss order. */
+  | 'CreateByPartialStopLoss'
+  /** Futures trailing stop order. */
+  | 'CreateByTrailingStop'
+  /** Laddered liquidation to reduce the required maintenance margin. */
+  | 'CreateByLiq'
+  /**
+   * If the position is still subject to liquidation (i.e., does not meet the required maintenance margin level),
+   * the position shall be taken over by the liquidation engine and closed at the bankruptcy price.
+   */
+  | 'CreateByTakeOver_PassThrough'
+  /** Auto-Deleveraging(ADL) */
+  | 'CreateByAdl_PassThrough'
+  /** Order placed via Paradigm. */
+  | 'CreateByBlock_PassThrough'
+  /** Order created by move position. */
+  | 'CreateByBlockTradeMovePosition_PassThrough'
+  /** The close order placed via web or app position area - web/app. */
+  | 'CreateByClosing'
+  /** Order created via grid bot - web/app. */
+  | 'CreateByFGridBot'
+  /** Order closed via grid bot - web/app. */
+  | 'CloseByFGridBot'
+  /** Order created by TWAP - web/app. */
+  | 'CreateByTWAP'
+  /** Order created by TV webhook - web/app. */
+  | 'CreateByTVSignal'
+  /** Order created by Mm rate close function - web/app. */
+  | 'CreateByMmRateClose'
+  /** Order created by Martingale bot - web/app. */
+  | 'CreateByMartingaleBot'
+  /** Order closed by Martingale bot - web/app. */
+  | 'CloseByMartingaleBot'
+  /** Order created by Ice berg strategy - web/app. */
+  | 'CreateByIceBerg'
+  /** Order created by arbitrage - web/app. */
+  | 'CreateByArbitrage'
+  /** Option dynamic delta hedge order - web/app */
+  | 'CreateByDdh'
+  /** BBO Order - Best Bid/Offer order */
+  | 'CreateByBboOrder';
+⋮----
+/** Represents an order created by a user. */
+⋮----
+/** Represents an order created by an admin closing. */
+⋮----
+/** Futures conditional order. */
+⋮----
+/** Futures take profit order. */
+⋮----
+/** Futures partial take profit order. */
+⋮----
+/** Futures stop loss order. */
+⋮----
+/** Futures partial stop loss order. */
+⋮----
+/** Futures trailing stop order. */
+⋮----
+/** Laddered liquidation to reduce the required maintenance margin. */
+⋮----
+/**
+   * If the position is still subject to liquidation (i.e., does not meet the required maintenance margin level),
+   * the position shall be taken over by the liquidation engine and closed at the bankruptcy price.
+   */
+⋮----
+/** Auto-Deleveraging(ADL) */
+⋮----
+/** Order placed via Paradigm. */
+⋮----
+/** Order created by move position. */
+⋮----
+/** The close order placed via web or app position area - web/app. */
+⋮----
+/** Order created via grid bot - web/app. */
+⋮----
+/** Order closed via grid bot - web/app. */
+⋮----
+/** Order created by TWAP - web/app. */
+⋮----
+/** Order created by TV webhook - web/app. */
+⋮----
+/** Order created by Mm rate close function - web/app. */
+⋮----
+/** Order created by Martingale bot - web/app. */
+⋮----
+/** Order closed by Martingale bot - web/app. */
+⋮----
+/** Order created by Ice berg strategy - web/app. */
+⋮----
+/** Order created by arbitrage - web/app. */
+⋮----
+/** Option dynamic delta hedge order - web/app */
+⋮----
+/** BBO Order - Best Bid/Offer order */
+⋮----
+export type OrderCancelTypeV5 =
+  | 'CancelByUser'
+  | 'CancelByReduceOnly'
+  | 'CancelByPrepareLiq'
+  | 'CancelAllBeforeLiq'
+  | 'CancelByPrepareAdl'
+  | 'CancelAllBeforeAdl'
+  | 'CancelByAdmin'
+  | 'CancelByTpSlTsClear'
+  | 'CancelByPzSideCh'
+  | 'UNKNOWN';
+⋮----
+export type OrderRejectReasonV5 =
+  | 'EC_NoError'
+  | 'EC_Others'
+  | 'EC_UnknownMessageType'
+  | 'EC_MissingClOrdID'
+  | 'EC_MissingOrigClOrdID'
+  | 'EC_ClOrdIDOrigClOrdIDAreTheSame'
+  | 'EC_DuplicatedClOrdID'
+  | 'EC_OrigClOrdIDDoesNotExist'
+  | 'EC_TooLateToCancel'
+  | 'EC_UnknownOrderType'
+  | 'EC_UnknownSide'
+  | 'EC_UnknownTimeInForce'
+  | 'EC_WronglyRouted'
+  | 'EC_MarketOrderPriceIsNotZero'
+  | 'EC_LimitOrderInvalidPrice'
+  | 'EC_NoEnoughQtyToFill'
+  | 'EC_NoImmediateQtyToFill'
+  | 'EC_PerCancelRequest'
+  | 'EC_MarketOrderCannotBePostOnly'
+  | 'EC_PostOnlyWillTakeLiquidity'
+  | 'EC_CancelReplaceOrder'
+  | 'EC_InvalidSymbolStatus';
+⋮----
+export type StopOrderTypeV5 =
+  | 'TakeProfit'
+  | 'StopLoss'
+  | 'TrailingStop'
+  | 'Stop'
+  | 'PartialTakeProfit'
+  | 'PartialStopLoss'
+  | 'tpslOrder'
+  | 'OcoOrder'
+  | 'MmRateClose'
+  | 'BidirectionalTpslOrder';
+⋮----
+/**
+ * Position index. Used to identify positions in different position modes.
+ *
+ * - 0 one-way mode position
+ * - 1 Buy side of hedge-mode position
+ * - 2 Sell side of hedge-mode position
+ */
+export type PositionIdx = 0 | 1 | 2;
+⋮----
+/**
+ * Position status.
+ *
+ * - 'Normal'
+ * - 'Liq' in the liquidation progress
+ * - 'Adl' in the auto-deleverage progress
+ */
+export type PositionStatusV5 = 'Normal' | 'Liq' | 'Adl';
+export type PositionSideV5 = 'Buy' | 'Sell' | 'None' | '';
+⋮----
+export type OptionTypeV5 = 'Call' | 'Put';
+⋮----
+/**
+ * Trade mode.
+ *
+ * - 0 cross-margin,
+ * - 1 isolated margin
+ */
+export type TradeModeV5 = 0 | 1;
+⋮----
+export type TPSLModeV5 = 'Full' | 'Partial';
+export type AccountMarginModeV5 =
+  | 'ISOLATED_MARGIN'
+  | 'REGULAR_MARGIN'
+  | 'PORTFOLIO_MARGIN';
+export type UnifiedUpdateStatusV5 = 'FAIL' | 'PROCESS' | 'SUCCESS';
+⋮----
+export type AccountTypeV5 =
+  | 'CONTRACT'
+  | 'SPOT'
+  | 'INVESTMENT'
+  | 'OPTION'
+  | 'UNIFIED'
+  | 'FUND'
+  | 'EARN';
+⋮----
+export type TransactionTypeV5 =
+  | 'TRANSFER_IN'
+  | 'TRANSFER_OUT'
+  | 'TRADE'
+  | 'SETTLEMENT'
+  | 'DELIVERY'
+  | 'LIQUIDATION'
+  | 'ADL'
+  | 'AIRDROP'
+  | 'BONUS_RECOLLECT'
+  | 'BONUS_RECOLLECT'
+  | 'FEE_REFUND'
+  | 'INTEREST'
+  | 'CURRENCY_BUY'
+  | 'CURRENCY_SELL'
+  | 'BORROWED_AMOUNT_INS_LOAN'
+  | 'PRINCIPLE_REPAYMENT_INS_LOAN'
+  | 'INTEREST_REPAYMENT_INS_LOAN'
+  | 'AUTO_SOLD_COLLATERAL_INS_LOAN'
+  | 'AUTO_BUY_LIABILITY_INS_LOAN'
+  | 'AUTO_PRINCIPLE_REPAYMENT_INS_LOAN'
+  | 'AUTO_INTEREST_REPAYMENT_INS_LOAN'
+  | 'TRANSFER_IN_INS_LOAN'
+  | 'TRANSFER_OUT_INS_LOAN'
+  | 'SPOT_REPAYMENT_SELL'
+  | 'SPOT_REPAYMENT_BUY'
+  | 'TOKENS_SUBSCRIPTION'
+  | 'TOKENS_REDEMPTION'
+  | 'AUTO_DEDUCTION'
+  | 'FLEXIBLE_STAKING_SUBSCRIPTION'
+  | 'FLEXIBLE_STAKING_REDEMPTION'
+  | 'FIXED_STAKING_SUBSCRIPTION'
+  | 'BORROWED_AMOUNT_INS_LOAN'
+  | 'PRINCIPLE_REPAYMENT_INS_LOAN'
+  | 'INTEREST_REPAYMENT_INS_LOAN'
+  | 'AUTO_SOLD_COLLATERAL_INS_LOAN'
+  | 'AUTO_BUY_LIABILITY_INS_LOAN'
+  | 'AUTO_PRINCIPLE_REPAYMENT_INS_LOAN'
+  | 'AUTO_INTEREST_REPAYMENT_INS_LOAN'
+  | 'TRANSFER_IN_INS_LOAN'
+  | 'TRANSFER_OUT_INS_LOAN'
+  | 'SPOT_REPAYMENT_SELL'
+  | 'SPOT_REPAYMENT_BUY'
+  | 'TOKENS_SUBSCRIPTION'
+  | 'TOKENS_REDEMPTION'
+  | 'AUTO_DEDUCTION'
+  | 'FLEXIBLE_STAKING_SUBSCRIPTION'
+  | 'FLEXIBLE_STAKING_REDEMPTION'
+  | 'FIXED_STAKING_SUBSCRIPTION'
+  | 'FLEXIBLE_STAKING_REFUND'
+  | 'FIXED_STAKING_REFUND'
+  | 'PREMARKET_TRANSFER_OUT'
+  | 'PREMARKET_DELIVERY_SELL_NEW_COIN'
+  | 'PREMARKET_DELIVERY_BUY_NEW_COIN'
+  | 'PREMARKET_DELIVERY_PLEDGE_PAY_SELLER'
+  | 'PREMARKET_DELIVERY_PLEDGE_BACK'
+  | 'PREMARKET_ROLLBACK_PLEDGE_BACK'
+  | 'PREMARKET_ROLLBACK_PLEDGE_PENALTY_TO_BUYER'
+  | 'CUSTODY_NETWORK_FEE'
+  | 'CUSTODY_SETTLE_FEE'
+  | 'CUSTODY_LOCK'
+  | 'CUSTODY_UNLOCK'
+  | 'CUSTODY_UNLOCK_REFUND'
+  | 'LOANS_BORROW_FUNDS'
+  | 'LOANS_PLEDGE_ASSET'
+  | 'BONUS_TRANSFER_IN'
+  | 'BONUS_TRANSFER_OUT'
+  | 'PEF_TRANSFER_IN'
+  | 'PEF_TRANSFER_OUT'
+  | 'PEF_PROFIT_SHARE'
+  | 'ONCHAINEARN_SUBSCRIPTION'
+  | 'ONCHAINEARN_REDEMPTION'
+  | 'ONCHAINEARN_REFUND'
+  | 'STRUCTURE_PRODUCT_SUBSCRIPTION'
+  | 'STRUCTURE_PRODUCT_REFUND'
+  | 'CLASSIC_WEALTH_MANAGEMENT_SUBSCRIPTION'
+  | 'PREMIMUM_WEALTH_MANAGEMENT_SUBSCRIPTION'
+  | 'PREMIMUM_WEALTH_MANAGEMENT_REFUND'
+  | 'LIQUIDITY_MINING_SUBSCRIPTION'
+  | 'LIQUIDITY_MINING_REFUND'
+  | 'PWM_SUBSCRIPTION'
+  | 'PWM_REFUND'
+  | 'DEFI_INVESTMENT_SUBSCRIPTION'
+  | 'DEFI_INVESTMENT_REFUND'
+  | 'DEFI_INVESTMENT_REDEMPTION'
+  | 'INSTITUTION_LOAN_IN'
+  | 'INSTITUTION_PAYBACK_PRINCIPAL_OUT'
+  | 'INSTITUTION_PAYBACK_INTEREST_OUT'
+  | 'INSTITUTION_EXCHANGE_SELL'
+  | 'INSTITUTION_EXCHANGE_BUY'
+  | 'INSTITUTION_LIQ_PRINCIPAL_OUT'
+  | 'INSTITUTION_LIQ_INTEREST_OUT'
+  | 'INSTITUTION_LOAN_TRANSFER_IN'
+  | 'INSTITUTION_LOAN_TRANSFER_OUT'
+  | 'INSTITUTION_LOAN_WITHOUT_WITHDRAW'
+  | 'INSTITUTION_LOAN_RESERVE_IN'
+  | 'INSTITUTION_LOAN_RESERVE_OUT'
+  | 'PLATFORM_TOKEN_MNT_LIQRECALLEDMMNT'
+  | 'PLATFORM_TOKEN_MNT_LIQRETURNEDMNT'
+  | 'DIVIDEND_SETTLEMENT'
+  /**
+   * Forward stock split settlement. Closes the entire existing position; the
+   * new position is opened as `FORWARD_SPLIT_OPEN`.
+   *
+   * Changelog 2026-10-13 updated this description. The enum glossary still
+   * lists the older wording "fractional share settlement".
+   */
+  | 'FORWARD_SPLIT_SETTLE'
+  /** Forward stock split position opening after the existing position is settled and closed. */
+  | 'FORWARD_SPLIT_OPEN'
+  /**
+   * Reverse stock split settlement. Closes the entire existing position; the
+   * new position is opened as `REVERSE_SPLIT_OPEN`.
+   *
+   * Changelog 2026-10-13 updated this description. The enum glossary still
+   * lists the older wording "fractional share settlement".
+   */
+  | 'REVERSE_SPLIT_SETTLE'
+  /** Reverse stock split position opening after the existing position is settled and closed. */
+  | 'REVERSE_SPLIT_OPEN';
+⋮----
+/**
+   * Forward stock split settlement. Closes the entire existing position; the
+   * new position is opened as `FORWARD_SPLIT_OPEN`.
+   *
+   * Changelog 2026-10-13 updated this description. The enum glossary still
+   * lists the older wording "fractional share settlement".
+   */
+⋮----
+/** Forward stock split position opening after the existing position is settled and closed. */
+⋮----
+/**
+   * Reverse stock split settlement. Closes the entire existing position; the
+   * new position is opened as `REVERSE_SPLIT_OPEN`.
+   *
+   * Changelog 2026-10-13 updated this description. The enum glossary still
+   * lists the older wording "fractional share settlement".
+   */
+⋮----
+/** Reverse stock split position opening after the existing position is settled and closed. */
+⋮----
+export type PermissionTypeV5 =
+  | 'ContractTrade'
+  | 'Spot'
+  | 'Wallet'
+  | 'Options'
+  | 'Derivatives'
+  | 'Exchange'
+  | 'NFT';
+⋮----
+/**
+ * Leveraged token status:
+ *
+ * - '1' LT can be purchased and redeemed
+ * - '2' LT can be purchased, but not redeemed
+ * - '3' LT can be redeemed, but not purchased
+ * - '4' LT cannot be purchased nor redeemed
+ * - '5' Adjusting position
+ */
+export type LeverageTokenStatusV5 = '1' | '2' | '3' | '4' | '5';
+⋮----
+/**
+ * Leveraged token order type: '1': purchase, '2': redeem
+ */
+export type LTOrderTypeV5 = '1' | '2';
+⋮----
+/**
+ * Leveraged token order status: '1': completed, '2': in progress, '3': failed
+ */
+export type LTOrderStatusV5 = '1' | '2' | '3';
+⋮----
+export type ExecTypeV5 =
+  | 'Trade'
+  | 'AdlTrade'
+  | 'Funding'
+  | 'BustTrade'
+  | 'Settle'
+  | 'BlockTrade'
+  | 'MovePosition'
+  /** @deprecated Removed from Bybit execType; kept for older payloads. */
+  | 'CorporateAction'
+  /**
+   * Forward stock split settlement and closure of the entire existing position,
+   * followed by opening a new position (`ForwardSplitOpen`).
+   */
+  | 'ForwardSplitSettle'
+  /** Forward stock split position opening after the existing position is settled and closed. */
+  | 'ForwardSplitOpen'
+  /**
+   * Reverse stock split settlement and closure of the entire existing position,
+   * followed by opening a new position (`ReverseSplitOpen`).
+   */
+  | 'ReverseSplitSettle'
+  /** Reverse stock split position opening after the existing position is settled and closed. */
+  | 'ReverseSplitOpen'
+  | 'Dividend'
+  | 'UNKNOWN';
+⋮----
+/** @deprecated Removed from Bybit execType; kept for older payloads. */
+⋮----
+/**
+   * Forward stock split settlement and closure of the entire existing position,
+   * followed by opening a new position (`ForwardSplitOpen`).
+   */
+⋮----
+/** Forward stock split position opening after the existing position is settled and closed. */
+⋮----
+/**
+   * Reverse stock split settlement and closure of the entire existing position,
+   * followed by opening a new position (`ReverseSplitOpen`).
+   */
+⋮----
+/** Reverse stock split position opening after the existing position is settled and closed. */
+⋮----
+/**
+ * Withdraw type. 0(default): on chain. 1: off chain. 2: all.
+ */
+export type WithdrawalTypeV5 = '0' | '1' | '2';
+⋮----
+export interface PermissionsV5 {
+  ContractTrade?: string[];
+  Spot?: string[];
+  Wallet?: string[];
+  Options?: string[];
+  Derivatives?: string[];
+  CopyTrading?: string[];
+  BlockTrade?: string[];
+  Exchange?: string[];
+  /** @deprecated , always returns []*/
+  NFT?: string[];
+  Earn?: string[];
+  Affiliate?: string[];
+  FiatP2P?: string[];
+  /** Bybit Pay (FaitPayOrder) */
+  FiatBitPay?: string[];
+  FiatConvertBroker?: string[];
+  BitCard?: string[];
+  ByXPost?: string[];
+}
+⋮----
+/** @deprecated , always returns []*/
+⋮----
+/** Bybit Pay (FaitPayOrder) */
+⋮----
+export interface CategoryCursorListV5<
+  T extends unknown[],
+  TCategory extends CategoryV5 = CategoryV5,
+> {
+  category: TCategory;
+  list: T;
+  nextPageCursor?: string;
+}
+⋮----
+/**
+ * Next page cursor does not exist for spot!
+ */
+export interface CursorListV5<T extends unknown[]> {
+  nextPageCursor: string;
+  list: T;
+}
+⋮----
+/**
+ * A wrapper type for any responses that have a "nextPageCursor" property, and a "rows" property with an array of elements
+ *
+ * ```{ nextPageCursor: "something", rows: someData[] }```
+ */
+export interface CursorRowsV5<T extends unknown[]> {
+  nextPageCursor: string;
+  rows: T;
+}
+⋮----
+export interface CategoryListV5<
+  T extends unknown[],
+  TCategory extends CategoryV5,
+> {
+  category: TCategory;
+  list: T;
+}
+⋮----
+export interface CategorySymbolListV5<
+  T extends unknown[],
+  TCategory extends CategoryV5,
+> {
+  category: TCategory;
+  symbol: string;
+  list: T;
+}
+⋮----
+export interface GetSystemStatusParamsV5 {
+  id?: string;
+  state?: string;
+}
+⋮----
+export interface SystemStatusItemV5 {
+  id: string;
+  title: string;
+  state: string;
+  begin: string;
+  end: string;
+  href: string;
+  serviceTypes: number[];
+  product: number[];
+  uidSuffix: number[];
+  maintainType: string;
+  env: string;
+}
+
+================
 File: src/types/request/v5-market.ts
 ================
 import { KlineIntervalV3 } from '../shared';
@@ -15282,11 +15905,14 @@ export interface GetOptionBaseCoinsParamsV5 {
    * Comma-separated underlying types.
    * 0 crypto, 1 commodity, 2 stock, 3 forex, 4 oil. Omit to return all types.
    */
-
-================
-File: src/types/response/index.ts
-================
-
+⋮----
+export interface GetCorporateActionsParamsV5 {
+  category?: 'option';
+  baseCoin?: string;
+  actionType?: 'ForwardSplit' | 'ReverseSplit' | 'Dividend';
+  limit?: number;
+  cursor?: string;
+}
 
 ================
 File: src/types/response/v5-market.ts
@@ -15944,602 +16570,29 @@ export interface OptionBaseCoinV5 {
 export interface OptionBaseCoinsResultV5 {
   list: OptionBaseCoinV5[];
 }
-
-================
-File: src/types/shared-v5.ts
-================
-export type CategoryV5 = 'spot' | 'linear' | 'inverse' | 'option';
-/** Public WS subscribe/routing category. Event Contract uses `'event'`; REST `CategoryV5` does not. */
-export type WSCategoryV5 = CategoryV5 | 'event';
-export type ContractTypeV5 =
-  | 'InversePerpetual'
-  | 'LinearPerpetual'
-  | 'InverseFutures';
-export type CopyTradingV5 = 'none' | 'both' | 'utaOnly' | 'normalOnly';
 ⋮----
-export type InstrumentStatusV5 =
-  | 'PreLaunch'
-  | 'PendingOpen'
-  | 'Trading'
-  | 'Settling'
-  | 'Delivering'
-  | 'Closed';
-⋮----
-/**
- * Region / product class returned as `symbolType` on instruments-info (and account instruments-info).
- * For `category=linear`, includes e.g. `stock`, `forex`, `commodity`, `xstocks`. Spot may return `''`.
- */
-export type InstrumentSymbolTypeV5 =
-  | ''
-  | 'stock'
-  | 'forex'
-  | 'commodity'
-  | 'xstocks';
-⋮----
-export type MarginTradingV5 = 'none' | 'both' | 'utaOnly' | 'normalSpotOnly';
-⋮----
-/** Product type for strategy APIs (create / list). */
-export type StrategyCategoryV5 =
-  | 'UTA_USDT'
-  | 'UTA_USDC'
-  | 'UTA_USDC_FUTURE'
-  | 'UTA_SPOT'
-  | 'UTA_INVERSE'
-  | 'UTA_INVERSE_FUTURE'
-  | 'UTA_USDT_FUTURE';
-⋮----
-export type StrategyTypeV5 = 'twap' | 'chaseOrder' | 'iceberg' | 'pov';
-⋮----
-export type StrategyPreferV5 =
-  | 'limit'
-  | 'priceSpeedBalance'
-  | 'fastestExecution'
-  | 'quickExecution';
-⋮----
-/** POV strategy execution mode */
-export type PovModeV5 =
-  | 'TradedVolume'
-  | 'OppositeSideLiquidity'
-  | 'SameSideLiquidity';
-⋮----
-export type OrderFilterV5 = 'Order' | 'tpslOrder' | 'StopOrder';
-export type OrderSideV5 = 'Buy' | 'Sell';
-export type OrderTypeV5 = 'Market' | 'Limit';
-export type OrderTimeInForceV5 = 'GTC' | 'IOC' | 'FOK' | 'PostOnly' | 'RPI';
-export type OrderTriggerByV5 = 'LastPrice' | 'IndexPrice' | 'MarkPrice';
-export type OCOTriggerTypeV5 =
-  | 'OcoTriggerByUnknown'
-  | 'OcoTriggerTp'
-  | 'OcoTriggerBySl';
-⋮----
-export type OrderSMPTypeV5 =
-  | 'None'
-  | 'CancelMaker'
-  | 'CancelTaker'
-  | 'CancelBoth';
-⋮----
-export type OrderStatusV5 =
-  | 'Created'
-  | 'New'
-  | 'Rejected'
-  | 'PartiallyFilled'
-  | 'PartiallyFilledCanceled'
-  | 'Filled'
-  | 'Cancelled'
-  | 'Untriggered'
-  | 'Triggered'
-  | 'Deactivated'
-  | 'Active';
-⋮----
-/**
- * Defines the types of order creation mechanisms.
- */
-export type OrderCreateTypeV5 =
-  /** Represents an order created by a user. */
-  | 'CreateByUser'
-  /** Represents an order created by an admin closing. */
-  | 'CreateByAdminClosing'
-  /** Futures conditional order. */
-  | 'CreateByStopOrder'
-  /** Futures take profit order. */
-  | 'CreateByTakeProfit'
-  /** Futures partial take profit order. */
-  | 'CreateByPartialTakeProfit'
-  /** Futures stop loss order. */
-  | 'CreateByStopLoss'
-  /** Futures partial stop loss order. */
-  | 'CreateByPartialStopLoss'
-  /** Futures trailing stop order. */
-  | 'CreateByTrailingStop'
-  /** Laddered liquidation to reduce the required maintenance margin. */
-  | 'CreateByLiq'
-  /**
-   * If the position is still subject to liquidation (i.e., does not meet the required maintenance margin level),
-   * the position shall be taken over by the liquidation engine and closed at the bankruptcy price.
-   */
-  | 'CreateByTakeOver_PassThrough'
-  /** Auto-Deleveraging(ADL) */
-  | 'CreateByAdl_PassThrough'
-  /** Order placed via Paradigm. */
-  | 'CreateByBlock_PassThrough'
-  /** Order created by move position. */
-  | 'CreateByBlockTradeMovePosition_PassThrough'
-  /** The close order placed via web or app position area - web/app. */
-  | 'CreateByClosing'
-  /** Order created via grid bot - web/app. */
-  | 'CreateByFGridBot'
-  /** Order closed via grid bot - web/app. */
-  | 'CloseByFGridBot'
-  /** Order created by TWAP - web/app. */
-  | 'CreateByTWAP'
-  /** Order created by TV webhook - web/app. */
-  | 'CreateByTVSignal'
-  /** Order created by Mm rate close function - web/app. */
-  | 'CreateByMmRateClose'
-  /** Order created by Martingale bot - web/app. */
-  | 'CreateByMartingaleBot'
-  /** Order closed by Martingale bot - web/app. */
-  | 'CloseByMartingaleBot'
-  /** Order created by Ice berg strategy - web/app. */
-  | 'CreateByIceBerg'
-  /** Order created by arbitrage - web/app. */
-  | 'CreateByArbitrage'
-  /** Option dynamic delta hedge order - web/app */
-  | 'CreateByDdh'
-  /** BBO Order - Best Bid/Offer order */
-  | 'CreateByBboOrder';
-⋮----
-/** Represents an order created by a user. */
-⋮----
-/** Represents an order created by an admin closing. */
-⋮----
-/** Futures conditional order. */
-⋮----
-/** Futures take profit order. */
-⋮----
-/** Futures partial take profit order. */
-⋮----
-/** Futures stop loss order. */
-⋮----
-/** Futures partial stop loss order. */
-⋮----
-/** Futures trailing stop order. */
-⋮----
-/** Laddered liquidation to reduce the required maintenance margin. */
-⋮----
-/**
-   * If the position is still subject to liquidation (i.e., does not meet the required maintenance margin level),
-   * the position shall be taken over by the liquidation engine and closed at the bankruptcy price.
-   */
-⋮----
-/** Auto-Deleveraging(ADL) */
-⋮----
-/** Order placed via Paradigm. */
-⋮----
-/** Order created by move position. */
-⋮----
-/** The close order placed via web or app position area - web/app. */
-⋮----
-/** Order created via grid bot - web/app. */
-⋮----
-/** Order closed via grid bot - web/app. */
-⋮----
-/** Order created by TWAP - web/app. */
-⋮----
-/** Order created by TV webhook - web/app. */
-⋮----
-/** Order created by Mm rate close function - web/app. */
-⋮----
-/** Order created by Martingale bot - web/app. */
-⋮----
-/** Order closed by Martingale bot - web/app. */
-⋮----
-/** Order created by Ice berg strategy - web/app. */
-⋮----
-/** Order created by arbitrage - web/app. */
-⋮----
-/** Option dynamic delta hedge order - web/app */
-⋮----
-/** BBO Order - Best Bid/Offer order */
-⋮----
-export type OrderCancelTypeV5 =
-  | 'CancelByUser'
-  | 'CancelByReduceOnly'
-  | 'CancelByPrepareLiq'
-  | 'CancelAllBeforeLiq'
-  | 'CancelByPrepareAdl'
-  | 'CancelAllBeforeAdl'
-  | 'CancelByAdmin'
-  | 'CancelByTpSlTsClear'
-  | 'CancelByPzSideCh'
-  | 'UNKNOWN';
-⋮----
-export type OrderRejectReasonV5 =
-  | 'EC_NoError'
-  | 'EC_Others'
-  | 'EC_UnknownMessageType'
-  | 'EC_MissingClOrdID'
-  | 'EC_MissingOrigClOrdID'
-  | 'EC_ClOrdIDOrigClOrdIDAreTheSame'
-  | 'EC_DuplicatedClOrdID'
-  | 'EC_OrigClOrdIDDoesNotExist'
-  | 'EC_TooLateToCancel'
-  | 'EC_UnknownOrderType'
-  | 'EC_UnknownSide'
-  | 'EC_UnknownTimeInForce'
-  | 'EC_WronglyRouted'
-  | 'EC_MarketOrderPriceIsNotZero'
-  | 'EC_LimitOrderInvalidPrice'
-  | 'EC_NoEnoughQtyToFill'
-  | 'EC_NoImmediateQtyToFill'
-  | 'EC_PerCancelRequest'
-  | 'EC_MarketOrderCannotBePostOnly'
-  | 'EC_PostOnlyWillTakeLiquidity'
-  | 'EC_CancelReplaceOrder'
-  | 'EC_InvalidSymbolStatus';
-⋮----
-export type StopOrderTypeV5 =
-  | 'TakeProfit'
-  | 'StopLoss'
-  | 'TrailingStop'
-  | 'Stop'
-  | 'PartialTakeProfit'
-  | 'PartialStopLoss'
-  | 'tpslOrder'
-  | 'OcoOrder'
-  | 'MmRateClose'
-  | 'BidirectionalTpslOrder';
-⋮----
-/**
- * Position index. Used to identify positions in different position modes.
- *
- * - 0 one-way mode position
- * - 1 Buy side of hedge-mode position
- * - 2 Sell side of hedge-mode position
- */
-export type PositionIdx = 0 | 1 | 2;
-⋮----
-/**
- * Position status.
- *
- * - 'Normal'
- * - 'Liq' in the liquidation progress
- * - 'Adl' in the auto-deleverage progress
- */
-export type PositionStatusV5 = 'Normal' | 'Liq' | 'Adl';
-export type PositionSideV5 = 'Buy' | 'Sell' | 'None' | '';
-⋮----
-export type OptionTypeV5 = 'Call' | 'Put';
-⋮----
-/**
- * Trade mode.
- *
- * - 0 cross-margin,
- * - 1 isolated margin
- */
-export type TradeModeV5 = 0 | 1;
-⋮----
-export type TPSLModeV5 = 'Full' | 'Partial';
-export type AccountMarginModeV5 =
-  | 'ISOLATED_MARGIN'
-  | 'REGULAR_MARGIN'
-  | 'PORTFOLIO_MARGIN';
-export type UnifiedUpdateStatusV5 = 'FAIL' | 'PROCESS' | 'SUCCESS';
-⋮----
-export type AccountTypeV5 =
-  | 'CONTRACT'
-  | 'SPOT'
-  | 'INVESTMENT'
-  | 'OPTION'
-  | 'UNIFIED'
-  | 'FUND'
-  | 'EARN';
-⋮----
-export type TransactionTypeV5 =
-  | 'TRANSFER_IN'
-  | 'TRANSFER_OUT'
-  | 'TRADE'
-  | 'SETTLEMENT'
-  | 'DELIVERY'
-  | 'LIQUIDATION'
-  | 'ADL'
-  | 'AIRDROP'
-  | 'BONUS_RECOLLECT'
-  | 'BONUS_RECOLLECT'
-  | 'FEE_REFUND'
-  | 'INTEREST'
-  | 'CURRENCY_BUY'
-  | 'CURRENCY_SELL'
-  | 'BORROWED_AMOUNT_INS_LOAN'
-  | 'PRINCIPLE_REPAYMENT_INS_LOAN'
-  | 'INTEREST_REPAYMENT_INS_LOAN'
-  | 'AUTO_SOLD_COLLATERAL_INS_LOAN'
-  | 'AUTO_BUY_LIABILITY_INS_LOAN'
-  | 'AUTO_PRINCIPLE_REPAYMENT_INS_LOAN'
-  | 'AUTO_INTEREST_REPAYMENT_INS_LOAN'
-  | 'TRANSFER_IN_INS_LOAN'
-  | 'TRANSFER_OUT_INS_LOAN'
-  | 'SPOT_REPAYMENT_SELL'
-  | 'SPOT_REPAYMENT_BUY'
-  | 'TOKENS_SUBSCRIPTION'
-  | 'TOKENS_REDEMPTION'
-  | 'AUTO_DEDUCTION'
-  | 'FLEXIBLE_STAKING_SUBSCRIPTION'
-  | 'FLEXIBLE_STAKING_REDEMPTION'
-  | 'FIXED_STAKING_SUBSCRIPTION'
-  | 'BORROWED_AMOUNT_INS_LOAN'
-  | 'PRINCIPLE_REPAYMENT_INS_LOAN'
-  | 'INTEREST_REPAYMENT_INS_LOAN'
-  | 'AUTO_SOLD_COLLATERAL_INS_LOAN'
-  | 'AUTO_BUY_LIABILITY_INS_LOAN'
-  | 'AUTO_PRINCIPLE_REPAYMENT_INS_LOAN'
-  | 'AUTO_INTEREST_REPAYMENT_INS_LOAN'
-  | 'TRANSFER_IN_INS_LOAN'
-  | 'TRANSFER_OUT_INS_LOAN'
-  | 'SPOT_REPAYMENT_SELL'
-  | 'SPOT_REPAYMENT_BUY'
-  | 'TOKENS_SUBSCRIPTION'
-  | 'TOKENS_REDEMPTION'
-  | 'AUTO_DEDUCTION'
-  | 'FLEXIBLE_STAKING_SUBSCRIPTION'
-  | 'FLEXIBLE_STAKING_REDEMPTION'
-  | 'FIXED_STAKING_SUBSCRIPTION'
-  | 'FLEXIBLE_STAKING_REFUND'
-  | 'FIXED_STAKING_REFUND'
-  | 'PREMARKET_TRANSFER_OUT'
-  | 'PREMARKET_DELIVERY_SELL_NEW_COIN'
-  | 'PREMARKET_DELIVERY_BUY_NEW_COIN'
-  | 'PREMARKET_DELIVERY_PLEDGE_PAY_SELLER'
-  | 'PREMARKET_DELIVERY_PLEDGE_BACK'
-  | 'PREMARKET_ROLLBACK_PLEDGE_BACK'
-  | 'PREMARKET_ROLLBACK_PLEDGE_PENALTY_TO_BUYER'
-  | 'CUSTODY_NETWORK_FEE'
-  | 'CUSTODY_SETTLE_FEE'
-  | 'CUSTODY_LOCK'
-  | 'CUSTODY_UNLOCK'
-  | 'CUSTODY_UNLOCK_REFUND'
-  | 'LOANS_BORROW_FUNDS'
-  | 'LOANS_PLEDGE_ASSET'
-  | 'BONUS_TRANSFER_IN'
-  | 'BONUS_TRANSFER_OUT'
-  | 'PEF_TRANSFER_IN'
-  | 'PEF_TRANSFER_OUT'
-  | 'PEF_PROFIT_SHARE'
-  | 'ONCHAINEARN_SUBSCRIPTION'
-  | 'ONCHAINEARN_REDEMPTION'
-  | 'ONCHAINEARN_REFUND'
-  | 'STRUCTURE_PRODUCT_SUBSCRIPTION'
-  | 'STRUCTURE_PRODUCT_REFUND'
-  | 'CLASSIC_WEALTH_MANAGEMENT_SUBSCRIPTION'
-  | 'PREMIMUM_WEALTH_MANAGEMENT_SUBSCRIPTION'
-  | 'PREMIMUM_WEALTH_MANAGEMENT_REFUND'
-  | 'LIQUIDITY_MINING_SUBSCRIPTION'
-  | 'LIQUIDITY_MINING_REFUND'
-  | 'PWM_SUBSCRIPTION'
-  | 'PWM_REFUND'
-  | 'DEFI_INVESTMENT_SUBSCRIPTION'
-  | 'DEFI_INVESTMENT_REFUND'
-  | 'DEFI_INVESTMENT_REDEMPTION'
-  | 'INSTITUTION_LOAN_IN'
-  | 'INSTITUTION_PAYBACK_PRINCIPAL_OUT'
-  | 'INSTITUTION_PAYBACK_INTEREST_OUT'
-  | 'INSTITUTION_EXCHANGE_SELL'
-  | 'INSTITUTION_EXCHANGE_BUY'
-  | 'INSTITUTION_LIQ_PRINCIPAL_OUT'
-  | 'INSTITUTION_LIQ_INTEREST_OUT'
-  | 'INSTITUTION_LOAN_TRANSFER_IN'
-  | 'INSTITUTION_LOAN_TRANSFER_OUT'
-  | 'INSTITUTION_LOAN_WITHOUT_WITHDRAW'
-  | 'INSTITUTION_LOAN_RESERVE_IN'
-  | 'INSTITUTION_LOAN_RESERVE_OUT'
-  | 'PLATFORM_TOKEN_MNT_LIQRECALLEDMMNT'
-  | 'PLATFORM_TOKEN_MNT_LIQRETURNEDMNT'
-  | 'DIVIDEND_SETTLEMENT'
-  /**
-   * Forward stock split settlement. Closes the entire existing position; the
-   * new position is opened as `FORWARD_SPLIT_OPEN`.
-   *
-   * Changelog 2026-10-13 updated this description. The enum glossary still
-   * lists the older wording "fractional share settlement".
-   */
-  | 'FORWARD_SPLIT_SETTLE'
-  /** Forward stock split position opening after the existing position is settled and closed. */
-  | 'FORWARD_SPLIT_OPEN'
-  /**
-   * Reverse stock split settlement. Closes the entire existing position; the
-   * new position is opened as `REVERSE_SPLIT_OPEN`.
-   *
-   * Changelog 2026-10-13 updated this description. The enum glossary still
-   * lists the older wording "fractional share settlement".
-   */
-  | 'REVERSE_SPLIT_SETTLE'
-  /** Reverse stock split position opening after the existing position is settled and closed. */
-  | 'REVERSE_SPLIT_OPEN';
-⋮----
-/**
-   * Forward stock split settlement. Closes the entire existing position; the
-   * new position is opened as `FORWARD_SPLIT_OPEN`.
-   *
-   * Changelog 2026-10-13 updated this description. The enum glossary still
-   * lists the older wording "fractional share settlement".
-   */
-⋮----
-/** Forward stock split position opening after the existing position is settled and closed. */
-⋮----
-/**
-   * Reverse stock split settlement. Closes the entire existing position; the
-   * new position is opened as `REVERSE_SPLIT_OPEN`.
-   *
-   * Changelog 2026-10-13 updated this description. The enum glossary still
-   * lists the older wording "fractional share settlement".
-   */
-⋮----
-/** Reverse stock split position opening after the existing position is settled and closed. */
-⋮----
-export type PermissionTypeV5 =
-  | 'ContractTrade'
-  | 'Spot'
-  | 'Wallet'
-  | 'Options'
-  | 'Derivatives'
-  | 'Exchange'
-  | 'NFT';
-⋮----
-/**
- * Leveraged token status:
- *
- * - '1' LT can be purchased and redeemed
- * - '2' LT can be purchased, but not redeemed
- * - '3' LT can be redeemed, but not purchased
- * - '4' LT cannot be purchased nor redeemed
- * - '5' Adjusting position
- */
-export type LeverageTokenStatusV5 = '1' | '2' | '3' | '4' | '5';
-⋮----
-/**
- * Leveraged token order type: '1': purchase, '2': redeem
- */
-export type LTOrderTypeV5 = '1' | '2';
-⋮----
-/**
- * Leveraged token order status: '1': completed, '2': in progress, '3': failed
- */
-export type LTOrderStatusV5 = '1' | '2' | '3';
-⋮----
-export type ExecTypeV5 =
-  | 'Trade'
-  | 'AdlTrade'
-  | 'Funding'
-  | 'BustTrade'
-  | 'Settle'
-  | 'BlockTrade'
-  | 'MovePosition'
-  /** @deprecated Removed from Bybit execType; kept for older payloads. */
-  | 'CorporateAction'
-  /**
-   * Forward stock split settlement and closure of the entire existing position,
-   * followed by opening a new position (`ForwardSplitOpen`).
-   */
-  | 'ForwardSplitSettle'
-  /** Forward stock split position opening after the existing position is settled and closed. */
-  | 'ForwardSplitOpen'
-  /**
-   * Reverse stock split settlement and closure of the entire existing position,
-   * followed by opening a new position (`ReverseSplitOpen`).
-   */
-  | 'ReverseSplitSettle'
-  /** Reverse stock split position opening after the existing position is settled and closed. */
-  | 'ReverseSplitOpen'
-  | 'Dividend'
-  | 'UNKNOWN';
-⋮----
-/** @deprecated Removed from Bybit execType; kept for older payloads. */
-⋮----
-/**
-   * Forward stock split settlement and closure of the entire existing position,
-   * followed by opening a new position (`ForwardSplitOpen`).
-   */
-⋮----
-/** Forward stock split position opening after the existing position is settled and closed. */
-⋮----
-/**
-   * Reverse stock split settlement and closure of the entire existing position,
-   * followed by opening a new position (`ReverseSplitOpen`).
-   */
-⋮----
-/** Reverse stock split position opening after the existing position is settled and closed. */
-⋮----
-/**
- * Withdraw type. 0(default): on chain. 1: off chain. 2: all.
- */
-export type WithdrawalTypeV5 = '0' | '1' | '2';
-⋮----
-export interface PermissionsV5 {
-  ContractTrade?: string[];
-  Spot?: string[];
-  Wallet?: string[];
-  Options?: string[];
-  Derivatives?: string[];
-  CopyTrading?: string[];
-  BlockTrade?: string[];
-  Exchange?: string[];
-  /** @deprecated , always returns []*/
-  NFT?: string[];
-  Earn?: string[];
-  Affiliate?: string[];
-  FiatP2P?: string[];
-  /** Bybit Pay (FaitPayOrder) */
-  FiatBitPay?: string[];
-  FiatConvertBroker?: string[];
-  BitCard?: string[];
-  ByXPost?: string[];
-}
-⋮----
-/** @deprecated , always returns []*/
-⋮----
-/** Bybit Pay (FaitPayOrder) */
-⋮----
-export interface CategoryCursorListV5<
-  T extends unknown[],
-  TCategory extends CategoryV5 = CategoryV5,
-> {
-  category: TCategory;
-  list: T;
-  nextPageCursor?: string;
-}
-⋮----
-/**
- * Next page cursor does not exist for spot!
- */
-export interface CursorListV5<T extends unknown[]> {
-  nextPageCursor: string;
-  list: T;
-}
-⋮----
-/**
- * A wrapper type for any responses that have a "nextPageCursor" property, and a "rows" property with an array of elements
- *
- * ```{ nextPageCursor: "something", rows: someData[] }```
- */
-export interface CursorRowsV5<T extends unknown[]> {
-  nextPageCursor: string;
-  rows: T;
-}
-⋮----
-export interface CategoryListV5<
-  T extends unknown[],
-  TCategory extends CategoryV5,
-> {
-  category: TCategory;
-  list: T;
-}
-⋮----
-export interface CategorySymbolListV5<
-  T extends unknown[],
-  TCategory extends CategoryV5,
-> {
-  category: TCategory;
+export interface CorporateActionV5 {
+  category?: 'option';
   symbol: string;
-  list: T;
-}
-⋮----
-export interface GetSystemStatusParamsV5 {
-  id?: string;
-  state?: string;
-}
-⋮----
-export interface SystemStatusItemV5 {
-  id: string;
-  title: string;
-  state: string;
-  begin: string;
-  end: string;
-  href: string;
-  serviceTypes: number[];
-  product: number[];
-  uidSuffix: number[];
-  maintainType: string;
-  env: string;
+  baseCoin: string;
+  actionType: 'ForwardSplit' | 'ReverseSplit' | 'Dividend';
+  status: string;
+  effectiveTime: number;
+  details: {
+    splitFactor?: string;
+    splitType?: 'FORWARD' | 'REVERSE';
+    dividendAmountPerShare?: string;
+    dividendCurrency?: string;
+    installmentCount?: number;
+    installmentAmountPerShare?: string;
+    installmentCoin?: string;
+    firstSettlementTimeUtc?: number;
+    installments?: {
+      installmentNo: number;
+      settlementTimeUtc: number;
+      status: string;
+    }[];
+  };
 }
 
 ================
@@ -16638,6 +16691,7 @@ import {
   CancelAllRFQResultV5,
   CancelBorrowOrderFixedParamsV5,
   CancelEventQuoteParamsV5,
+  CancelFixedRateBorrowOrderParamsV5,
   CancelOrderParamsV5,
   CancelRFQParamsV5,
   CancelRFQQuoteItemV5,
@@ -16673,6 +16727,7 @@ import {
   ConvertHistoryRecordV5,
   ConvertQuoteV5,
   ConvertStatusV5,
+  CorporateActionV5,
   CreateBorrowOrderFixedParamsV5,
   CreateBorrowOrderFixedV5,
   CreateP2PAdParamsV5,
@@ -16749,6 +16804,7 @@ import {
   FixedLoanAvailableInventoryV5,
   FixedRateAvailableInventoryV5,
   FixedRateBorrowContractInfoV5,
+  FixedRateBorrowInterestAccruedV5,
   FixedRateBorrowOrderInfoV5,
   FixedRateBorrowParamsV5,
   FixedRateBorrowQuoteV5,
@@ -16826,6 +16882,7 @@ import {
   GetCollateralCoinsParamsV5,
   GetCompletedLoanOrderHistoryParamsV5,
   GetConvertHistoryParamsV5,
+  GetCorporateActionsParamsV5,
   GetDeliveryPriceParamsV5,
   GetDeliveryRecordParamsV5,
   GetDepositRecordParamsV5,
@@ -16856,6 +16913,7 @@ import {
   GetFixedLoanAvailableInventoryParamsV5,
   GetFixedRateAvailableInventoryParamsV5,
   GetFixedRateBorrowContractInfoParamsV5,
+  GetFixedRateBorrowInterestAccruedParamsV5,
   GetFixedRateBorrowOrderInfoParamsV5,
   GetFixedRateBorrowOrderQuoteParamsV5,
   GetFixedTermEarnOrderListParamsV5,
@@ -17715,6 +17773,14 @@ getFeeGroupStructure(
 getOptionBaseCoins(
     params?: GetOptionBaseCoinsParamsV5,
 ): Promise<APIResponseV3WithTime<OptionBaseCoinsResultV5>>
+⋮----
+getCorporateActions(params?: GetCorporateActionsParamsV5): Promise<
+    APIResponseV3WithTime<{
+      list: CorporateActionV5[];
+      nextPageCursor: string;
+    }>
+  > {
+    return this.get('/v5/market/corporate-action', params);
 ⋮----
 /**
    *
@@ -19798,6 +19864,23 @@ getFixedRateBorrowOrderQuote(
 renewFixedRateBorrow(
     params: RenewFixedRateBorrowParamsV5,
 ): Promise<APIResponseV3WithTime<string>>
+⋮----
+getFixedRateBorrowInterestAccrued(
+    params?: GetFixedRateBorrowInterestAccruedParamsV5,
+  ): Promise<
+    APIResponseV3WithTime<{
+      list: FixedRateBorrowInterestAccruedV5[];
+      nextPageCursor: string;
+    }>
+  > {
+    return this.getPrivate(
+      '/v5/spot-margin-trade/fixedborrow-interest-accrued',
+      params,
+    );
+⋮----
+cancelFixedRateBorrowOrder(
+    params: CancelFixedRateBorrowOrderParamsV5,
+): Promise<APIResponseV3WithTime<
 ⋮----
 getFlexibleAvailableInventory(
     params: GetFlexibleAvailableInventoryParamsV5,
@@ -24636,7 +24719,7 @@ File: package.json
 ================
 {
   "name": "bybit-api",
-  "version": "4.8.4",
+  "version": "4.8.5",
   "description": "Complete & robust Node.js SDK for Bybit's REST APIs and WebSockets, with TypeScript & strong end to end tests.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
