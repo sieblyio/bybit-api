@@ -164,6 +164,11 @@ export interface AutoRepayModeResultV5 {
   data: AutoRepayModeItemV5[];
 }
 
+export interface TradeAutoRepayResultV5 {
+  /** Saved switch state. 1: enabled; 0: disabled */
+  autoRepay: '0' | '1';
+}
+
 export interface SpotMarginLiabilityInfoV5 {
   currency: string;
   totalBorrowAmount: string;

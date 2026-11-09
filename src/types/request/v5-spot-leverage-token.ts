@@ -72,8 +72,14 @@ export interface GetAutoRepayModeParamsV5 {
 }
 
 export interface SetAutoRepayModeParamsV5 {
-  currency?: string; // Coin name, uppercase only. If not passed, enables for all currencies
+  /** Coin name, uppercase only. If omitted, sets the global switch; when enabled, includes currencies that become borrowable later */
+  currency?: string;
   autoRepayMode: '0' | '1'; // 0: Off, 1: On
+}
+
+export interface SetTradeAutoRepayParamsV5 {
+  /** 1: enable trade auto repayment; 0: disable */
+  autoRepay: '0' | '1';
 }
 
 export interface GetSpotMarginLiabilityInfoParamsV5 {

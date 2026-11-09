@@ -230,3 +230,9 @@ export interface EventQuoteResultV5 {
   orderLinkId: string;
   orderId: string;
 }
+
+export interface CancelAllEventQuotesResultV5 {
+  list: EventQuoteResultV5[];
+  /** 1: success; 0: failed */
+  success: '1' | '0';
+}

@@ -50,6 +50,8 @@ export interface ApiKeyPermissionsV5 {
   FiatGlobalPay?: string[];
   BitCard?: string[];
   ByXPost?: string[];
+  /** ComplianceAppeal: TM Onchain appeals. Bybit global master read-write API keys only; [] when not granted */
+  Compliance?: string[];
 }
 
 export interface ApiKeyInfoV5 {

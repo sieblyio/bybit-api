@@ -107,6 +107,7 @@ export interface AllowedDepositCoinInfoV5 {
 
 export interface DepositRecordV5 {
   id: string;
+  requestId?: string;
   coin: string;
   chain: string;
   amount: string;
