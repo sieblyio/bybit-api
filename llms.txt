@@ -531,6 +531,67 @@ import { RestClientV5 } from '../../src/index';
 // console.log('openInterest: ', openInterest.result.list);
 
 ================
+File: examples/Websocket/Private/ws-private-v5.ts
+================
+/* eslint-disable @typescript-eslint/no-empty-function */
+import { DefaultLogger, WebsocketClient, WS_KEY_MAP } from '../../../src';
+⋮----
+// or
+// import { DefaultLogger, WS_KEY_MAP, WebsocketClient } from 'bybit-api';
+⋮----
+// Create & inject a custom logger to enable the trace logging level (empty function)
+⋮----
+// trace: (...params) => console.log('trace', ...params),
+⋮----
+/**
+ * Prepare an instance of the WebSocket client. This client handles all aspects of connectivity for you:
+ * - Connections are opened when you subscribe to topics
+ * - If key & secret are provided, authentication is handled automatically
+ * - If you subscribe to topics from different v5 products (e.g. spot and linear perps),
+ *    subscription events are automatically routed to the different ws endpoints on bybit's side
+ * - Heartbeats/ping/pong/reconnects are all handled automatically.
+ *    If a connection drops, the client will clean it up, respawn a fresh connection and resubscribe for you.
+ */
+⋮----
+// testnet: false,
+// demoTrading: false, // set testnet to false, if you plan on using demo trading
+⋮----
+// console.log('raw message received ', JSON.stringify(data, null, 2));
+⋮----
+// wsClient.on('exception', (data) => {
+//   console.error('ws exception: ', data);
+// });
+⋮----
+/**
+ * For private V5 topics, us the subscribeV5() method on the ws client or use the original subscribe() method.
+ *
+ * Note: for private endpoints the "category" field is ignored since there is only one private endpoint
+ * (compared to one public one per category).
+ * The "category" is only needed for public topics since bybit has one endpoint for public events per category.
+ */
+⋮----
+// wsClient.subscribeV5('execution.fast', 'linear');
+// wsClient.subscribeV5('execution.fast.linear', 'linear');
+// wsClient.subscribeV5('execution.fast.spot', 'spot');
+// wsClient.subscribeV5('execution.fast.option', 'option');
+⋮----
+/**
+ * The following has the same effect as above, since there's only one private endpoint for V5 account topics:
+ */
+// wsClient.subscribe('position');
+// wsClient.subscribe('execution');
+// wsClient.subscribe(['order', 'wallet', 'greek']);
+⋮----
+// To unsubscribe from topics (after a 5 second delay, in this example):
+// setTimeout(() => {
+//   console.log('unsubscribing');
+//   wsClient.unsubscribeV5('execution', 'linear');
+// }, 5 * 1000);
+⋮----
+// Topics are tracked per websocket type
+// Get a list of subscribed topics (e.g. for public v3 spot topics) (after a 5 second delay)
+
+================
 File: examples/Websocket/Public/ws-public-allLiquidations.ts
 ================
 import {
@@ -2208,6 +2269,372 @@ export interface USDCPositionsRequest {
 }
 
 ================
+File: src/types/request/v5-alpha-trade.ts
+================
+/**
+ * V5 private Alpha / on-chain (Web3) trade requests.
+ */
+⋮----
+export interface GetAlphaTradeQuoteParamsV5 {
+  tradeType: 1 | 2;
+  fromTokenCode: string;
+  fromTokenAmount: string;
+  toTokenCode: string;
+  quoteMode?: 0 | 1 | 2;
+}
+⋮----
+export interface ExecuteAlphaTradeParamsV5 {
+  fromTokenCode: string;
+  fromTokenAmount: string;
+  toTokenCode: string;
+  slippage: string;
+  quoteData: string;
+  gas: string;
+  quoteMode: 0 | 1 | 2;
+  correctingCode: string;
+  tenant?: string;
+}
+⋮----
+export interface GetAlphaPayTokenListParamsV5 {
+  chainCode: string;
+  tokenAddress: string;
+}
+⋮----
+export interface GetAlphaTradeOrderListParamsV5 {
+  limit: number;
+  pageIndex: number;
+  tradeType?: number;
+  tokenCode?: string;
+  orderStatus?: number[];
+  days?: number;
+  direction?: 'prev' | 'next';
+}
+⋮----
+export interface GetAlphaBizTokenListParamsV5 {
+  tokenTag?: number;
+}
+⋮----
+export interface AlphaTokenAddressInfoV5 {
+  chainCode: string;
+  tokenAddress: string;
+}
+⋮----
+export interface GetAlphaBizTokenPriceListParamsV5 {
+  tokenAddressInfo: AlphaTokenAddressInfoV5[];
+}
+⋮----
+export interface GetAlphaBizTokenDetailsParamsV5 {
+  chainCode: string;
+  tokenAddress: string;
+}
+⋮----
+export interface GetAlphaAssetDetailParamsV5 {
+  chainCode: string;
+  tokenAddress: string;
+}
+
+================
+File: src/types/request/v5-card.ts
+================
+/**
+ * Bybit Card — /v5/card/*
+ * Authenticated; API key permission per Bybit (often card-related).
+ */
+⋮----
+export interface QueryCardAssetRecordsParamsV5 {
+  /** 0: Pending, 1: Cleared, 2: Declined */
+  statusCode?: string;
+  /** Default 100, range [1, 500] */
+  limit?: number;
+  /** Default 1, min 1 */
+  page?: number;
+  /** Last 2/4 digits of card number */
+  pan4?: string;
+  createBeginTime?: number;
+  createEndTime?: number;
+  /** Fuzzy search */
+  merchName?: string;
+  /** Authorization / Clearing / Refund (see Bybit) */
+  type?: string;
+  txnId?: string;
+  cardToken?: string;
+  orderNo?: string;
+}
+⋮----
+/** 0: Pending, 1: Cleared, 2: Declined */
+⋮----
+/** Default 100, range [1, 500] */
+⋮----
+/** Default 1, min 1 */
+⋮----
+/** Last 2/4 digits of card number */
+⋮----
+/** Fuzzy search */
+⋮----
+/** Authorization / Clearing / Refund (see Bybit) */
+⋮----
+export interface QueryCardPointRecordsParamsV5 {
+  type?: string;
+  pageSize?: number;
+  pageNo?: number;
+  startTime?: number;
+  endTime?: number;
+  outOrderId?: string;
+  bizId?: string;
+  bizTxnId?: string;
+  /** 1: Earn, 2: Deduct */
+  side?: string;
+}
+⋮----
+/** 1: Earn, 2: Deduct */
+⋮----
+export interface QueryCardMallItemListParamsV5 {
+  pageNo?: number;
+  pageSize?: number;
+  /** 1: Virtual, 2: Physical */
+  itemType?: number;
+  /** 1: POINTS, 2: CURRENCY */
+  itemBizType?: number;
+  /** 1: Priority, 2: Listing time, 3: Price */
+  orderBy?: number;
+  asc?: boolean;
+  /** 0: Default, 1: VIP */
+  source?: number;
+}
+⋮----
+/** 1: Virtual, 2: Physical */
+⋮----
+/** 1: POINTS, 2: CURRENCY */
+⋮----
+/** 1: Priority, 2: Listing time, 3: Price */
+⋮----
+/** 0: Default, 1: VIP */
+⋮----
+export interface QueryCardPointCashbackDetailParamsV5 {
+  bizTxnId: string;
+}
+
+================
+File: src/types/request/v5-earn-advance-discount.ts
+================
+/**
+ * /v5/earn/advance/ — product-extra, place order, position, order (Discount Buy, Dual Assets, etc.)
+ */
+export type GetAdvanceEarnProductExtraInfoParamsV5 =
+  | {
+      category: 'DiscountBuy';
+      productId?: string;
+    }
+  | {
+      category: 'DualAssets';
+      /** Required for Dual Assets quote. */
+      productId: string;
+    };
+⋮----
+/** Required for Dual Assets quote. */
+⋮----
+export interface AdvanceEarnDiscountBuyExtraV5 {
+  initialPrice: string;
+  purchasePrice: string;
+  knockoutPrice: string;
+  knockoutCouponE8: string;
+  settleType: 'Base' | 'Quote';
+  instUid: string;
+}
+⋮----
+export interface AdvanceEarnDualAssetsExtraV5 {
+  orderDirection: 'BuyLow' | 'SellHigh';
+  selectPrice: string;
+  /** Expected APY in e8 precision; API may return int. */
+  apyE8: string | number;
+}
+⋮----
+/** Expected APY in e8 precision; API may return int. */
+⋮----
+export interface AdvanceEarnInterestCardExtraV5 {
+  awardId: string | number;
+  specCode: string;
+}
+⋮----
+/**
+ * POST /v5/earn/advance/place-order — Discount Buy
+ */
+export interface SubmitAdvanceEarnPlaceOrderDiscountBuyV5 {
+  category: 'DiscountBuy';
+  productId: string;
+  orderType: 'Stake';
+  amount: string;
+  coin: string;
+  accountType: 'FUND' | 'UNIFIED';
+  orderLinkId: string;
+  discountBuyExtra: AdvanceEarnDiscountBuyExtraV5;
+}
+⋮----
+/**
+ * POST /v5/earn/advance/place-order — Dual Assets
+ */
+export interface SubmitAdvanceEarnPlaceOrderDualAssetsV5 {
+  category: 'DualAssets';
+  productId: string;
+  orderType: 'Stake';
+  amount: string;
+  coin: string;
+  accountType: 'FUND' | 'UNIFIED';
+  orderLinkId: string;
+  dualAssetsExtra: AdvanceEarnDualAssetsExtraV5;
+  interestCard?: AdvanceEarnInterestCardExtraV5;
+}
+⋮----
+export type SubmitAdvanceEarnPlaceOrderParamsV5 =
+  | SubmitAdvanceEarnPlaceOrderDiscountBuyV5
+  | SubmitAdvanceEarnPlaceOrderDualAssetsV5;
+⋮----
+export interface GetAdvanceEarnPositionListParamsV5 {
+  category: 'DiscountBuy' | 'DualAssets' | string;
+  productId?: string;
+  coin?: string;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+export interface GetAdvanceEarnOrderListParamsV5 {
+  category: 'DiscountBuy' | 'DualAssets' | string;
+  orderId?: string;
+  orderLinkId?: string;
+  productId?: string;
+  /** Dual Assets docs use string ms; other categories may use number. */
+  startTime?: string | number;
+  endTime?: string | number;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+/** Dual Assets docs use string ms; other categories may use number. */
+
+================
+File: src/types/request/v5-earn-fixed-term.ts
+================
+/**
+ * /v5/earn/fixed-term/*
+ */
+export interface GetFixedTermEarnProductParamsV5 {
+  coin?: string;
+}
+⋮----
+export interface SubmitFixedTermEarnOrderParamsV5 {
+  productId: string;
+  category: 'FixedTermSaving' | 'FundPool' | 'FundPoolPremium';
+  coin: string;
+  amount: string;
+  accountType: 'FUND' | 'UNIFIED';
+  orderLinkId: string;
+  autoInvest?: boolean;
+}
+⋮----
+export interface RedeemFixedTermEarnParamsV5 {
+  productId: string;
+  /** Early redemption: FundPool only */
+  category: 'FundPool';
+  positionId: string;
+}
+⋮----
+/** Early redemption: FundPool only */
+⋮----
+export interface GetFixedTermEarnPositionParamsV5 {
+  productId?: string;
+  category?: 'FixedTermSaving' | 'FundPool' | 'FundPoolPremium';
+  coin?: string;
+}
+⋮----
+export interface GetFixedTermEarnOrderListParamsV5 {
+  orderType?: 'Stake' | 'Redeem' | 'Reinvest';
+  productId?: string;
+  category?: 'FixedTermSaving' | 'FundPool' | 'FundPoolPremium';
+  orderId?: string;
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+export interface SetFixedTermEarnAutoInvestParamsV5 {
+  productId: string;
+  category: 'FixedTermSaving' | 'FundPool' | 'FundPoolPremium';
+  positionId: string;
+  status: 'Enable' | 'Disable';
+}
+
+================
+File: src/types/request/v5-earn-token.ts
+================
+/**
+ * Earn token product (e.g. BYUSDT) — /v5/earn/token/*
+ */
+⋮----
+export interface GetEarnTokenProductParamsV5 {
+  /** Currently only BYUSDT */
+  coin: string;
+}
+⋮----
+/** Currently only BYUSDT */
+⋮----
+export interface PlaceEarnTokenOrderParamsV5 {
+  coin: string;
+  orderLinkId: string;
+  orderType: 'Mint' | 'Redeem';
+  amount: string;
+  /** Mint: FlexibleSaving; Redeem: UNIFIED */
+  accountType: 'FlexibleSaving' | 'UNIFIED';
+}
+⋮----
+/** Mint: FlexibleSaving; Redeem: UNIFIED */
+⋮----
+export interface GetEarnTokenOrderListParamsV5 {
+  coin: string;
+  orderLinkId?: string;
+  orderId?: string;
+  orderType?: 'Mint' | 'Redeem';
+  /** seconds */
+  startTime?: number;
+  /** seconds */
+  endTime?: number;
+  cursor?: string;
+  limit?: number;
+}
+⋮----
+/** seconds */
+⋮----
+/** seconds */
+⋮----
+export interface GetEarnTokenPositionParamsV5 {
+  coin: string;
+}
+⋮----
+export interface GetEarnTokenDailyYieldParamsV5 {
+  coin: string;
+  startTime?: number;
+  endTime?: number;
+  cursor?: string;
+  limit?: number;
+}
+⋮----
+export interface GetEarnTokenHourlyYieldParamsV5 {
+  coin: string;
+  startTime?: number;
+  endTime?: number;
+  cursor?: string;
+  limit?: number;
+}
+⋮----
+export interface GetEarnTokenHistoryAprParamsV5 {
+  coin: string;
+  /** 1 = 7d, 2 = 30d, 3 = 180d */
+  range: 1 | 2 | 3;
+}
+⋮----
+/** 1 = 7d, 2 = 30d, 3 = 180d */
+
+================
 File: src/types/request/v5-pre-upgrade.ts
 ================
 import { ExecTypeV5 } from '../shared-v5';
@@ -2695,6 +3122,675 @@ export interface LinearOrder {
 }
 
 ================
+File: src/types/response/v5-alpha-trade.ts
+================
+/**
+ * V5 private Alpha / on-chain (Web3) trade responses.
+ */
+⋮----
+export interface AlphaTradeQuoteModeEstimationV5 {
+  quoteMode: number;
+  estimatedGas: string;
+  estimatedGasUsd: string;
+  estimatedSlippage: string;
+}
+⋮----
+export interface AlphaTradeQuoteResultV5 {
+  tradeType: number;
+  fromTokenCode: string;
+  fromTokenAmount: string;
+  fromTokenAmountUsd: string;
+  toTokenCode: string;
+  toTokenAmount: string;
+  toTokenAmountUsd: string;
+  minToTokenAmount: string;
+  slippage: string;
+  gas: string;
+  gasUsd: string;
+  platformFee: string;
+  platformFeeUsd: string;
+  swapRate: string;
+  lossRate: string;
+  quoteData: string;
+  correctingCode: string;
+  quoteMode: number;
+  quoteDataId: string;
+  expireTime: number;
+  modeEstimations: AlphaTradeQuoteModeEstimationV5[];
+  chargeAmount?: string;
+  timestamp?: number;
+}
+⋮----
+export interface ExecuteAlphaTradeResultV5 {
+  orderNo: string;
+}
+⋮----
+export interface AlphaPayTokenV5 {
+  tokenCode: string;
+  symbol: string;
+  tokenDecimals: number;
+  tokenIconUrlDay: string;
+  tokenIconUrlNight: string;
+  limit: string;
+  supportChains: string[];
+}
+⋮----
+export interface AlphaTradeOrderV5 {
+  orderType: number;
+  tradeType: number;
+  orderNo: string;
+  orderStatus: number;
+  fromTokenCode: string;
+  fromTokenAmount: string;
+  fromTokenSymbol: string;
+  fromTokenDecimals: number;
+  fromTokenIconUrlDay?: string;
+  fromTokenIconUrlNight?: string;
+  fromChainCode: string;
+  fromChainIconUrl?: string;
+  toTokenCode: string;
+  toTokenAmount: string;
+  toTokenSymbol: string;
+  toTokenDecimals: number;
+  toTokenIconUrlDay?: string;
+  toTokenIconUrlNight?: string;
+  toChainCode: string;
+  toChainIconUrl?: string;
+  gasTokenSymbol: string;
+  gasOnchain: string;
+  gasUsd: string | null;
+  platformFee: string;
+  platformFeeUsd: string | null;
+  quoteMode: number;
+  createTime: number;
+  executionTime?: number;
+  failureReasonCode?: string;
+  source?: string;
+  swapRate: string;
+  actualFromTokenAmount: string;
+}
+⋮----
+export interface AlphaTradeOrderListResultV5 {
+  total: number;
+  pageIndex: number;
+  orders: AlphaTradeOrderV5[];
+}
+⋮----
+export interface AlphaBizTokenV5 {
+  tokenCode: string;
+  chainCode: string;
+  chainIconUrl: string;
+  tokenAddress: string;
+  symbol: string;
+  tokenDecimals: number;
+  tokenIconUrlDay: string;
+  tokenIconUrlNight: string;
+  createTime: number;
+  createTimeOnchain: number;
+  riskFlag: number;
+  minOrderQuantity: number;
+  maxOrderQuantity: number;
+  tokenTags: number[];
+  payTokenCodes: string[];
+}
+⋮----
+export interface AlphaBizTokenPriceV5 {
+  chainCode: string;
+  tokenAddress: string;
+  price: string;
+  change24h: string;
+  vol24h: string;
+  marketCap: string;
+  liquidity: string;
+  holders: string;
+}
+⋮----
+export interface AlphaBizTokenPriceListResultV5 {
+  tokenPriceInfoList: AlphaBizTokenPriceV5[];
+}
+⋮----
+export interface AlphaBizTokenDetailsV5 {
+  tokenCode: string;
+  chainCode: string;
+  chainIconUrl: string;
+  tokenAddress: string;
+  symbol: string;
+  tokenDecimals: number;
+  tokenIconUrlDay: string;
+  tokenIconUrlNight: string;
+  minOrderQuantity: string;
+  maxOrderQuantity: string;
+  maxPositionQuantity: string;
+  tokenDesc: string;
+  xUrl: string;
+  officialUrl: string;
+  whitePaperUrl: string;
+  tokenTag: number;
+  riskFlag: number;
+  createTimeOnchain: number;
+  status: number;
+  tokenTags: number[];
+  showMessage: number;
+  content?: string;
+  linkName?: string;
+  linkAddress?: string;
+}
+⋮----
+export interface AlphaAssetV5 {
+  chainCode: string;
+  chainIconUrl: string;
+  tokenAddress: string;
+  tokenCode: string;
+  tokenSymbol: string;
+  tokenDecimals: number;
+  tokenIconUrlDay: string;
+  tokenIconUrlNight: string;
+  tokenAmount: string;
+  tokenAmountUsd: string;
+  tradeFlag: number;
+  pnl: string | null;
+  pnlRatio: string | null;
+  costPrice: string | null;
+  lastPrice: string;
+  costTotalValue: string | null;
+  assetStatus: number;
+  announcementUrl?: string;
+  estimatedOfflineTime?: number;
+  delistingTime?: number;
+}
+⋮----
+export interface AlphaAssetListResultV5 {
+  totalAssetUsd: string;
+  assetList: AlphaAssetV5[];
+}
+⋮----
+export interface AlphaAssetDetailResultV5 {
+  assetList: AlphaAssetV5[];
+}
+
+================
+File: src/types/response/v5-card.ts
+================
+export interface CardAssetRecordV5 {
+  pan4: string;
+  pan6: string;
+  tradeStatus: string;
+  side: string;
+  basicAmount: string;
+  basicCurrency: string;
+  transactionAmount: string;
+  transactionCurrency: string;
+  txnCreate: number;
+  merchCountry: string;
+  merchCity: string;
+  merchName: string;
+  txnId: string;
+  declinedReason: string;
+  totalFees: string;
+  uid: number;
+  transactionCurrencyAmount: string;
+  fxPad: string;
+  interchangeFee: string;
+  billAmount: string;
+  paidAmount: string;
+  paidCurrency: string;
+  bonusAmount: string;
+  foreignTransactionFee: string;
+  totalTax: string;
+  paidFiat: string;
+  withdrawalFee: string;
+  status: string;
+  orderNo: string;
+  mccCode: string;
+  merchCategoryDesc: string;
+}
+⋮----
+export interface CardAssetRecordsResultV5 {
+  pageSize: number;
+  pageNo: number;
+  totalCount: number;
+  data: CardAssetRecordV5[];
+}
+⋮----
+export interface CardPointBalanceV5 {
+  accountId: string;
+  availablePoint: string | number;
+  pendingPoint: string | number;
+  status: string;
+  updateTime: string | number;
+  settlementPeriod: number;
+}
+⋮----
+export interface CardPointRecordV5 {
+  outOrderId: string;
+  point: number;
+  side: string;
+  type: string;
+  subType: string;
+  createTime: number;
+  updateTime: number;
+  bizId: string;
+  bizTxnId: string;
+  transactionDate: string;
+  transactionId: string;
+  transactionAmount: string;
+  basicCurrency: string;
+  merchCategoryDesc: string;
+  merchName: string;
+  merchCountry: string;
+  merchCity: string;
+  pan4: string;
+  payFiatAmount: string;
+  transactionCurrencyAmount: string;
+}
+⋮----
+export interface CardPointRecordsResultV5 {
+  pageSize: number;
+  pageNo: number;
+  totalCount: number;
+  data: CardPointRecordV5[];
+}
+⋮----
+export interface CardPointTierInfoV5 {
+  usedLimit: string;
+  limit: string;
+  unit: string;
+  tier: string;
+  autoCashback: boolean;
+}
+⋮----
+export interface CardMallItemV5 {
+  itemId: string;
+  itemName: string;
+  priority: number;
+  onTime: string;
+  offTime: string;
+  price: string;
+  discountPrice: string;
+  totalNum: number;
+  redeemNum: number;
+  picPath: string;
+  currency: string;
+  currencyType: number;
+  itemType: number;
+  itemBizType: number;
+}
+⋮----
+export interface CardMallItemListResultV5 {
+  pageNo: number;
+  pageSize: number;
+  totalCount: number;
+  data: CardMallItemV5[];
+}
+⋮----
+export interface CardPointCashbackDetailV5 {
+  points: string;
+  amt: string;
+  ccy: string;
+  ccyType: string;
+  createTime: string;
+  bizTxnId: string;
+  sourceId: number;
+  sourceCode: string;
+  orderStatus: number;
+  orderSubStatus: number;
+  orderShowStatus: string;
+  failedBizCode: string;
+}
+
+================
+File: src/types/response/v5-earn-advance-discount.ts
+================
+export interface AdvanceEarnDiscountBuyOfferV5 {
+  productId: string;
+  currentPrice: string;
+  purchasePrice: string;
+  knockoutPrice: string;
+  knockoutCouponE8: string;
+  maxInvestmentAmount: string;
+  instUid: string;
+  expiredAt: string;
+  category: string;
+}
+⋮----
+/** GET /v5/earn/advance/product-extra-info?category=DiscountBuy */
+export interface AdvanceEarnProductExtraInfoDiscountBuyV5 {
+  offers: AdvanceEarnDiscountBuyOfferV5[];
+}
+⋮----
+export interface AdvanceEarnDualAssetQuoteLevelV5 {
+  selectPrice: string;
+  apyE8: string;
+  maxInvestmentAmount: string;
+  expiredAt: string;
+}
+⋮----
+export interface AdvanceEarnDualAssetQuoteProductV5 {
+  productId: string;
+  currentPrice: string;
+  buyLowPrice: AdvanceEarnDualAssetQuoteLevelV5[];
+  sellHighPrice: AdvanceEarnDualAssetQuoteLevelV5[];
+}
+⋮----
+/** GET /v5/earn/advance/product-extra-info?category=DualAssets&productId= */
+export interface AdvanceEarnProductExtraInfoDualAssetsV5 {
+  category: 'DualAssets';
+  list: AdvanceEarnDualAssetQuoteProductV5[];
+}
+⋮----
+export type AdvanceEarnProductExtraInfoV5 =
+  | AdvanceEarnProductExtraInfoDiscountBuyV5
+  | AdvanceEarnProductExtraInfoDualAssetsV5;
+⋮----
+export interface AdvanceEarnPlaceOrderResultV5 {
+  orderId: string;
+  orderLinkId: string;
+}
+⋮----
+export interface AdvanceEarnDiscountBuyPositionV5 {
+  positionId: string;
+  productId: string;
+  category: string;
+  coin: string;
+  underlyingAsset: string;
+  amount: string;
+  purchasePrice: string;
+  knockoutPrice: string;
+  knockoutCouponE8: string;
+  status: string;
+  orderId: string;
+  duration: string;
+  settlementTime: string;
+  accountType: string;
+  toAccountType: string;
+  settleType: string;
+  expectReceiveAt: string;
+}
+⋮----
+export interface AdvanceEarnDualAssetsPositionV5 {
+  positionId: string;
+  productId: string;
+  category: string;
+  baseCoin: string;
+  quoteCoin: string;
+  investCoin: string;
+  amount: string;
+  apyE8: string;
+  direction: 'BuyLow' | 'SellHigh' | string;
+  targetPrice: string;
+  settlementTime: string;
+  status: string;
+  orderId: string;
+  duration: string;
+  expectReturnCoin: string;
+  expectReturnAmount: string;
+  accountType: string;
+  toAccountType: string;
+  yieldStartAt: string | number;
+  yieldEndAt: string | number;
+}
+⋮----
+export interface AdvanceEarnPositionListV5 {
+  category: string;
+  list: (AdvanceEarnDiscountBuyPositionV5 | AdvanceEarnDualAssetsPositionV5)[];
+  nextPageCursor: string;
+}
+⋮----
+export interface AdvanceEarnDiscountBuyOrderV5 {
+  orderId: string;
+  orderLinkId: string;
+  productId: string;
+  category: string;
+  orderType: string;
+  amount: string;
+  coin: string;
+  underlyingAsset: string;
+  status: string;
+  createdTime: string;
+  purchasePrice: string;
+  knockoutPrice: string;
+  knockoutCouponE8: string;
+  duration: string;
+  settlementTime: string;
+  accountType: string;
+  toAccountType: string;
+  settleType: string;
+  settlementPrice: string;
+  settlementCoin: string;
+  settlementAmount: string;
+  isVip: boolean;
+  refundStatus: string;
+}
+⋮----
+export interface AdvanceEarnDualAssetsOrderV5 {
+  orderId: string;
+  orderLinkId: string;
+  productId: string;
+  category: string;
+  orderType: string;
+  amount: string;
+  coin: string;
+  baseCoin: string;
+  quoteCoin: string;
+  status: string;
+  createdTime: string;
+  updatedTime: string;
+  direction: 'BuyLow' | 'SellHigh' | string;
+  targetPrice: string;
+  settlementTime: string | number;
+  estimateApyE8: string | number;
+  duration: string;
+  accountType: string;
+  toAccountType: string;
+  selectApyE8: string | number;
+  isVip: boolean;
+  settlementCoin: string;
+  settlementAmount: string;
+  orderMode: string;
+  settlementPrice: string;
+  refundStatus: string;
+  trialBonusAmount: string;
+  trialBonusPnl: string;
+}
+⋮----
+export interface AdvanceEarnOrderListV5 {
+  category: string;
+  list: (AdvanceEarnDiscountBuyOrderV5 | AdvanceEarnDualAssetsOrderV5)[];
+  nextPageCursor: string;
+}
+
+================
+File: src/types/response/v5-earn-fixed-term.ts
+================
+export interface FixedTermEarnTieredApyV5 {
+  min: string;
+  max: string;
+  apy: string;
+}
+⋮----
+export interface FixedTermEarnInterestCoinApyV5 {
+  coin: string;
+  apy: string;
+  expectUnitEarning: string;
+  currentPrice: string;
+}
+⋮----
+export interface FixedTermEarnProductV5 {
+  productId: string;
+  category: 'FixedTermSaving' | 'FundPool' | 'FundPoolPremium' | string;
+  coin: string;
+  duration: string;
+  status: 'Available' | 'SoldOut' | 'NotStarted' | string;
+  tieredApyList: FixedTermEarnTieredApyV5[];
+  minStakeAmount: string;
+  maxStakeAmount: string;
+  precision: number;
+  subscribeStartAt: string;
+  subscribeEndAt: string;
+  allowEarlyRedemption: boolean;
+  earlyRedemptionApy: string;
+  redemptionLimitDuration: string;
+  allowAutoReinvest: boolean;
+  interestCoinApyList: FixedTermEarnInterestCoinApyV5[];
+  isVip: boolean;
+  creditTime: string;
+  specialUserGroupRequired: boolean;
+  specialUserGroupInfo: string;
+}
+⋮----
+export interface FixedTermEarnProductListV5 {
+  list: FixedTermEarnProductV5[];
+}
+⋮----
+export interface FixedTermEarnPlaceOrderResultV5 {
+  orderId: string;
+  orderLinkId: string;
+}
+⋮----
+export interface RedeemFixedTermEarnResultV5 {
+  redeemAmount: string;
+  estEarnings: string;
+}
+⋮----
+export interface FixedTermEarnEarlyRedeemInfoV5 {
+  allowEarlyRedeem: boolean;
+  earlyRedeemEarning: string;
+  returnCoin: string;
+  redemptionLimitDuration: string;
+}
+⋮----
+export interface FixedTermEarnPositionInterestV5 {
+  coin: string;
+  apy: string;
+  expectReturnEarning: string;
+  price: string;
+}
+⋮----
+export interface FixedTermEarnPositionV5 {
+  positionId: string;
+  productId: string;
+  category: string;
+  coin: string;
+  amount: string;
+  effectiveAmount: string;
+  duration: string;
+  status: string;
+  settlementTime: string;
+  createdAt: string;
+  orderId: string;
+  earlyRedeemInfo: FixedTermEarnEarlyRedeemInfoV5 | null;
+  allowAutoReinvest: boolean;
+  autoReinvest: string;
+  interestCoinApyList: FixedTermEarnPositionInterestV5[];
+}
+⋮----
+export interface FixedTermEarnPositionListV5 {
+  list: FixedTermEarnPositionV5[];
+}
+⋮----
+export interface FixedTermEarnOrderYieldInfoV5 {
+  coin: string;
+  amount: string;
+  status: string;
+  createdAt: string;
+  apy: string;
+}
+⋮----
+export interface FixedTermEarnOrderV5 {
+  orderId: string;
+  orderLinkId: string;
+  orderType: string;
+  status: string;
+  productId: string;
+  category: string;
+  coin: string;
+  amount: string;
+  duration: string;
+  accountType: string;
+  settlementTime: string;
+  createdAt: string;
+  yieldInfoList: FixedTermEarnOrderYieldInfoV5[];
+}
+⋮----
+export interface FixedTermEarnOrderListV5 {
+  list: FixedTermEarnOrderV5[];
+  nextPageCursor: string;
+}
+
+================
+File: src/types/response/v5-earn-token.ts
+================
+/**
+ * Earn token product (e.g. BYUSDT) — /v5/earn/token/*
+ */
+⋮----
+export interface EarnTokenProductV5 {
+  productId: string;
+  coin: string;
+  mintFeeRateE8: string;
+  redeemFeeRateE8: string;
+  minInvestment: string;
+  userHolding: string;
+  leftQuota: string;
+  canMint: boolean;
+  savingsBalance: string;
+  aprE8: string;
+  bonusAprE8: string;
+  bonusMaxAmount: string;
+  baseCoinPrecision: number;
+  tokenPrecision: number;
+}
+⋮----
+export interface PlaceEarnTokenOrderResultV5 {
+  orderId: string;
+  orderLinkId: string;
+}
+⋮----
+export interface EarnTokenOrderV5 {
+  orderId: string;
+  orderLinkId: string;
+  orderType: 'Mint' | 'Redeem';
+  fromCoin: string;
+  toCoin: string;
+  fromAmount: string;
+  toAmount: string;
+  serviceFee: string;
+  status: 'Success' | 'Processing' | 'Fail';
+  createdTime: string;
+}
+⋮----
+export interface EarnTokenPositionV5 {
+  totalAmount: string;
+  totalYield: string;
+  yesterdayYield: string;
+  aprE8: number;
+  bonusAprE8: number;
+  bonusMaxAmount: string;
+  hasQuota: boolean;
+}
+⋮----
+export interface EarnTokenDailyYieldRecordV5 {
+  yield: string;
+  bonusYield: string;
+  status: 'Success' | 'Processing';
+  createdTime: string;
+}
+⋮----
+export interface EarnTokenHourlyYieldRecordV5 {
+  effectiveAmount: string;
+  yield: string;
+  rewardType: 0 | 1;
+  aprE8: string;
+  hourlyDate: string;
+  createdTime: string;
+}
+⋮----
+export interface EarnTokenHistoryAprPointV5 {
+  timestamp: string;
+  aprE8: string;
+}
+
+================
 File: src/types/response/v5-preupgrade.ts
 ================
 export interface PreUpgradeTransaction {
@@ -2740,6 +3836,176 @@ export interface PreUpgradeUSDCSessionSettlement {
   realisedPnl: string;
   createdTime: string;
 }
+
+================
+File: src/types/response/v5-spreadtrading.ts
+================
+export interface SpreadInstrumentInfoV5 {
+  symbol: string;
+  contractType: 'FundingRateArb' | 'CarryTrade' | 'FutureSpread' | 'PerpBasis';
+  status: 'Trading' | 'Settling';
+  baseCoin: string;
+  quoteCoin: string;
+  settleCoin: string;
+  tickSize: string;
+  minPrice: string;
+  maxPrice: string;
+  lotSize: string;
+  minSize: string;
+  maxSize: string;
+  launchTime: string;
+  deliveryTime: string;
+  legs: {
+    symbol: string;
+    contractType: 'LinearPerpetual' | 'LinearFutures' | 'Spot';
+  }[];
+}
+⋮----
+export interface SpreadOrderbookResponseV5 {
+  s: string; // Symbol
+  b: [string, string][]; // Bids array [price, size]
+  a: [string, string][]; // Asks array [price, size]
+  u: number; // Update ID
+  ts: number; // Timestamp
+  seq: number; // Sequence
+  cts: number; // Cross timestamp
+}
+⋮----
+s: string; // Symbol
+b: [string, string][]; // Bids array [price, size]
+a: [string, string][]; // Asks array [price, size]
+u: number; // Update ID
+ts: number; // Timestamp
+seq: number; // Sequence
+cts: number; // Cross timestamp
+⋮----
+export interface SpreadTickerV5 {
+  symbol: string; // Spread combination symbol name
+  bidPrice: string; // Bid 1 price
+  bidSize: string; // Bid 1 size
+  askPrice: string; // Ask 1 price
+  askSize: string; // Ask 1 size
+  lastPrice: string; // Last trade price
+  highPrice24h: string; // The highest price in the last 24 hours
+  lowPrice24h: string; // The lowest price in the last 24 hours
+  prevPrice24h: string; // Price 24 hours ago
+  volume24h: string; // Volume for 24h
+}
+⋮----
+symbol: string; // Spread combination symbol name
+bidPrice: string; // Bid 1 price
+bidSize: string; // Bid 1 size
+askPrice: string; // Ask 1 price
+askSize: string; // Ask 1 size
+lastPrice: string; // Last trade price
+highPrice24h: string; // The highest price in the last 24 hours
+lowPrice24h: string; // The lowest price in the last 24 hours
+prevPrice24h: string; // Price 24 hours ago
+volume24h: string; // Volume for 24h
+⋮----
+export interface SpreadRecentTradeV5 {
+  execId: string; // Execution ID
+  symbol: string; // Spread combination symbol name
+  price: string; // Trade price
+  size: string; // Trade size
+  side: 'Buy' | 'Sell'; // Side of taker
+  time: string; // Trade time (ms)
+  seq?: string;
+}
+⋮----
+execId: string; // Execution ID
+symbol: string; // Spread combination symbol name
+price: string; // Trade price
+size: string; // Trade size
+side: 'Buy' | 'Sell'; // Side of taker
+time: string; // Trade time (ms)
+⋮----
+export interface SpreadOpenOrderV5 {
+  symbol: string;
+  baseCoin: string;
+  orderType: 'Market' | 'Limit';
+  orderLinkId: string;
+  side: 'Buy' | 'Sell';
+  timeInForce: 'GTC' | 'FOK' | 'IOC' | 'PostOnly';
+  orderId: string;
+  leavesQty: string;
+  orderStatus: 'New' | 'PartiallyFilled';
+  cumExecQty: string;
+  price: string;
+  qty: string;
+  createdTime: string;
+  updatedTime: string;
+}
+⋮----
+export interface SpreadOrderHistoryV5 {
+  symbol: string;
+  orderType: 'Market' | 'Limit';
+  orderLinkId: string;
+  orderId: string;
+  contractType: 'FundingRateArb' | 'CarryTrade' | 'FutureSpread' | 'PerpBasis';
+  orderStatus: 'Rejected' | 'Cancelled' | 'Filled';
+  price: string;
+  orderQty: string;
+  timeInForce: 'GTC' | 'FOK' | 'IOC' | 'PostOnly';
+  baseCoin: string;
+  createdAt: string;
+  updatedAt: string;
+  side: 'Buy' | 'Sell';
+  leavesQty: string;
+  settleCoin: string;
+  cumExecQty: string;
+  qty: string;
+  leg1Symbol: string;
+  leg1ProdType: 'Futures' | 'Spot';
+  leg1OrderId: string;
+  leg1Side: string;
+  leg2ProdType: 'Futures' | 'Spot';
+  leg2OrderId: string;
+  leg2Symbol: string;
+  leg2Side: string;
+  cxlRejReason: string;
+  cumFeeDetail?: Record<string, string>; // Cumulative trading fee details instead of cumExecFee
+}
+⋮----
+cumFeeDetail?: Record<string, string>; // Cumulative trading fee details instead of cumExecFee
+⋮----
+export interface SpreadTradeLegV5 {
+  symbol: string;
+  side: 'Buy' | 'Sell';
+  execPrice: string;
+  execTime: string;
+  execValue: string;
+  execType: string;
+  category: 'linear' | 'spot';
+  execQty: string;
+  execFee: string;
+  feeCurrency: string; // Trading fee currency
+  execId: string;
+}
+⋮----
+feeCurrency: string; // Trading fee currency
+⋮----
+export interface SpreadTradeV5 {
+  symbol: string;
+  orderLinkId: string;
+  side: 'Buy' | 'Sell';
+  orderId: string;
+  execPrice: string;
+  execTime: string;
+  execType: 'Trade';
+  execQty: string;
+  execId: string;
+  legs: SpreadTradeLegV5[];
+  extraFees: string;
+}
+⋮----
+/** GET /v5/spread/max-qty */
+export interface SpreadMaxQtyResultV5 {
+  /** Maximum order quantity (available balance for the spread order). */
+  ab: string;
+}
+⋮----
+/** Maximum order quantity (available balance for the spread order). */
 
 ================
 File: src/types/websockets/index.ts
@@ -3329,67 +4595,6 @@ File: tsconfig.test.json
 }
 
 ================
-File: examples/Websocket/Private/ws-private-v5.ts
-================
-/* eslint-disable @typescript-eslint/no-empty-function */
-import { DefaultLogger, WebsocketClient, WS_KEY_MAP } from '../../../src';
-⋮----
-// or
-// import { DefaultLogger, WS_KEY_MAP, WebsocketClient } from 'bybit-api';
-⋮----
-// Create & inject a custom logger to enable the trace logging level (empty function)
-⋮----
-// trace: (...params) => console.log('trace', ...params),
-⋮----
-/**
- * Prepare an instance of the WebSocket client. This client handles all aspects of connectivity for you:
- * - Connections are opened when you subscribe to topics
- * - If key & secret are provided, authentication is handled automatically
- * - If you subscribe to topics from different v5 products (e.g. spot and linear perps),
- *    subscription events are automatically routed to the different ws endpoints on bybit's side
- * - Heartbeats/ping/pong/reconnects are all handled automatically.
- *    If a connection drops, the client will clean it up, respawn a fresh connection and resubscribe for you.
- */
-⋮----
-// testnet: false,
-// demoTrading: false, // set testnet to false, if you plan on using demo trading
-⋮----
-// console.log('raw message received ', JSON.stringify(data, null, 2));
-⋮----
-// wsClient.on('exception', (data) => {
-//   console.error('ws exception: ', data);
-// });
-⋮----
-/**
- * For private V5 topics, us the subscribeV5() method on the ws client or use the original subscribe() method.
- *
- * Note: for private endpoints the "category" field is ignored since there is only one private endpoint
- * (compared to one public one per category).
- * The "category" is only needed for public topics since bybit has one endpoint for public events per category.
- */
-⋮----
-// wsClient.subscribeV5('execution.fast', 'linear');
-// wsClient.subscribeV5('execution.fast.linear', 'linear');
-// wsClient.subscribeV5('execution.fast.spot', 'spot');
-// wsClient.subscribeV5('execution.fast.option', 'option');
-⋮----
-/**
- * The following has the same effect as above, since there's only one private endpoint for V5 account topics:
- */
-// wsClient.subscribe('position');
-// wsClient.subscribe('execution');
-// wsClient.subscribe(['order', 'wallet', 'greek']);
-⋮----
-// To unsubscribe from topics (after a 5 second delay, in this example):
-// setTimeout(() => {
-//   console.log('unsubscribing');
-//   wsClient.unsubscribeV5('execution', 'linear');
-// }, 5 * 1000);
-⋮----
-// Topics are tracked per websocket type
-// Get a list of subscribed topics (e.g. for public v3 spot topics) (after a 5 second delay)
-
-================
 File: src/constants/enum.ts
 ================
 /** Full take profit/stop loss mode (a single TP order and a single SL order can be placed, covering the entire position) */
@@ -3586,71 +4791,6 @@ export interface GetAlphaPredictionSportsGroupStageDetailParamsV5 {
 }
 
 ================
-File: src/types/request/v5-alpha-trade.ts
-================
-/**
- * V5 private Alpha / on-chain (Web3) trade requests.
- */
-⋮----
-export interface GetAlphaTradeQuoteParamsV5 {
-  tradeType: 1 | 2;
-  fromTokenCode: string;
-  fromTokenAmount: string;
-  toTokenCode: string;
-  quoteMode?: 0 | 1 | 2;
-}
-⋮----
-export interface ExecuteAlphaTradeParamsV5 {
-  fromTokenCode: string;
-  fromTokenAmount: string;
-  toTokenCode: string;
-  slippage: string;
-  quoteData: string;
-  gas: string;
-  quoteMode: 0 | 1 | 2;
-  correctingCode: string;
-  tenant?: string;
-}
-⋮----
-export interface GetAlphaPayTokenListParamsV5 {
-  chainCode: string;
-  tokenAddress: string;
-}
-⋮----
-export interface GetAlphaTradeOrderListParamsV5 {
-  limit: number;
-  pageIndex: number;
-  tradeType?: number;
-  tokenCode?: string;
-  orderStatus?: number[];
-  days?: number;
-  direction?: 'prev' | 'next';
-}
-⋮----
-export interface GetAlphaBizTokenListParamsV5 {
-  tokenTag?: number;
-}
-⋮----
-export interface AlphaTokenAddressInfoV5 {
-  chainCode: string;
-  tokenAddress: string;
-}
-⋮----
-export interface GetAlphaBizTokenPriceListParamsV5 {
-  tokenAddressInfo: AlphaTokenAddressInfoV5[];
-}
-⋮----
-export interface GetAlphaBizTokenDetailsParamsV5 {
-  chainCode: string;
-  tokenAddress: string;
-}
-⋮----
-export interface GetAlphaAssetDetailParamsV5 {
-  chainCode: string;
-  tokenAddress: string;
-}
-
-================
 File: src/types/request/v5-broker.ts
 ================
 export interface GetExchangeBrokerEarningsParamsV5 {
@@ -3705,234 +4845,21 @@ export interface GetAllBrokerRateLimitsParamsV5 {
 }
 
 ================
-File: src/types/request/v5-card.ts
+File: src/types/request/v5-earn-liquidity-mining.ts
 ================
 /**
- * Bybit Card — /v5/card/*
- * Authenticated; API key permission per Bybit (often card-related).
+ * GET /v5/earn/liquidity-mining/product (public, 50 req/s per IP)
  */
-⋮----
-export interface QueryCardAssetRecordsParamsV5 {
-  /** 0: Pending, 1: Cleared, 2: Declined */
-  statusCode?: string;
-  /** Default 100, range [1, 500] */
-  limit?: number;
-  /** Default 1, min 1 */
-  page?: number;
-  /** Last 2/4 digits of card number */
-  pan4?: string;
-  createBeginTime?: number;
-  createEndTime?: number;
-  /** Fuzzy search */
-  merchName?: string;
-  /** Authorization / Clearing / Refund (see Bybit) */
-  type?: string;
-  txnId?: string;
-  cardToken?: string;
-  orderNo?: string;
+export interface GetLiquidityMiningProductParamsV5 {
+  baseCoin?: string;
+  quoteCoin?: string;
 }
 ⋮----
-/** 0: Pending, 1: Cleared, 2: Declined */
-⋮----
-/** Default 100, range [1, 500] */
-⋮----
-/** Default 1, min 1 */
-⋮----
-/** Last 2/4 digits of card number */
-⋮----
-/** Fuzzy search */
-⋮----
-/** Authorization / Clearing / Refund (see Bybit) */
-⋮----
-export interface QueryCardPointRecordsParamsV5 {
-  type?: string;
-  pageSize?: number;
-  pageNo?: number;
-  startTime?: number;
-  endTime?: number;
-  outOrderId?: string;
-  bizId?: string;
-  bizTxnId?: string;
-  /** 1: Earn, 2: Deduct */
-  side?: string;
-}
-⋮----
-/** 1: Earn, 2: Deduct */
-⋮----
-export interface QueryCardMallItemListParamsV5 {
-  pageNo?: number;
-  pageSize?: number;
-  /** 1: Virtual, 2: Physical */
-  itemType?: number;
-  /** 1: POINTS, 2: CURRENCY */
-  itemBizType?: number;
-  /** 1: Priority, 2: Listing time, 3: Price */
-  orderBy?: number;
-  asc?: boolean;
-  /** 0: Default, 1: VIP */
-  source?: number;
-}
-⋮----
-/** 1: Virtual, 2: Physical */
-⋮----
-/** 1: POINTS, 2: CURRENCY */
-⋮----
-/** 1: Priority, 2: Listing time, 3: Price */
-⋮----
-/** 0: Default, 1: VIP */
-⋮----
-export interface QueryCardPointCashbackDetailParamsV5 {
-  bizTxnId: string;
-}
-
-================
-File: src/types/request/v5-earn-advance-discount.ts
-================
-/**
- * /v5/earn/advance/ — product-extra, place order, position, order (Discount Buy, Dual Assets, etc.)
- */
-export type GetAdvanceEarnProductExtraInfoParamsV5 =
-  | {
-      category: 'DiscountBuy';
-      productId?: string;
-    }
-  | {
-      category: 'DualAssets';
-      /** Required for Dual Assets quote. */
-      productId: string;
-    };
-⋮----
-/** Required for Dual Assets quote. */
-⋮----
-export interface AdvanceEarnDiscountBuyExtraV5 {
-  initialPrice: string;
-  purchasePrice: string;
-  knockoutPrice: string;
-  knockoutCouponE8: string;
-  settleType: 'Base' | 'Quote';
-  instUid: string;
-}
-⋮----
-export interface AdvanceEarnDualAssetsExtraV5 {
-  orderDirection: 'BuyLow' | 'SellHigh';
-  selectPrice: string;
-  /** Expected APY in e8 precision; API may return int. */
-  apyE8: string | number;
-}
-⋮----
-/** Expected APY in e8 precision; API may return int. */
-⋮----
-export interface AdvanceEarnInterestCardExtraV5 {
-  awardId: string | number;
-  specCode: string;
-}
-⋮----
-/**
- * POST /v5/earn/advance/place-order — Discount Buy
- */
-export interface SubmitAdvanceEarnPlaceOrderDiscountBuyV5 {
-  category: 'DiscountBuy';
+export interface ReinvestLiquidityMiningParamsV5 {
   productId: string;
-  orderType: 'Stake';
-  amount: string;
-  coin: string;
-  accountType: 'FUND' | 'UNIFIED';
   orderLinkId: string;
-  discountBuyExtra: AdvanceEarnDiscountBuyExtraV5;
-}
-⋮----
-/**
- * POST /v5/earn/advance/place-order — Dual Assets
- */
-export interface SubmitAdvanceEarnPlaceOrderDualAssetsV5 {
-  category: 'DualAssets';
-  productId: string;
-  orderType: 'Stake';
-  amount: string;
-  coin: string;
-  accountType: 'FUND' | 'UNIFIED';
-  orderLinkId: string;
-  dualAssetsExtra: AdvanceEarnDualAssetsExtraV5;
-  interestCard?: AdvanceEarnInterestCardExtraV5;
-}
-⋮----
-export type SubmitAdvanceEarnPlaceOrderParamsV5 =
-  | SubmitAdvanceEarnPlaceOrderDiscountBuyV5
-  | SubmitAdvanceEarnPlaceOrderDualAssetsV5;
-⋮----
-export interface GetAdvanceEarnPositionListParamsV5 {
-  category: 'DiscountBuy' | 'DualAssets' | string;
-  productId?: string;
-  coin?: string;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface GetAdvanceEarnOrderListParamsV5 {
-  category: 'DiscountBuy' | 'DualAssets' | string;
-  orderId?: string;
-  orderLinkId?: string;
-  productId?: string;
-  /** Dual Assets docs use string ms; other categories may use number. */
-  startTime?: string | number;
-  endTime?: string | number;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-/** Dual Assets docs use string ms; other categories may use number. */
-
-================
-File: src/types/request/v5-earn-fixed-term.ts
-================
-/**
- * /v5/earn/fixed-term/*
- */
-export interface GetFixedTermEarnProductParamsV5 {
-  coin?: string;
-}
-⋮----
-export interface SubmitFixedTermEarnOrderParamsV5 {
-  productId: string;
-  category: 'FixedTermSaving' | 'FundPool' | 'FundPoolPremium';
-  coin: string;
-  amount: string;
-  accountType: 'FUND' | 'UNIFIED';
-  orderLinkId: string;
-  autoInvest?: boolean;
-}
-⋮----
-export interface RedeemFixedTermEarnParamsV5 {
-  productId: string;
-  /** Early redemption: FundPool only */
-  category: 'FundPool';
   positionId: string;
-}
-⋮----
-/** Early redemption: FundPool only */
-⋮----
-export interface GetFixedTermEarnPositionParamsV5 {
-  productId?: string;
-  category?: 'FixedTermSaving' | 'FundPool' | 'FundPoolPremium';
-  coin?: string;
-}
-⋮----
-export interface GetFixedTermEarnOrderListParamsV5 {
-  orderType?: 'Stake' | 'Redeem' | 'Reinvest';
-  productId?: string;
-  category?: 'FixedTermSaving' | 'FundPool' | 'FundPoolPremium';
-  orderId?: string;
-  startTime?: number;
-  endTime?: number;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface SetFixedTermEarnAutoInvestParamsV5 {
-  productId: string;
-  category: 'FixedTermSaving' | 'FundPool' | 'FundPoolPremium';
-  positionId: string;
-  status: 'Enable' | 'Disable';
+  leverage?: string;
 }
 
 ================
@@ -4140,76 +5067,6 @@ export interface GetPwmFundTransferRecordsParamsV5 {
   transferId?: string;
   fromUserId?: number;
 }
-
-================
-File: src/types/request/v5-earn-token.ts
-================
-/**
- * Earn token product (e.g. BYUSDT) — /v5/earn/token/*
- */
-⋮----
-export interface GetEarnTokenProductParamsV5 {
-  /** Currently only BYUSDT */
-  coin: string;
-}
-⋮----
-/** Currently only BYUSDT */
-⋮----
-export interface PlaceEarnTokenOrderParamsV5 {
-  coin: string;
-  orderLinkId: string;
-  orderType: 'Mint' | 'Redeem';
-  amount: string;
-  /** Mint: FlexibleSaving; Redeem: UNIFIED */
-  accountType: 'FlexibleSaving' | 'UNIFIED';
-}
-⋮----
-/** Mint: FlexibleSaving; Redeem: UNIFIED */
-⋮----
-export interface GetEarnTokenOrderListParamsV5 {
-  coin: string;
-  orderLinkId?: string;
-  orderId?: string;
-  orderType?: 'Mint' | 'Redeem';
-  /** seconds */
-  startTime?: number;
-  /** seconds */
-  endTime?: number;
-  cursor?: string;
-  limit?: number;
-}
-⋮----
-/** seconds */
-⋮----
-/** seconds */
-⋮----
-export interface GetEarnTokenPositionParamsV5 {
-  coin: string;
-}
-⋮----
-export interface GetEarnTokenDailyYieldParamsV5 {
-  coin: string;
-  startTime?: number;
-  endTime?: number;
-  cursor?: string;
-  limit?: number;
-}
-⋮----
-export interface GetEarnTokenHourlyYieldParamsV5 {
-  coin: string;
-  startTime?: number;
-  endTime?: number;
-  cursor?: string;
-  limit?: number;
-}
-⋮----
-export interface GetEarnTokenHistoryAprParamsV5 {
-  coin: string;
-  /** 1 = 7d, 2 = 30d, 3 = 180d */
-  range: 1 | 2 | 3;
-}
-⋮----
-/** 1 = 7d, 2 = 30d, 3 = 180d */
 
 ================
 File: src/types/request/v5-position.ts
@@ -4674,6 +5531,83 @@ export interface GetTokenSplashProjectListParamsV5 {
 export interface GetTokenSplashUserActivityParamsV5 {
   projectId?: string;
   activityCoin?: string;
+}
+
+================
+File: src/types/request/v5-spreadtrading.ts
+================
+export interface GetSpreadInstrumentsInfoParamsV5 {
+  symbol?: string;
+  baseCoin?: string;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+/** GET /v5/spread/max-qty */
+export interface GetSpreadMaxQtyParamsV5 {
+  symbol: string;
+  /** 1: Buy, 2: Sell */
+  side: '1' | '2';
+  orderPrice: string;
+}
+⋮----
+/** 1: Buy, 2: Sell */
+⋮----
+export interface SubmitSpreadOrderParamsV5 {
+  symbol: string;
+  side: 'Buy' | 'Sell';
+  orderType: 'Limit' | 'Market';
+  qty: string;
+  price: string;
+  orderLinkId: string;
+  timeInForce: 'IOC' | 'FOK' | 'GTC' | 'PostOnly';
+}
+⋮----
+export interface AmendSpreadOrderParamsV5 {
+  symbol: string;
+  orderId?: string;
+  orderLinkId?: string;
+  qty?: string;
+  price?: string;
+}
+⋮----
+export interface GetSpreadOpenOrdersParamsV5 {
+  symbol?: string;
+  baseCoin?: string;
+  orderId?: string;
+  orderLinkId?: string;
+  limit?: number;
+  cursor?: string;
+}
+export interface GetSpreadOrderHistoryParamsV5 {
+  symbol?: string;
+  baseCoin?: string;
+  orderId?: string;
+  orderLinkId?: string;
+  /**
+   * Filter by order status. Undocumented in the endpoint parameter table; confirmed by Bybit's API announcement.
+   * @see https://t.me/Bybit_API_Announcements/464
+   */
+  orderStatus?: 'Rejected' | 'Cancelled' | 'Filled';
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+/**
+   * Filter by order status. Undocumented in the endpoint parameter table; confirmed by Bybit's API announcement.
+   * @see https://t.me/Bybit_API_Announcements/464
+   */
+⋮----
+export interface GetSpreadTradeHistoryParamsV5 {
+  symbol?: string;
+  orderId?: string;
+  orderLinkId?: string;
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+  cursor?: string;
 }
 
 ================
@@ -5196,193 +6130,6 @@ export interface AlphaPredictionSportsGroupStageDetailV5 {
 }
 
 ================
-File: src/types/response/v5-alpha-trade.ts
-================
-/**
- * V5 private Alpha / on-chain (Web3) trade responses.
- */
-⋮----
-export interface AlphaTradeQuoteModeEstimationV5 {
-  quoteMode: number;
-  estimatedGas: string;
-  estimatedGasUsd: string;
-  estimatedSlippage: string;
-}
-⋮----
-export interface AlphaTradeQuoteResultV5 {
-  tradeType: number;
-  fromTokenCode: string;
-  fromTokenAmount: string;
-  fromTokenAmountUsd: string;
-  toTokenCode: string;
-  toTokenAmount: string;
-  toTokenAmountUsd: string;
-  minToTokenAmount: string;
-  slippage: string;
-  gas: string;
-  gasUsd: string;
-  platformFee: string;
-  platformFeeUsd: string;
-  swapRate: string;
-  lossRate: string;
-  quoteData: string;
-  correctingCode: string;
-  quoteMode: number;
-  quoteDataId: string;
-  expireTime: number;
-  modeEstimations: AlphaTradeQuoteModeEstimationV5[];
-  chargeAmount?: string;
-  timestamp?: number;
-}
-⋮----
-export interface ExecuteAlphaTradeResultV5 {
-  orderNo: string;
-}
-⋮----
-export interface AlphaPayTokenV5 {
-  tokenCode: string;
-  symbol: string;
-  tokenDecimals: number;
-  tokenIconUrlDay: string;
-  tokenIconUrlNight: string;
-  limit: string;
-  supportChains: string[];
-}
-⋮----
-export interface AlphaTradeOrderV5 {
-  orderType: number;
-  tradeType: number;
-  orderNo: string;
-  orderStatus: number;
-  fromTokenCode: string;
-  fromTokenAmount: string;
-  fromTokenSymbol: string;
-  fromTokenDecimals: number;
-  fromTokenIconUrlDay?: string;
-  fromTokenIconUrlNight?: string;
-  fromChainCode: string;
-  fromChainIconUrl?: string;
-  toTokenCode: string;
-  toTokenAmount: string;
-  toTokenSymbol: string;
-  toTokenDecimals: number;
-  toTokenIconUrlDay?: string;
-  toTokenIconUrlNight?: string;
-  toChainCode: string;
-  toChainIconUrl?: string;
-  gasTokenSymbol: string;
-  gasOnchain: string;
-  gasUsd: string | null;
-  platformFee: string;
-  platformFeeUsd: string | null;
-  quoteMode: number;
-  createTime: number;
-  executionTime?: number;
-  failureReasonCode?: string;
-  source?: string;
-  swapRate: string;
-  actualFromTokenAmount: string;
-}
-⋮----
-export interface AlphaTradeOrderListResultV5 {
-  total: number;
-  pageIndex: number;
-  orders: AlphaTradeOrderV5[];
-}
-⋮----
-export interface AlphaBizTokenV5 {
-  tokenCode: string;
-  chainCode: string;
-  chainIconUrl: string;
-  tokenAddress: string;
-  symbol: string;
-  tokenDecimals: number;
-  tokenIconUrlDay: string;
-  tokenIconUrlNight: string;
-  createTime: number;
-  createTimeOnchain: number;
-  riskFlag: number;
-  minOrderQuantity: number;
-  maxOrderQuantity: number;
-  tokenTags: number[];
-  payTokenCodes: string[];
-}
-⋮----
-export interface AlphaBizTokenPriceV5 {
-  chainCode: string;
-  tokenAddress: string;
-  price: string;
-  change24h: string;
-  vol24h: string;
-  marketCap: string;
-  liquidity: string;
-  holders: string;
-}
-⋮----
-export interface AlphaBizTokenPriceListResultV5 {
-  tokenPriceInfoList: AlphaBizTokenPriceV5[];
-}
-⋮----
-export interface AlphaBizTokenDetailsV5 {
-  tokenCode: string;
-  chainCode: string;
-  chainIconUrl: string;
-  tokenAddress: string;
-  symbol: string;
-  tokenDecimals: number;
-  tokenIconUrlDay: string;
-  tokenIconUrlNight: string;
-  minOrderQuantity: string;
-  maxOrderQuantity: string;
-  maxPositionQuantity: string;
-  tokenDesc: string;
-  xUrl: string;
-  officialUrl: string;
-  whitePaperUrl: string;
-  tokenTag: number;
-  riskFlag: number;
-  createTimeOnchain: number;
-  status: number;
-  tokenTags: number[];
-  showMessage: number;
-  content?: string;
-  linkName?: string;
-  linkAddress?: string;
-}
-⋮----
-export interface AlphaAssetV5 {
-  chainCode: string;
-  chainIconUrl: string;
-  tokenAddress: string;
-  tokenCode: string;
-  tokenSymbol: string;
-  tokenDecimals: number;
-  tokenIconUrlDay: string;
-  tokenIconUrlNight: string;
-  tokenAmount: string;
-  tokenAmountUsd: string;
-  tradeFlag: number;
-  pnl: string | null;
-  pnlRatio: string | null;
-  costPrice: string | null;
-  lastPrice: string;
-  costTotalValue: string | null;
-  assetStatus: number;
-  announcementUrl?: string;
-  estimatedOfflineTime?: number;
-  delistingTime?: number;
-}
-⋮----
-export interface AlphaAssetListResultV5 {
-  totalAssetUsd: string;
-  assetList: AlphaAssetV5[];
-}
-⋮----
-export interface AlphaAssetDetailResultV5 {
-  assetList: AlphaAssetV5[];
-}
-
-================
 File: src/types/response/v5-broker.ts
 ================
 interface EarningDetailV5 {
@@ -5496,412 +6243,45 @@ export interface BrokerRateLimitAllItemV5 {
 }
 
 ================
-File: src/types/response/v5-card.ts
+File: src/types/response/v5-earn-liquidity-mining.ts
 ================
-export interface CardAssetRecordV5 {
-  pan4: string;
-  pan6: string;
-  tradeStatus: string;
-  side: string;
-  basicAmount: string;
-  basicCurrency: string;
-  transactionAmount: string;
-  transactionCurrency: string;
-  txnCreate: number;
-  merchCountry: string;
-  merchCity: string;
-  merchName: string;
-  txnId: string;
-  declinedReason: string;
-  totalFees: string;
-  uid: number;
-  transactionCurrencyAmount: string;
-  fxPad: string;
-  interchangeFee: string;
-  billAmount: string;
-  paidAmount: string;
-  paidCurrency: string;
-  bonusAmount: string;
-  foreignTransactionFee: string;
-  totalTax: string;
-  paidFiat: string;
-  withdrawalFee: string;
-  status: string;
-  orderNo: string;
-  mccCode: string;
-  merchCategoryDesc: string;
-}
-⋮----
-export interface CardAssetRecordsResultV5 {
-  pageSize: number;
-  pageNo: number;
-  totalCount: number;
-  data: CardAssetRecordV5[];
-}
-⋮----
-export interface CardPointBalanceV5 {
-  accountId: string;
-  availablePoint: string | number;
-  pendingPoint: string | number;
-  status: string;
-  updateTime: string | number;
-  settlementPeriod: number;
-}
-⋮----
-export interface CardPointRecordV5 {
-  outOrderId: string;
-  point: number;
-  side: string;
-  type: string;
-  subType: string;
-  createTime: number;
-  updateTime: number;
-  bizId: string;
-  bizTxnId: string;
-  transactionDate: string;
-  transactionId: string;
-  transactionAmount: string;
-  basicCurrency: string;
-  merchCategoryDesc: string;
-  merchName: string;
-  merchCountry: string;
-  merchCity: string;
-  pan4: string;
-  payFiatAmount: string;
-  transactionCurrencyAmount: string;
-}
-⋮----
-export interface CardPointRecordsResultV5 {
-  pageSize: number;
-  pageNo: number;
-  totalCount: number;
-  data: CardPointRecordV5[];
-}
-⋮----
-export interface CardPointTierInfoV5 {
-  usedLimit: string;
-  limit: string;
-  unit: string;
-  tier: string;
-  autoCashback: boolean;
-}
-⋮----
-export interface CardMallItemV5 {
-  itemId: string;
-  itemName: string;
-  priority: number;
-  onTime: string;
-  offTime: string;
-  price: string;
-  discountPrice: string;
-  totalNum: number;
-  redeemNum: number;
-  picPath: string;
-  currency: string;
-  currencyType: number;
-  itemType: number;
-  itemBizType: number;
-}
-⋮----
-export interface CardMallItemListResultV5 {
-  pageNo: number;
-  pageSize: number;
-  totalCount: number;
-  data: CardMallItemV5[];
-}
-⋮----
-export interface CardPointCashbackDetailV5 {
-  points: string;
-  amt: string;
-  ccy: string;
-  ccyType: string;
-  createTime: string;
-  bizTxnId: string;
-  sourceId: number;
-  sourceCode: string;
-  orderStatus: number;
-  orderSubStatus: number;
-  orderShowStatus: string;
-  failedBizCode: string;
-}
-
-================
-File: src/types/response/v5-earn-advance-discount.ts
-================
-export interface AdvanceEarnDiscountBuyOfferV5 {
-  productId: string;
-  currentPrice: string;
-  purchasePrice: string;
-  knockoutPrice: string;
-  knockoutCouponE8: string;
-  maxInvestmentAmount: string;
-  instUid: string;
-  expiredAt: string;
-  category: string;
-}
-⋮----
-/** GET /v5/earn/advance/product-extra-info?category=DiscountBuy */
-export interface AdvanceEarnProductExtraInfoDiscountBuyV5 {
-  offers: AdvanceEarnDiscountBuyOfferV5[];
-}
-⋮----
-export interface AdvanceEarnDualAssetQuoteLevelV5 {
-  selectPrice: string;
-  apyE8: string;
-  maxInvestmentAmount: string;
-  expiredAt: string;
-}
-⋮----
-export interface AdvanceEarnDualAssetQuoteProductV5 {
-  productId: string;
-  currentPrice: string;
-  buyLowPrice: AdvanceEarnDualAssetQuoteLevelV5[];
-  sellHighPrice: AdvanceEarnDualAssetQuoteLevelV5[];
-}
-⋮----
-/** GET /v5/earn/advance/product-extra-info?category=DualAssets&productId= */
-export interface AdvanceEarnProductExtraInfoDualAssetsV5 {
-  category: 'DualAssets';
-  list: AdvanceEarnDualAssetQuoteProductV5[];
-}
-⋮----
-export type AdvanceEarnProductExtraInfoV5 =
-  | AdvanceEarnProductExtraInfoDiscountBuyV5
-  | AdvanceEarnProductExtraInfoDualAssetsV5;
-⋮----
-export interface AdvanceEarnPlaceOrderResultV5 {
-  orderId: string;
-  orderLinkId: string;
-}
-⋮----
-export interface AdvanceEarnDiscountBuyPositionV5 {
-  positionId: string;
-  productId: string;
-  category: string;
+export interface LiquidityMiningApyBreakdownV5 {
   coin: string;
-  underlyingAsset: string;
-  amount: string;
-  purchasePrice: string;
-  knockoutPrice: string;
-  knockoutCouponE8: string;
-  status: string;
-  orderId: string;
-  duration: string;
-  settlementTime: string;
-  accountType: string;
-  toAccountType: string;
-  settleType: string;
-  expectReceiveAt: string;
+  apy: string;
 }
 ⋮----
-export interface AdvanceEarnDualAssetsPositionV5 {
-  positionId: string;
+export interface LiquidityMiningProductV5 {
   productId: string;
-  category: string;
   baseCoin: string;
   quoteCoin: string;
-  investCoin: string;
-  amount: string;
+  status: 'Available' | 'NotAvailable' | string;
+  maxLeverage: number;
+  minInvestmentQuote: string;
+  minInvestmentBase: string;
+  maxInvestmentQuote: string;
+  maxInvestmentBase: string;
+  minWithdrawalAmount: string;
+  minReinvestAmount: string;
+  baseCoinPrecision: number;
+  quoteCoinPrecision: number;
+  yieldCoins: string[];
   apyE8: string;
-  direction: 'BuyLow' | 'SellHigh' | string;
-  targetPrice: string;
-  settlementTime: string;
-  status: string;
-  orderId: string;
-  duration: string;
-  expectReturnCoin: string;
-  expectReturnAmount: string;
-  accountType: string;
-  toAccountType: string;
-  yieldStartAt: string | number;
-  yieldEndAt: string | number;
+  apy7dE8: string;
+  poolLiquidityValue: string;
+  dailyYield: string;
+  slippageRateE8List: string[];
+  apyBreakdown: LiquidityMiningApyBreakdownV5[];
+  apy7dBreakdown: LiquidityMiningApyBreakdownV5[];
+  slippage_levels?: string[];
 }
 ⋮----
-export interface AdvanceEarnPositionListV5 {
-  category: string;
-  list: (AdvanceEarnDiscountBuyPositionV5 | AdvanceEarnDualAssetsPositionV5)[];
-  nextPageCursor: string;
+export interface LiquidityMiningProductResultV5 {
+  products: LiquidityMiningProductV5[];
 }
 ⋮----
-export interface AdvanceEarnDiscountBuyOrderV5 {
+export interface ReinvestLiquidityMiningResultV5 {
   orderId: string;
   orderLinkId: string;
-  productId: string;
-  category: string;
-  orderType: string;
-  amount: string;
-  coin: string;
-  underlyingAsset: string;
-  status: string;
-  createdTime: string;
-  purchasePrice: string;
-  knockoutPrice: string;
-  knockoutCouponE8: string;
-  duration: string;
-  settlementTime: string;
-  accountType: string;
-  toAccountType: string;
-  settleType: string;
-  settlementPrice: string;
-  settlementCoin: string;
-  settlementAmount: string;
-  isVip: boolean;
-  refundStatus: string;
-}
-⋮----
-export interface AdvanceEarnDualAssetsOrderV5 {
-  orderId: string;
-  orderLinkId: string;
-  productId: string;
-  category: string;
-  orderType: string;
-  amount: string;
-  coin: string;
-  baseCoin: string;
-  quoteCoin: string;
-  status: string;
-  createdTime: string;
-  updatedTime: string;
-  direction: 'BuyLow' | 'SellHigh' | string;
-  targetPrice: string;
-  settlementTime: string | number;
-  estimateApyE8: string | number;
-  duration: string;
-  accountType: string;
-  toAccountType: string;
-  selectApyE8: string | number;
-  isVip: boolean;
-  settlementCoin: string;
-  settlementAmount: string;
-  orderMode: string;
-  settlementPrice: string;
-  refundStatus: string;
-  trialBonusAmount: string;
-  trialBonusPnl: string;
-}
-⋮----
-export interface AdvanceEarnOrderListV5 {
-  category: string;
-  list: (AdvanceEarnDiscountBuyOrderV5 | AdvanceEarnDualAssetsOrderV5)[];
-  nextPageCursor: string;
-}
-
-================
-File: src/types/response/v5-earn-fixed-term.ts
-================
-export interface FixedTermEarnTieredApyV5 {
-  min: string;
-  max: string;
-  apy: string;
-}
-⋮----
-export interface FixedTermEarnInterestCoinApyV5 {
-  coin: string;
-  apy: string;
-  expectUnitEarning: string;
-  currentPrice: string;
-}
-⋮----
-export interface FixedTermEarnProductV5 {
-  productId: string;
-  category: 'FixedTermSaving' | 'FundPool' | 'FundPoolPremium' | string;
-  coin: string;
-  duration: string;
-  status: 'Available' | 'SoldOut' | 'NotStarted' | string;
-  tieredApyList: FixedTermEarnTieredApyV5[];
-  minStakeAmount: string;
-  maxStakeAmount: string;
-  precision: number;
-  subscribeStartAt: string;
-  subscribeEndAt: string;
-  allowEarlyRedemption: boolean;
-  earlyRedemptionApy: string;
-  redemptionLimitDuration: string;
-  allowAutoReinvest: boolean;
-  interestCoinApyList: FixedTermEarnInterestCoinApyV5[];
-  isVip: boolean;
-  creditTime: string;
-  specialUserGroupRequired: boolean;
-  specialUserGroupInfo: string;
-}
-⋮----
-export interface FixedTermEarnProductListV5 {
-  list: FixedTermEarnProductV5[];
-}
-⋮----
-export interface FixedTermEarnPlaceOrderResultV5 {
-  orderId: string;
-  orderLinkId: string;
-}
-⋮----
-export interface RedeemFixedTermEarnResultV5 {
-  redeemAmount: string;
-  estEarnings: string;
-}
-⋮----
-export interface FixedTermEarnEarlyRedeemInfoV5 {
-  allowEarlyRedeem: boolean;
-  earlyRedeemEarning: string;
-  returnCoin: string;
-  redemptionLimitDuration: string;
-}
-⋮----
-export interface FixedTermEarnPositionInterestV5 {
-  coin: string;
-  apy: string;
-  expectReturnEarning: string;
-  price: string;
-}
-⋮----
-export interface FixedTermEarnPositionV5 {
-  positionId: string;
-  productId: string;
-  category: string;
-  coin: string;
-  amount: string;
-  effectiveAmount: string;
-  duration: string;
-  status: string;
-  settlementTime: string;
-  createdAt: string;
-  orderId: string;
-  earlyRedeemInfo: FixedTermEarnEarlyRedeemInfoV5 | null;
-  allowAutoReinvest: boolean;
-  autoReinvest: string;
-  interestCoinApyList: FixedTermEarnPositionInterestV5[];
-}
-⋮----
-export interface FixedTermEarnPositionListV5 {
-  list: FixedTermEarnPositionV5[];
-}
-⋮----
-export interface FixedTermEarnOrderYieldInfoV5 {
-  coin: string;
-  amount: string;
-  status: string;
-  createdAt: string;
-  apy: string;
-}
-⋮----
-export interface FixedTermEarnOrderV5 {
-  orderId: string;
-  orderLinkId: string;
-  orderType: string;
-  status: string;
-  productId: string;
-  category: string;
-  coin: string;
-  amount: string;
-  duration: string;
-  accountType: string;
-  settlementTime: string;
-  createdAt: string;
-  yieldInfoList: FixedTermEarnOrderYieldInfoV5[];
-}
-⋮----
-export interface FixedTermEarnOrderListV5 {
-  list: FixedTermEarnOrderV5[];
-  nextPageCursor: string;
 }
 
 ================
@@ -6380,79 +6760,6 @@ export interface PwmFundTransferRecordV5 {
   toUserId: number;
   amount: string;
   coin: string;
-}
-
-================
-File: src/types/response/v5-earn-token.ts
-================
-/**
- * Earn token product (e.g. BYUSDT) — /v5/earn/token/*
- */
-⋮----
-export interface EarnTokenProductV5 {
-  productId: string;
-  coin: string;
-  mintFeeRateE8: string;
-  redeemFeeRateE8: string;
-  minInvestment: string;
-  userHolding: string;
-  leftQuota: string;
-  canMint: boolean;
-  savingsBalance: string;
-  aprE8: string;
-  bonusAprE8: string;
-  bonusMaxAmount: string;
-  baseCoinPrecision: number;
-  tokenPrecision: number;
-}
-⋮----
-export interface PlaceEarnTokenOrderResultV5 {
-  orderId: string;
-  orderLinkId: string;
-}
-⋮----
-export interface EarnTokenOrderV5 {
-  orderId: string;
-  orderLinkId: string;
-  orderType: 'Mint' | 'Redeem';
-  fromCoin: string;
-  toCoin: string;
-  fromAmount: string;
-  toAmount: string;
-  serviceFee: string;
-  status: 'Success' | 'Processing' | 'Fail';
-  createdTime: string;
-}
-⋮----
-export interface EarnTokenPositionV5 {
-  totalAmount: string;
-  totalYield: string;
-  yesterdayYield: string;
-  aprE8: number;
-  bonusAprE8: number;
-  bonusMaxAmount: string;
-  hasQuota: boolean;
-}
-⋮----
-export interface EarnTokenDailyYieldRecordV5 {
-  yield: string;
-  bonusYield: string;
-  status: 'Success' | 'Processing';
-  createdTime: string;
-}
-⋮----
-export interface EarnTokenHourlyYieldRecordV5 {
-  effectiveAmount: string;
-  yield: string;
-  rewardType: 0 | 1;
-  aprE8: string;
-  hourlyDate: string;
-  createdTime: string;
-}
-⋮----
-export interface EarnTokenHistoryAprPointV5 {
-  timestamp: string;
-  aprE8: string;
 }
 
 ================
@@ -6944,176 +7251,6 @@ export interface RWANavChartResultV5 {
   productId: number;
   list: RWANavChartPointV5[];
 }
-
-================
-File: src/types/response/v5-spreadtrading.ts
-================
-export interface SpreadInstrumentInfoV5 {
-  symbol: string;
-  contractType: 'FundingRateArb' | 'CarryTrade' | 'FutureSpread' | 'PerpBasis';
-  status: 'Trading' | 'Settling';
-  baseCoin: string;
-  quoteCoin: string;
-  settleCoin: string;
-  tickSize: string;
-  minPrice: string;
-  maxPrice: string;
-  lotSize: string;
-  minSize: string;
-  maxSize: string;
-  launchTime: string;
-  deliveryTime: string;
-  legs: {
-    symbol: string;
-    contractType: 'LinearPerpetual' | 'LinearFutures' | 'Spot';
-  }[];
-}
-⋮----
-export interface SpreadOrderbookResponseV5 {
-  s: string; // Symbol
-  b: [string, string][]; // Bids array [price, size]
-  a: [string, string][]; // Asks array [price, size]
-  u: number; // Update ID
-  ts: number; // Timestamp
-  seq: number; // Sequence
-  cts: number; // Cross timestamp
-}
-⋮----
-s: string; // Symbol
-b: [string, string][]; // Bids array [price, size]
-a: [string, string][]; // Asks array [price, size]
-u: number; // Update ID
-ts: number; // Timestamp
-seq: number; // Sequence
-cts: number; // Cross timestamp
-⋮----
-export interface SpreadTickerV5 {
-  symbol: string; // Spread combination symbol name
-  bidPrice: string; // Bid 1 price
-  bidSize: string; // Bid 1 size
-  askPrice: string; // Ask 1 price
-  askSize: string; // Ask 1 size
-  lastPrice: string; // Last trade price
-  highPrice24h: string; // The highest price in the last 24 hours
-  lowPrice24h: string; // The lowest price in the last 24 hours
-  prevPrice24h: string; // Price 24 hours ago
-  volume24h: string; // Volume for 24h
-}
-⋮----
-symbol: string; // Spread combination symbol name
-bidPrice: string; // Bid 1 price
-bidSize: string; // Bid 1 size
-askPrice: string; // Ask 1 price
-askSize: string; // Ask 1 size
-lastPrice: string; // Last trade price
-highPrice24h: string; // The highest price in the last 24 hours
-lowPrice24h: string; // The lowest price in the last 24 hours
-prevPrice24h: string; // Price 24 hours ago
-volume24h: string; // Volume for 24h
-⋮----
-export interface SpreadRecentTradeV5 {
-  execId: string; // Execution ID
-  symbol: string; // Spread combination symbol name
-  price: string; // Trade price
-  size: string; // Trade size
-  side: 'Buy' | 'Sell'; // Side of taker
-  time: string; // Trade time (ms)
-  seq?: string;
-}
-⋮----
-execId: string; // Execution ID
-symbol: string; // Spread combination symbol name
-price: string; // Trade price
-size: string; // Trade size
-side: 'Buy' | 'Sell'; // Side of taker
-time: string; // Trade time (ms)
-⋮----
-export interface SpreadOpenOrderV5 {
-  symbol: string;
-  baseCoin: string;
-  orderType: 'Market' | 'Limit';
-  orderLinkId: string;
-  side: 'Buy' | 'Sell';
-  timeInForce: 'GTC' | 'FOK' | 'IOC' | 'PostOnly';
-  orderId: string;
-  leavesQty: string;
-  orderStatus: 'New' | 'PartiallyFilled';
-  cumExecQty: string;
-  price: string;
-  qty: string;
-  createdTime: string;
-  updatedTime: string;
-}
-⋮----
-export interface SpreadOrderHistoryV5 {
-  symbol: string;
-  orderType: 'Market' | 'Limit';
-  orderLinkId: string;
-  orderId: string;
-  contractType: 'FundingRateArb' | 'CarryTrade' | 'FutureSpread' | 'PerpBasis';
-  orderStatus: 'Rejected' | 'Cancelled' | 'Filled';
-  price: string;
-  orderQty: string;
-  timeInForce: 'GTC' | 'FOK' | 'IOC' | 'PostOnly';
-  baseCoin: string;
-  createdAt: string;
-  updatedAt: string;
-  side: 'Buy' | 'Sell';
-  leavesQty: string;
-  settleCoin: string;
-  cumExecQty: string;
-  qty: string;
-  leg1Symbol: string;
-  leg1ProdType: 'Futures' | 'Spot';
-  leg1OrderId: string;
-  leg1Side: string;
-  leg2ProdType: 'Futures' | 'Spot';
-  leg2OrderId: string;
-  leg2Symbol: string;
-  leg2Side: string;
-  cxlRejReason: string;
-  cumFeeDetail?: Record<string, string>; // Cumulative trading fee details instead of cumExecFee
-}
-⋮----
-cumFeeDetail?: Record<string, string>; // Cumulative trading fee details instead of cumExecFee
-⋮----
-export interface SpreadTradeLegV5 {
-  symbol: string;
-  side: 'Buy' | 'Sell';
-  execPrice: string;
-  execTime: string;
-  execValue: string;
-  execType: string;
-  category: 'linear' | 'spot';
-  execQty: string;
-  execFee: string;
-  feeCurrency: string; // Trading fee currency
-  execId: string;
-}
-⋮----
-feeCurrency: string; // Trading fee currency
-⋮----
-export interface SpreadTradeV5 {
-  symbol: string;
-  orderLinkId: string;
-  side: 'Buy' | 'Sell';
-  orderId: string;
-  execPrice: string;
-  execTime: string;
-  execType: 'Trade';
-  execQty: string;
-  execId: string;
-  legs: SpreadTradeLegV5[];
-  extraFees: string;
-}
-⋮----
-/** GET /v5/spread/max-qty */
-export interface SpreadMaxQtyResultV5 {
-  /** Maximum order quantity (available balance for the spread order). */
-  ab: string;
-}
-⋮----
-/** Maximum order quantity (available balance for the spread order). */
 
 ================
 File: src/types/response/v5-strategy.ts
@@ -7690,22 +7827,420 @@ verbose: true, // report individual test
 // watchman: true,
 
 ================
-File: src/types/request/v5-earn-liquidity-mining.ts
+File: src/types/request/v5-account.ts
 ================
-/**
- * GET /v5/earn/liquidity-mining/product (public, 50 req/s per IP)
- */
-export interface GetLiquidityMiningProductParamsV5 {
-  baseCoin?: string;
-  quoteCoin?: string;
+import {
+  AccountTypeV5,
+  CategoryV5,
+  InstrumentSymbolTypeV5,
+  TransactionTypeV5,
+} from '../shared-v5';
+⋮----
+export interface GetWalletBalanceParamsV5 {
+  accountType: AccountTypeV5;
+  coin?: string;
 }
 ⋮----
-export interface ReinvestLiquidityMiningParamsV5 {
-  productId: string;
-  orderLinkId: string;
-  positionId: string;
-  leverage?: string;
+export interface GetBorrowHistoryParamsV5 {
+  currency?: string;
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+  cursor?: string;
 }
+⋮----
+export interface GetFeeRateParamsV5 {
+  category: CategoryV5;
+  symbol?: string;
+  baseCoin?: string;
+}
+⋮----
+export interface GetTransactionLogParamsV5 {
+  accountType?: AccountTypeV5;
+  category?: CategoryV5;
+  currency?: string;
+  baseCoin?: string;
+  type?: TransactionTypeV5;
+  /**
+   * Transaction sub type, "movePosition", used to filter trans logs of Move Position only
+   */
+  transSubType?: string;
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+/**
+   * Transaction sub type, "movePosition", used to filter trans logs of Move Position only
+   */
+⋮----
+export interface MMPModifyParamsV5 {
+  baseCoin: string;
+  window: string;
+  frozenPeriod: string;
+  qtyLimit: string;
+  deltaLimit: string;
+  vegaLimit?: string;
+}
+⋮----
+export interface RepayLiabilityParamsV5 {
+  coin?: string;
+}
+⋮----
+export interface SetCollateralCoinParamsV5 {
+  coin: string;
+  collateralSwitch: 'ON' | 'OFF';
+}
+⋮----
+export interface GetClassicTransactionLogsParamsV5 {
+  currency?: string;
+  baseCoin?: string;
+  type?: string;
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+export interface SetLimitPriceActionParamsV5 {
+  category: CategoryV5;
+  modifyEnable: boolean;
+}
+⋮----
+/**
+ * Set Delta Neutral Mode. POST /v5/account/set-delta-mode
+ * 1: enable, 0: disable.
+ */
+export interface SetDeltaNeutralModeParamsV5 {
+  deltaEnable: '1' | '0';
+}
+⋮----
+export interface GetAccountInstrumentsInfoParamsV5 {
+  category: 'spot' | 'linear' | 'inverse';
+  symbol?: string;
+  /** Filter by `symbolType` (e.g. `commodity`, `stock`, `forex` for linear). */
+  symbolType?: InstrumentSymbolTypeV5;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+/** Filter by `symbolType` (e.g. `commodity`, `stock`, `forex` for linear). */
+⋮----
+/** GET /v5/account/pay-info */
+export interface GetPayInfoParamsV5 {
+  coin?: string;
+}
+⋮----
+/** GET /v5/account/trade-info-for-analysis */
+export interface GetTradeInfoForAnalysisParamsV5 {
+  symbol: string;
+  startTime?: number;
+  endTime?: number;
+}
+⋮----
+export interface ManualRepayParamsV5 {
+  coin?: string;
+  amount?: string;
+  /**
+   * ALL: fixed + floating (floating first); FIXED: fixed only; FLEXIBLE: floating only. Default: FLEXIBLE.
+   * If neither `coin` nor `amount` is set, this must be ALL (repay all liabilities) or the request is rejected.
+   */
+  repaymentType?: 'ALL' | 'FIXED' | 'FLEXIBLE';
+}
+⋮----
+/**
+   * ALL: fixed + floating (floating first); FIXED: fixed only; FLEXIBLE: floating only. Default: FLEXIBLE.
+   * If neither `coin` nor `amount` is set, this must be ALL (repay all liabilities) or the request is rejected.
+   */
+
+================
+File: src/types/request/v5-asset.ts
+================
+import { AccountTypeV5, CategoryV5 } from '../shared-v5';
+⋮----
+export interface GetCoinExchangeRecordParamsV5 {
+  fromCoin?: string;
+  toCoin?: string;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+export interface GetDeliveryRecordParamsV5 {
+  category: CategoryV5;
+  symbol?: string;
+  startTime?: number;
+  endTime?: number;
+  expDate?: string;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+export interface GetSettlementRecordParamsV5 {
+  category: CategoryV5;
+  symbol?: string;
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+export interface GetAssetInfoParamsV5 {
+  accountType: AccountTypeV5;
+  coin?: string;
+}
+⋮----
+export interface GetAllCoinsBalanceParamsV5 {
+  memberId?: string;
+  accountType: AccountTypeV5;
+  coin?: string;
+  withBonus?: number;
+}
+⋮----
+export interface GetAccountCoinBalanceParamsV5 {
+  memberId?: string;
+  toMemberId?: string;
+  accountType: AccountTypeV5;
+  coin: string;
+  toAccountType?: AccountTypeV5;
+  withBonus?: number;
+  withTransferSafeAmount?: 0 | 1;
+  withLtvTransferSafeAmount?: 0 | 1;
+}
+⋮----
+export interface GetInternalTransferParamsV5 {
+  transferId?: string;
+  coin?: string;
+  status?: string;
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+export interface UniversalTransferParamsV5 {
+  transferId: string;
+  coin: string;
+  amount: string;
+  fromMemberId: number;
+  toMemberId: number;
+  fromAccountType: AccountTypeV5;
+  toAccountType: AccountTypeV5;
+}
+⋮----
+export interface GetUniversalTransferRecordsParamsV5 {
+  transferId?: string;
+  coin?: string;
+  status?: string;
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+  cursor?: string;
+  fromMemberId?: string;
+  toMemberId?: string;
+}
+⋮----
+export interface GetAllowedDepositCoinInfoParamsV5 {
+  coin?: string;
+  chain?: string;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+export interface GetDepositRecordParamsV5 {
+  id?: string;
+  txID?: string;
+  coin?: string;
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+export interface GetSubAccountDepositRecordParamsV5 {
+  id?: string;
+  txID?: string;
+  subMemberId: string;
+  coin?: string;
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+export interface GetInternalDepositRecordParamsV5 {
+  txID?: string;
+  startTime?: number;
+  endTime?: number;
+  coin?: string;
+  cursor?: string;
+  limit?: number;
+}
+⋮----
+export interface GetWithdrawalRecordsParamsV5 {
+  withdrawID?: string;
+  txID?: string;
+  coin?: string;
+  withdrawType?: number;
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+export interface GetWithdrawalAddressListParamsV5 {
+  coin?: string;
+  chain?: string;
+  addressType?: 0 | 1 | 2;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+export interface SubmitDepositOriginatorInfoParamsV5 {
+  depositId: number;
+  subAccountId?: number;
+  /** Travel Rule questionnaire JSON string. See Questionnaire docs. */
+  questionnaire: string;
+}
+⋮----
+/** Travel Rule questionnaire JSON string. See Questionnaire docs. */
+⋮----
+export interface WithdrawParamsV5 {
+  coin: string;
+  /**
+   * When forceChain is 0 or 1, required. When forceChain is 2 (Bybit UID withdraw), may be null/omitted.
+   */
+  chain?: string;
+  address: string;
+  tag?: string;
+  amount: string;
+  timestamp: number;
+  forceChain?: number;
+  /**
+   * FUND, UTA, or EARN; or comma combo e.g. FUND,UTA,EARN (funding first, then UTA and Earn for remainder).
+   * SPOT is legacy if still supported for older integrations.
+   */
+  accountType: string;
+  feeType?: 0 | 1;
+  requestId?: string;
+  /**
+   * Required for Bybit Turkey (TR) site users when creating a withdrawal. Omitted for other regions unless the API requires it.
+   */
+  transactionPurpose?: string;
+  /**
+   * Travel Rule questionnaire JSON string (max 16384 bytes). Takes precedence over `beneficiary` / `transactionPurpose` when both are set.
+   */
+  questionnaire?: string;
+  beneficiary?: {
+    vaspEntityId?: string;
+    beneficiaryName?: string;
+    beneficiaryLegalType?: string;
+    beneficiaryWalletType?: string;
+    beneficiaryUnhostedWalletType?: string;
+    beneficiaryPoiNumber?: string;
+    beneficiaryPoiType?: string;
+    beneficiaryPoiIssuingCountry?: string;
+    beneficiaryPoiExpiredDate?: string;
+  };
+}
+⋮----
+/**
+   * When forceChain is 0 or 1, required. When forceChain is 2 (Bybit UID withdraw), may be null/omitted.
+   */
+⋮----
+/**
+   * FUND, UTA, or EARN; or comma combo e.g. FUND,UTA,EARN (funding first, then UTA and Earn for remainder).
+   * SPOT is legacy if still supported for older integrations.
+   */
+⋮----
+/**
+   * Required for Bybit Turkey (TR) site users when creating a withdrawal. Omitted for other regions unless the API requires it.
+   */
+⋮----
+/**
+   * Travel Rule questionnaire JSON string (max 16384 bytes). Takes precedence over `beneficiary` / `transactionPurpose` when both are set.
+   */
+⋮----
+export interface ConvertCoinsParamsV5 {
+  coin?: string;
+  side?: number;
+  accountType:
+    | 'eb_convert_funding'
+    | 'eb_convert_uta'
+    | 'eb_convert_spot'
+    | 'eb_convert_contract'
+    | 'eb_convert_inverse';
+}
+⋮----
+export interface RequestConvertQuoteParamsV5 {
+  fromCoin: string;
+  toCoin: string;
+  fromCoinType?: string;
+  toCoinType?: string;
+  requestCoin: string;
+  requestAmount: string;
+  accountType:
+    | 'eb_convert_funding'
+    | 'eb_convert_uta'
+    | 'eb_convert_spot'
+    | 'eb_convert_contract'
+    | 'eb_convert_inverse';
+  requestId?: string;
+}
+⋮----
+export interface GetConvertHistoryParamsV5 {
+  accountType?: string;
+  index?: number;
+  limit?: number;
+}
+⋮----
+export interface GetSmallBalanceListParamsV5 {
+  accountType: 'eb_convert_uta'; // Wallet type, only supports Unified wallet
+  fromCoin?: string; // Source currency
+}
+⋮----
+accountType: 'eb_convert_uta'; // Wallet type, only supports Unified wallet
+fromCoin?: string; // Source currency
+⋮----
+export interface GetFiatTradingPairListParamsV5 {
+  side?: 0 | 1; // 0: buy (buy crypto, sell fiat), 1: sell (sell crypto, buy fiat)
+}
+⋮----
+side?: 0 | 1; // 0: buy (buy crypto, sell fiat), 1: sell (sell crypto, buy fiat)
+⋮----
+/** Funding Account Transaction History. Interval createTimeFrom-createTimeTo max 7 days. */
+export interface GetFundingAccountTransactionHistoryParamsV5 {
+  createTimeFrom?: string;
+  createTimeTo?: string;
+  limit?: string;
+  cursor?: string;
+}
+⋮----
+/** Asset Overview. memberId required when querying sub account via master API key. */
+export interface GetAssetOverviewParamsV5 {
+  memberId?: string;
+  /** Fiat currency for valuation; defaults to USD if omitted. */
+  valuationCurrency?: string;
+  /** Account type filter; returns all if omitted. */
+  accountType?: string;
+}
+⋮----
+/** Fiat currency for valuation; defaults to USD if omitted. */
+⋮----
+/** Account type filter; returns all if omitted. */
+⋮----
+/** GET /v5/asset/portfolio-margin */
+export interface GetPortfolioMarginInfoParamsV5 {
+  baseCoin?: string;
+}
+⋮----
+/** GET /v5/asset/total-members-assets */
+export interface GetTotalMembersAssetsParamsV5 {
+  /** If omitted, defaults to BTC. Total is quoted in this coin. */
+  coin?: string;
+}
+⋮----
+/** If omitted, defaults to BTC. Total is quoted in this coin. */
 
 ================
 File: src/types/request/v5-event.ts
@@ -7989,83 +8524,6 @@ export interface GetP2PChatMessagesParamsV5 {
 /** Page size, up to 30. */
 ⋮----
 /** AES encrypted session ID. */
-
-================
-File: src/types/request/v5-spreadtrading.ts
-================
-export interface GetSpreadInstrumentsInfoParamsV5 {
-  symbol?: string;
-  baseCoin?: string;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-/** GET /v5/spread/max-qty */
-export interface GetSpreadMaxQtyParamsV5 {
-  symbol: string;
-  /** 1: Buy, 2: Sell */
-  side: '1' | '2';
-  orderPrice: string;
-}
-⋮----
-/** 1: Buy, 2: Sell */
-⋮----
-export interface SubmitSpreadOrderParamsV5 {
-  symbol: string;
-  side: 'Buy' | 'Sell';
-  orderType: 'Limit' | 'Market';
-  qty: string;
-  price: string;
-  orderLinkId: string;
-  timeInForce: 'IOC' | 'FOK' | 'GTC' | 'PostOnly';
-}
-⋮----
-export interface AmendSpreadOrderParamsV5 {
-  symbol: string;
-  orderId?: string;
-  orderLinkId?: string;
-  qty?: string;
-  price?: string;
-}
-⋮----
-export interface GetSpreadOpenOrdersParamsV5 {
-  symbol?: string;
-  baseCoin?: string;
-  orderId?: string;
-  orderLinkId?: string;
-  limit?: number;
-  cursor?: string;
-}
-export interface GetSpreadOrderHistoryParamsV5 {
-  symbol?: string;
-  baseCoin?: string;
-  orderId?: string;
-  orderLinkId?: string;
-  /**
-   * Filter by order status. Undocumented in the endpoint parameter table; confirmed by Bybit's API announcement.
-   * @see https://t.me/Bybit_API_Announcements/464
-   */
-  orderStatus?: 'Rejected' | 'Cancelled' | 'Filled';
-  startTime?: number;
-  endTime?: number;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-/**
-   * Filter by order status. Undocumented in the endpoint parameter table; confirmed by Bybit's API announcement.
-   * @see https://t.me/Bybit_API_Announcements/464
-   */
-⋮----
-export interface GetSpreadTradeHistoryParamsV5 {
-  symbol?: string;
-  orderId?: string;
-  orderLinkId?: string;
-  startTime?: number;
-  endTime?: number;
-  limit?: number;
-  cursor?: string;
-}
 
 ================
 File: src/types/request/v5-strategy.ts
@@ -8380,45 +8838,208 @@ export interface BatchCancelOrderParamsV5 {
 }
 
 ================
-File: src/types/response/v5-earn-liquidity-mining.ts
+File: src/types/request/v5-user.ts
 ================
-export interface LiquidityMiningApyBreakdownV5 {
-  coin: string;
-  apy: string;
+import { PermissionsV5 } from '../shared-v5';
+⋮----
+export interface CreateSubMemberParamsV5 {
+  username: string;
+  password?: string;
+  /**
+   * 1: normal, 6: custodial
+   */
+  memberType: 1 | 6;
+  /**
+   * 0: quick login disabled (default), 1: quick login enabled
+   */
+  switch?: 0 | 1;
+  isUta?: boolean;
+  note?: string;
 }
 ⋮----
-export interface LiquidityMiningProductV5 {
-  productId: string;
-  baseCoin: string;
-  quoteCoin: string;
-  status: 'Available' | 'NotAvailable' | string;
-  maxLeverage: number;
-  minInvestmentQuote: string;
-  minInvestmentBase: string;
-  maxInvestmentQuote: string;
-  maxInvestmentBase: string;
-  minWithdrawalAmount: string;
-  minReinvestAmount: string;
-  baseCoinPrecision: number;
-  quoteCoinPrecision: number;
-  yieldCoins: string[];
-  apyE8: string;
-  apy7dE8: string;
-  poolLiquidityValue: string;
-  dailyYield: string;
-  slippageRateE8List: string[];
-  apyBreakdown: LiquidityMiningApyBreakdownV5[];
-  apy7dBreakdown: LiquidityMiningApyBreakdownV5[];
-  slippage_levels?: string[];
+/**
+   * 1: normal, 6: custodial
+   */
+⋮----
+/**
+   * 0: quick login disabled (default), 1: quick login enabled
+   */
+⋮----
+export interface CreateSubApiKeyParamsV5 {
+  subuid: number;
+  note?: string;
+  readOnly: 0 | 1;
+  ips?: string;
+  permissions: PermissionsV5;
 }
 ⋮----
-export interface LiquidityMiningProductResultV5 {
-  products: LiquidityMiningProductV5[];
+export interface UpdateApiKeyParamsV5 {
+  apikey?: string;
+  readOnly?: 0 | 1;
+  permissions: PermissionsV5;
 }
 ⋮----
-export interface ReinvestLiquidityMiningResultV5 {
-  orderId: string;
-  orderLinkId: string;
+export interface UpdateSubApiKeyUpdateParamsV5 {
+  readOnly?: number;
+  ips?: string[];
+  permissions: PermissionsV5;
+}
+⋮----
+export interface DeleteSubMemberParamsV5 {
+  subMemberId: string;
+}
+⋮----
+export interface GetSubAccountAllApiKeysParamsV5 {
+  subMemberId: string;
+  limit?: number;
+  cursor?: string;
+}
+⋮----
+export interface GetAffiliateUserListParamsV5 {
+  size?: number;
+  cursor?: string;
+  needDeposit?: boolean;
+  need30?: boolean;
+  need365?: boolean;
+  startDate?: string;
+  endDate?: string;
+}
+⋮----
+/** GET /v5/affiliate/affiliate-sub-list */
+export interface GetAffiliateSubAffiliateListParamsV5 {
+  cursor?: string;
+  /** [0, 100]. Default: 0 */
+  size?: number;
+  /** YYYY-MM-DD. Range with endDate max 3 months */
+  startDate?: string;
+  /** YYYY-MM-DD. Must be provided with startDate or both omitted (T-1 default) */
+  endDate?: string;
+  /** Exact sub-affiliate ID. 0 or omit for all */
+  subAffId?: number;
+}
+⋮----
+/** [0, 100]. Default: 0 */
+⋮----
+/** YYYY-MM-DD. Range with endDate max 3 months */
+⋮----
+/** YYYY-MM-DD. Must be provided with startDate or both omitted (T-1 default) */
+⋮----
+/** Exact sub-affiliate ID. 0 or omit for all */
+⋮----
+export interface GetAffiliateUserInfoParamsV5 {
+  /** The master account UID of affiliate's client */
+  uid: string;
+  /** Coin type for filtering, e.g. USDT */
+  coin?: string;
+  /**
+   * Business line filter. 1: Derivatives, 2: Spot, 3: ByFi, 4: USDC, 5: Options
+   */
+  business?: '1' | '2' | '3' | '4' | '5';
+}
+⋮----
+/** The master account UID of affiliate's client */
+⋮----
+/** Coin type for filtering, e.g. USDT */
+⋮----
+/**
+   * Business line filter. 1: Derivatives, 2: Spot, 3: ByFi, 4: USDC, 5: Options
+   */
+⋮----
+/** Get Friend Referrals - invitation relationship status. 0: alive; 1: invalid */
+export interface GetFriendReferralsParamsV5 {
+  status?: string;
+  size?: string;
+  cursor?: string;
+}
+⋮----
+/**
+ * Referral product line.
+ *
+ * 0 unknown, 1 spot, 2 contracts, 3 options, 4 USDC perpetual, 6 TradeFi, 9 Alpha.
+ * Unrecognized response values are returned as 0.
+ */
+export type ReferralProductLineV5 = 0 | 1 | 2 | 3 | 4 | 6 | 9;
+⋮----
+/**
+ * Invitee status (`friendStatus`).
+ *
+ * 0 unknown, 1 signed up, 2 first deposit, 3 first trade, 4 qualified,
+ * 5 not qualified, 6 historical invitation, 7 boost in progress,
+ * 8 boost qualified, 9 boost failed, 10 boost user signed up.
+ */
+export type ReferralFriendStatusV5 = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+⋮----
+/**
+ * POST /v5/referral/commission/records
+ *
+ * All fields are optional. Send `{}` when no filter is needed. An empty
+ * `userIdList` does not filter by invitee. `page` 0 is treated as 1.
+ * `pageSize` 0 or greater than 200 is treated as 10.
+ * Times are `YYYY-MM-DD HH:mm:ss`. Property names are the proto camelCase
+ * names; gateway serialization is not independently verified.
+ */
+export interface GetReferralCommissionRecordsParamsV5 {
+  /** Invitee IDs. An empty list does not filter by invitee. */
+  userIdList?: number[];
+  /** Start time, `YYYY-MM-DD HH:mm:ss`. An unparsable value is sent downstream as `""`. */
+  startTime?: string;
+  /** End time, `YYYY-MM-DD HH:mm:ss`. An unparsable value is sent downstream as `""`. */
+  endTime?: string;
+  /** One-based page. `0` is treated as `1`. */
+  page?: number;
+  /** Page size. `0` or a value greater than 200 is treated as 10. */
+  pageSize?: number;
+  productLine?: ReferralProductLineV5;
+}
+⋮----
+/** Invitee IDs. An empty list does not filter by invitee. */
+⋮----
+/** Start time, `YYYY-MM-DD HH:mm:ss`. An unparsable value is sent downstream as `""`. */
+⋮----
+/** End time, `YYYY-MM-DD HH:mm:ss`. An unparsable value is sent downstream as `""`. */
+⋮----
+/** One-based page. `0` is treated as `1`. */
+⋮----
+/** Page size. `0` or a value greater than 200 is treated as 10. */
+⋮----
+/**
+ * POST /v5/referral/user/invitations
+ *
+ * All fields are optional. An empty `userIdList` does not filter by invitee.
+ * Invalid or empty times are passed downstream as `0`.
+ */
+export interface GetReferralUserInvitationsParamsV5 {
+  /** Invitee IDs. An empty list does not filter by invitee. */
+  userIdList?: number[];
+  /** `YYYY-MM-DD HH:mm:ss`. Invalid or empty values are passed downstream as `0`. */
+  startTime?: string;
+  /** `YYYY-MM-DD HH:mm:ss`. Invalid or empty values are passed downstream as `0`. */
+  endTime?: string;
+  /** Page number. `0` is treated as `1`. */
+  page?: number;
+  /** Page size. `0` or a value greater than 200 is treated as 10. */
+  pageSize?: number;
+  friendStatus?: ReferralFriendStatusV5;
+}
+⋮----
+/** Invitee IDs. An empty list does not filter by invitee. */
+⋮----
+/** `YYYY-MM-DD HH:mm:ss`. Invalid or empty values are passed downstream as `0`. */
+⋮----
+/** `YYYY-MM-DD HH:mm:ss`. Invalid or empty values are passed downstream as `0`. */
+⋮----
+/** Page number. `0` is treated as `1`. */
+⋮----
+/** Page size. `0` or a value greater than 200 is treated as 10. */
+⋮----
+/** Sign Agreement. Only master account.
+ * - `category` (legacy): 2 = metals (XAU/XAG perps; stock perps share this); 3 = crude oil. New enum values are not added here; prefer `categoryV2`.
+ * - `categoryV2` (recommended): 1 = metals; 2 = crude oil. Additional values may be added by the API; use a numeric literal or variable.
+ * - Either `category` or `categoryV2` must be sent. */
+export interface SignAgreementParamsV5 {
+  agree: boolean;
+  category?: 2 | 3;
+  categoryV2?: number;
 }
 
 ================
@@ -9596,422 +10217,6 @@ postImrE4: number; // Initial margin rate after checking (in basis points)
 postMmrE4: number; // Maintenance margin rate after checking (in basis points)
 
 ================
-File: src/types/request/v5-account.ts
-================
-import {
-  AccountTypeV5,
-  CategoryV5,
-  InstrumentSymbolTypeV5,
-  TransactionTypeV5,
-} from '../shared-v5';
-⋮----
-export interface GetWalletBalanceParamsV5 {
-  accountType: AccountTypeV5;
-  coin?: string;
-}
-⋮----
-export interface GetBorrowHistoryParamsV5 {
-  currency?: string;
-  startTime?: number;
-  endTime?: number;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface GetFeeRateParamsV5 {
-  category: CategoryV5;
-  symbol?: string;
-  baseCoin?: string;
-}
-⋮----
-export interface GetTransactionLogParamsV5 {
-  accountType?: AccountTypeV5;
-  category?: CategoryV5;
-  currency?: string;
-  baseCoin?: string;
-  type?: TransactionTypeV5;
-  /**
-   * Transaction sub type, "movePosition", used to filter trans logs of Move Position only
-   */
-  transSubType?: string;
-  startTime?: number;
-  endTime?: number;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-/**
-   * Transaction sub type, "movePosition", used to filter trans logs of Move Position only
-   */
-⋮----
-export interface MMPModifyParamsV5 {
-  baseCoin: string;
-  window: string;
-  frozenPeriod: string;
-  qtyLimit: string;
-  deltaLimit: string;
-  vegaLimit?: string;
-}
-⋮----
-export interface RepayLiabilityParamsV5 {
-  coin?: string;
-}
-⋮----
-export interface SetCollateralCoinParamsV5 {
-  coin: string;
-  collateralSwitch: 'ON' | 'OFF';
-}
-⋮----
-export interface GetClassicTransactionLogsParamsV5 {
-  currency?: string;
-  baseCoin?: string;
-  type?: string;
-  startTime?: number;
-  endTime?: number;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface SetLimitPriceActionParamsV5 {
-  category: CategoryV5;
-  modifyEnable: boolean;
-}
-⋮----
-/**
- * Set Delta Neutral Mode. POST /v5/account/set-delta-mode
- * 1: enable, 0: disable.
- */
-export interface SetDeltaNeutralModeParamsV5 {
-  deltaEnable: '1' | '0';
-}
-⋮----
-export interface GetAccountInstrumentsInfoParamsV5 {
-  category: 'spot' | 'linear' | 'inverse';
-  symbol?: string;
-  /** Filter by `symbolType` (e.g. `commodity`, `stock`, `forex` for linear). */
-  symbolType?: InstrumentSymbolTypeV5;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-/** Filter by `symbolType` (e.g. `commodity`, `stock`, `forex` for linear). */
-⋮----
-/** GET /v5/account/pay-info */
-export interface GetPayInfoParamsV5 {
-  coin?: string;
-}
-⋮----
-/** GET /v5/account/trade-info-for-analysis */
-export interface GetTradeInfoForAnalysisParamsV5 {
-  symbol: string;
-  startTime?: number;
-  endTime?: number;
-}
-⋮----
-export interface ManualRepayParamsV5 {
-  coin?: string;
-  amount?: string;
-  /**
-   * ALL: fixed + floating (floating first); FIXED: fixed only; FLEXIBLE: floating only. Default: FLEXIBLE.
-   * If neither `coin` nor `amount` is set, this must be ALL (repay all liabilities) or the request is rejected.
-   */
-  repaymentType?: 'ALL' | 'FIXED' | 'FLEXIBLE';
-}
-⋮----
-/**
-   * ALL: fixed + floating (floating first); FIXED: fixed only; FLEXIBLE: floating only. Default: FLEXIBLE.
-   * If neither `coin` nor `amount` is set, this must be ALL (repay all liabilities) or the request is rejected.
-   */
-
-================
-File: src/types/request/v5-asset.ts
-================
-import { AccountTypeV5, CategoryV5 } from '../shared-v5';
-⋮----
-export interface GetCoinExchangeRecordParamsV5 {
-  fromCoin?: string;
-  toCoin?: string;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface GetDeliveryRecordParamsV5 {
-  category: CategoryV5;
-  symbol?: string;
-  startTime?: number;
-  endTime?: number;
-  expDate?: string;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface GetSettlementRecordParamsV5 {
-  category: CategoryV5;
-  symbol?: string;
-  startTime?: number;
-  endTime?: number;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface GetAssetInfoParamsV5 {
-  accountType: AccountTypeV5;
-  coin?: string;
-}
-⋮----
-export interface GetAllCoinsBalanceParamsV5 {
-  memberId?: string;
-  accountType: AccountTypeV5;
-  coin?: string;
-  withBonus?: number;
-}
-⋮----
-export interface GetAccountCoinBalanceParamsV5 {
-  memberId?: string;
-  toMemberId?: string;
-  accountType: AccountTypeV5;
-  coin: string;
-  toAccountType?: AccountTypeV5;
-  withBonus?: number;
-  withTransferSafeAmount?: 0 | 1;
-  withLtvTransferSafeAmount?: 0 | 1;
-}
-⋮----
-export interface GetInternalTransferParamsV5 {
-  transferId?: string;
-  coin?: string;
-  status?: string;
-  startTime?: number;
-  endTime?: number;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface UniversalTransferParamsV5 {
-  transferId: string;
-  coin: string;
-  amount: string;
-  fromMemberId: number;
-  toMemberId: number;
-  fromAccountType: AccountTypeV5;
-  toAccountType: AccountTypeV5;
-}
-⋮----
-export interface GetUniversalTransferRecordsParamsV5 {
-  transferId?: string;
-  coin?: string;
-  status?: string;
-  startTime?: number;
-  endTime?: number;
-  limit?: number;
-  cursor?: string;
-  fromMemberId?: string;
-  toMemberId?: string;
-}
-⋮----
-export interface GetAllowedDepositCoinInfoParamsV5 {
-  coin?: string;
-  chain?: string;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface GetDepositRecordParamsV5 {
-  id?: string;
-  txID?: string;
-  coin?: string;
-  startTime?: number;
-  endTime?: number;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface GetSubAccountDepositRecordParamsV5 {
-  id?: string;
-  txID?: string;
-  subMemberId: string;
-  coin?: string;
-  startTime?: number;
-  endTime?: number;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface GetInternalDepositRecordParamsV5 {
-  txID?: string;
-  startTime?: number;
-  endTime?: number;
-  coin?: string;
-  cursor?: string;
-  limit?: number;
-}
-⋮----
-export interface GetWithdrawalRecordsParamsV5 {
-  withdrawID?: string;
-  txID?: string;
-  coin?: string;
-  withdrawType?: number;
-  startTime?: number;
-  endTime?: number;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface GetWithdrawalAddressListParamsV5 {
-  coin?: string;
-  chain?: string;
-  addressType?: 0 | 1 | 2;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface SubmitDepositOriginatorInfoParamsV5 {
-  depositId: number;
-  subAccountId?: number;
-  /** Travel Rule questionnaire JSON string. See Questionnaire docs. */
-  questionnaire: string;
-}
-⋮----
-/** Travel Rule questionnaire JSON string. See Questionnaire docs. */
-⋮----
-export interface WithdrawParamsV5 {
-  coin: string;
-  /**
-   * When forceChain is 0 or 1, required. When forceChain is 2 (Bybit UID withdraw), may be null/omitted.
-   */
-  chain?: string;
-  address: string;
-  tag?: string;
-  amount: string;
-  timestamp: number;
-  forceChain?: number;
-  /**
-   * FUND, UTA, or EARN; or comma combo e.g. FUND,UTA,EARN (funding first, then UTA and Earn for remainder).
-   * SPOT is legacy if still supported for older integrations.
-   */
-  accountType: string;
-  feeType?: 0 | 1;
-  requestId?: string;
-  /**
-   * Required for Bybit Turkey (TR) site users when creating a withdrawal. Omitted for other regions unless the API requires it.
-   */
-  transactionPurpose?: string;
-  /**
-   * Travel Rule questionnaire JSON string (max 16384 bytes). Takes precedence over `beneficiary` / `transactionPurpose` when both are set.
-   */
-  questionnaire?: string;
-  beneficiary?: {
-    vaspEntityId?: string;
-    beneficiaryName?: string;
-    beneficiaryLegalType?: string;
-    beneficiaryWalletType?: string;
-    beneficiaryUnhostedWalletType?: string;
-    beneficiaryPoiNumber?: string;
-    beneficiaryPoiType?: string;
-    beneficiaryPoiIssuingCountry?: string;
-    beneficiaryPoiExpiredDate?: string;
-  };
-}
-⋮----
-/**
-   * When forceChain is 0 or 1, required. When forceChain is 2 (Bybit UID withdraw), may be null/omitted.
-   */
-⋮----
-/**
-   * FUND, UTA, or EARN; or comma combo e.g. FUND,UTA,EARN (funding first, then UTA and Earn for remainder).
-   * SPOT is legacy if still supported for older integrations.
-   */
-⋮----
-/**
-   * Required for Bybit Turkey (TR) site users when creating a withdrawal. Omitted for other regions unless the API requires it.
-   */
-⋮----
-/**
-   * Travel Rule questionnaire JSON string (max 16384 bytes). Takes precedence over `beneficiary` / `transactionPurpose` when both are set.
-   */
-⋮----
-export interface ConvertCoinsParamsV5 {
-  coin?: string;
-  side?: number;
-  accountType:
-    | 'eb_convert_funding'
-    | 'eb_convert_uta'
-    | 'eb_convert_spot'
-    | 'eb_convert_contract'
-    | 'eb_convert_inverse';
-}
-⋮----
-export interface RequestConvertQuoteParamsV5 {
-  fromCoin: string;
-  toCoin: string;
-  fromCoinType?: string;
-  toCoinType?: string;
-  requestCoin: string;
-  requestAmount: string;
-  accountType:
-    | 'eb_convert_funding'
-    | 'eb_convert_uta'
-    | 'eb_convert_spot'
-    | 'eb_convert_contract'
-    | 'eb_convert_inverse';
-  requestId?: string;
-}
-⋮----
-export interface GetConvertHistoryParamsV5 {
-  accountType?: string;
-  index?: number;
-  limit?: number;
-}
-⋮----
-export interface GetSmallBalanceListParamsV5 {
-  accountType: 'eb_convert_uta'; // Wallet type, only supports Unified wallet
-  fromCoin?: string; // Source currency
-}
-⋮----
-accountType: 'eb_convert_uta'; // Wallet type, only supports Unified wallet
-fromCoin?: string; // Source currency
-⋮----
-export interface GetFiatTradingPairListParamsV5 {
-  side?: 0 | 1; // 0: buy (buy crypto, sell fiat), 1: sell (sell crypto, buy fiat)
-}
-⋮----
-side?: 0 | 1; // 0: buy (buy crypto, sell fiat), 1: sell (sell crypto, buy fiat)
-⋮----
-/** Funding Account Transaction History. Interval createTimeFrom-createTimeTo max 7 days. */
-export interface GetFundingAccountTransactionHistoryParamsV5 {
-  createTimeFrom?: string;
-  createTimeTo?: string;
-  limit?: string;
-  cursor?: string;
-}
-⋮----
-/** Asset Overview. memberId required when querying sub account via master API key. */
-export interface GetAssetOverviewParamsV5 {
-  memberId?: string;
-  /** Fiat currency for valuation; defaults to USD if omitted. */
-  valuationCurrency?: string;
-  /** Account type filter; returns all if omitted. */
-  accountType?: string;
-}
-⋮----
-/** Fiat currency for valuation; defaults to USD if omitted. */
-⋮----
-/** Account type filter; returns all if omitted. */
-⋮----
-/** GET /v5/asset/portfolio-margin */
-export interface GetPortfolioMarginInfoParamsV5 {
-  baseCoin?: string;
-}
-⋮----
-/** GET /v5/asset/total-members-assets */
-export interface GetTotalMembersAssetsParamsV5 {
-  /** If omitted, defaults to BTC. Total is quoted in this coin. */
-  coin?: string;
-}
-⋮----
-/** If omitted, defaults to BTC. Total is quoted in this coin. */
-
-================
 File: src/types/request/v5-crypto-loan.ts
 ================
 export interface BorrowCryptoLoanParamsV5 {
@@ -10297,1090 +10502,6 @@ export interface RepayInstitutionalLoanParamsV5 {
 ⋮----
 token: string; // Coin name
 quantity: string; // The qty to be repaid
-
-================
-File: src/types/request/v5-user.ts
-================
-import { PermissionsV5 } from '../shared-v5';
-⋮----
-export interface CreateSubMemberParamsV5 {
-  username: string;
-  password?: string;
-  /**
-   * 1: normal, 6: custodial
-   */
-  memberType: 1 | 6;
-  /**
-   * 0: quick login disabled (default), 1: quick login enabled
-   */
-  switch?: 0 | 1;
-  isUta?: boolean;
-  note?: string;
-}
-⋮----
-/**
-   * 1: normal, 6: custodial
-   */
-⋮----
-/**
-   * 0: quick login disabled (default), 1: quick login enabled
-   */
-⋮----
-export interface CreateSubApiKeyParamsV5 {
-  subuid: number;
-  note?: string;
-  readOnly: 0 | 1;
-  ips?: string;
-  permissions: PermissionsV5;
-}
-⋮----
-export interface UpdateApiKeyParamsV5 {
-  apikey?: string;
-  readOnly?: 0 | 1;
-  permissions: PermissionsV5;
-}
-⋮----
-export interface UpdateSubApiKeyUpdateParamsV5 {
-  readOnly?: number;
-  ips?: string[];
-  permissions: PermissionsV5;
-}
-⋮----
-export interface DeleteSubMemberParamsV5 {
-  subMemberId: string;
-}
-⋮----
-export interface GetSubAccountAllApiKeysParamsV5 {
-  subMemberId: string;
-  limit?: number;
-  cursor?: string;
-}
-⋮----
-export interface GetAffiliateUserListParamsV5 {
-  size?: number;
-  cursor?: string;
-  needDeposit?: boolean;
-  need30?: boolean;
-  need365?: boolean;
-  startDate?: string;
-  endDate?: string;
-}
-⋮----
-/** GET /v5/affiliate/affiliate-sub-list */
-export interface GetAffiliateSubAffiliateListParamsV5 {
-  cursor?: string;
-  /** [0, 100]. Default: 0 */
-  size?: number;
-  /** YYYY-MM-DD. Range with endDate max 3 months */
-  startDate?: string;
-  /** YYYY-MM-DD. Must be provided with startDate or both omitted (T-1 default) */
-  endDate?: string;
-  /** Exact sub-affiliate ID. 0 or omit for all */
-  subAffId?: number;
-}
-⋮----
-/** [0, 100]. Default: 0 */
-⋮----
-/** YYYY-MM-DD. Range with endDate max 3 months */
-⋮----
-/** YYYY-MM-DD. Must be provided with startDate or both omitted (T-1 default) */
-⋮----
-/** Exact sub-affiliate ID. 0 or omit for all */
-⋮----
-export interface GetAffiliateUserInfoParamsV5 {
-  /** The master account UID of affiliate's client */
-  uid: string;
-  /** Coin type for filtering, e.g. USDT */
-  coin?: string;
-  /**
-   * Business line filter. 1: Derivatives, 2: Spot, 3: ByFi, 4: USDC, 5: Options
-   */
-  business?: '1' | '2' | '3' | '4' | '5';
-}
-⋮----
-/** The master account UID of affiliate's client */
-⋮----
-/** Coin type for filtering, e.g. USDT */
-⋮----
-/**
-   * Business line filter. 1: Derivatives, 2: Spot, 3: ByFi, 4: USDC, 5: Options
-   */
-⋮----
-/** Get Friend Referrals - invitation relationship status. 0: alive; 1: invalid */
-export interface GetFriendReferralsParamsV5 {
-  status?: string;
-  size?: string;
-  cursor?: string;
-}
-⋮----
-/**
- * Referral product line.
- *
- * 0 unknown, 1 spot, 2 contracts, 3 options, 4 USDC perpetual, 6 TradeFi, 9 Alpha.
- * Unrecognized response values are returned as 0.
- */
-export type ReferralProductLineV5 = 0 | 1 | 2 | 3 | 4 | 6 | 9;
-⋮----
-/**
- * Invitee status (`friendStatus`).
- *
- * 0 unknown, 1 signed up, 2 first deposit, 3 first trade, 4 qualified,
- * 5 not qualified, 6 historical invitation, 7 boost in progress,
- * 8 boost qualified, 9 boost failed, 10 boost user signed up.
- */
-export type ReferralFriendStatusV5 = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-⋮----
-/**
- * POST /v5/referral/commission/records
- *
- * All fields are optional. Send `{}` when no filter is needed. An empty
- * `userIdList` does not filter by invitee. `page` 0 is treated as 1.
- * `pageSize` 0 or greater than 200 is treated as 10.
- * Times are `YYYY-MM-DD HH:mm:ss`. Property names are the proto camelCase
- * names; gateway serialization is not independently verified.
- */
-export interface GetReferralCommissionRecordsParamsV5 {
-  /** Invitee IDs. An empty list does not filter by invitee. */
-  userIdList?: number[];
-  /** Start time, `YYYY-MM-DD HH:mm:ss`. An unparsable value is sent downstream as `""`. */
-  startTime?: string;
-  /** End time, `YYYY-MM-DD HH:mm:ss`. An unparsable value is sent downstream as `""`. */
-  endTime?: string;
-  /** One-based page. `0` is treated as `1`. */
-  page?: number;
-  /** Page size. `0` or a value greater than 200 is treated as 10. */
-  pageSize?: number;
-  productLine?: ReferralProductLineV5;
-}
-⋮----
-/** Invitee IDs. An empty list does not filter by invitee. */
-⋮----
-/** Start time, `YYYY-MM-DD HH:mm:ss`. An unparsable value is sent downstream as `""`. */
-⋮----
-/** End time, `YYYY-MM-DD HH:mm:ss`. An unparsable value is sent downstream as `""`. */
-⋮----
-/** One-based page. `0` is treated as `1`. */
-⋮----
-/** Page size. `0` or a value greater than 200 is treated as 10. */
-⋮----
-/**
- * POST /v5/referral/user/invitations
- *
- * All fields are optional. An empty `userIdList` does not filter by invitee.
- * Invalid or empty times are passed downstream as `0`.
- */
-export interface GetReferralUserInvitationsParamsV5 {
-  /** Invitee IDs. An empty list does not filter by invitee. */
-  userIdList?: number[];
-  /** `YYYY-MM-DD HH:mm:ss`. Invalid or empty values are passed downstream as `0`. */
-  startTime?: string;
-  /** `YYYY-MM-DD HH:mm:ss`. Invalid or empty values are passed downstream as `0`. */
-  endTime?: string;
-  /** Page number. `0` is treated as `1`. */
-  page?: number;
-  /** Page size. `0` or a value greater than 200 is treated as 10. */
-  pageSize?: number;
-  friendStatus?: ReferralFriendStatusV5;
-}
-⋮----
-/** Invitee IDs. An empty list does not filter by invitee. */
-⋮----
-/** `YYYY-MM-DD HH:mm:ss`. Invalid or empty values are passed downstream as `0`. */
-⋮----
-/** `YYYY-MM-DD HH:mm:ss`. Invalid or empty values are passed downstream as `0`. */
-⋮----
-/** Page number. `0` is treated as `1`. */
-⋮----
-/** Page size. `0` or a value greater than 200 is treated as 10. */
-⋮----
-/** Sign Agreement. Only master account.
- * - `category` (legacy): 2 = metals (XAU/XAG perps; stock perps share this); 3 = crude oil. New enum values are not added here; prefer `categoryV2`.
- * - `categoryV2` (recommended): 1 = metals; 2 = crude oil. Additional values may be added by the API; use a numeric literal or variable.
- * - Either `category` or `categoryV2` must be sent. */
-export interface SignAgreementParamsV5 {
-  agree: boolean;
-  category?: 2 | 3;
-  categoryV2?: number;
-}
-
-================
-File: src/types/response/v5-crypto-loan.ts
-================
-export interface CollateralCoinV5 {
-  collateralAccuracy: number;
-  initialLTV: string;
-  liquidationLTV: string;
-  marginCallLTV: string;
-  maxLimit: string;
-}
-⋮----
-export interface VipCollateralCoinsV5 {
-  list: CollateralCoinV5[];
-  vipLevel: string;
-}
-⋮----
-export interface BorrowableCoinV5 {
-  borrowingAccuracy: number;
-  currency: string;
-  flexibleHourlyInterestRate: string;
-  hourlyInterestRate7D: string;
-  hourlyInterestRate14D: string;
-  hourlyInterestRate30D: string;
-  hourlyInterestRate90D: string;
-  hourlyInterestRate180D: string;
-  maxBorrowingAmount: string;
-  minBorrowingAmount: string;
-}
-⋮----
-export interface VipBorrowableCoinsV5 {
-  list: BorrowableCoinV5[];
-  vipLevel: string;
-}
-⋮----
-export interface AccountBorrowCollateralLimitV5 {
-  collateralCurrency: string;
-  loanCurrency: string;
-  maxCollateralAmount: string;
-  maxLoanAmount: string;
-  minCollateralAmount: string;
-  minLoanAmount: string;
-}
-⋮----
-export interface UnpaidLoanOrderV5 {
-  collateralAmount: string;
-  collateralCurrency: string;
-  currentLTV: string;
-  expirationTime: string;
-  hourlyInterestRate: string;
-  loanCurrency: string;
-  loanTerm: string;
-  orderId: string;
-  residualInterest: string;
-  residualPenaltyInterest: string;
-  totalDebt: string;
-}
-⋮----
-export interface RepaymentHistoryV5 {
-  collateralCurrency: string;
-  collateralReturn: string;
-  loanCurrency: string;
-  loanTerm: string;
-  orderId: string;
-  repayAmount: string;
-  repayId: string;
-  repayStatus: number;
-  repayTime: string;
-  repayType: string;
-}
-⋮----
-export interface CompletedLoanOrderV5 {
-  borrowTime: string;
-  collateralCurrency: string;
-  expirationTime: string;
-  hourlyInterestRate: string;
-  initialCollateralAmount: string;
-  initialLoanAmount: string;
-  loanCurrency: string;
-  loanTerm: string;
-  orderId: string;
-  repaidInterest: string;
-  repaidPenaltyInterest: string;
-  status: number;
-}
-export interface LoanLTVAdjustmentHistoryV5 {
-  collateralCurrency: string;
-  orderId: string;
-  adjustId: string;
-  adjustTime: string;
-  preLTV: string;
-  afterLTV: string;
-  direction: number;
-  amount: string;
-}
-⋮----
-// New Crypto Loan Types
-⋮----
-export interface BorrowCoinV5 {
-  currency: string;
-  fixedBorrowable: boolean;
-  fixedBorrowingAccuracy: number;
-  flexibleBorrowable: boolean;
-  flexibleBorrowingAccuracy: number;
-  maxBorrowingAmount: string;
-  minFixedBorrowingAmount: string;
-  minFlexibleBorrowingAmount: string;
-  vipLevel: string;
-  flexibleAnnualizedInterestRate: string;
-  annualizedInterestRate7D: string;
-  annualizedInterestRate14D: string;
-  annualizedInterestRate30D: string;
-  annualizedInterestRate60D: string;
-  annualizedInterestRate90D: string;
-  annualizedInterestRate180D: string;
-}
-⋮----
-export interface CollateralRatioV5 {
-  collateralRatio: string;
-  maxValue: string;
-  minValue: string;
-}
-⋮----
-export interface CollateralRatioConfigV5 {
-  collateralRatioList: CollateralRatioV5[];
-  currencies: string;
-}
-⋮----
-export interface CurrencyLiquidationV5 {
-  currency: string;
-  liquidationOrder: number;
-}
-⋮----
-export interface CollateralDataV5 {
-  collateralRatioConfigList: CollateralRatioConfigV5[];
-  currencyLiquidationList: CurrencyLiquidationV5[];
-}
-⋮----
-// Additional New Crypto Loan Types
-⋮----
-export interface AdjustCollateralAmountV5 {
-  adjustId: number;
-}
-⋮----
-export interface CollateralAdjustmentHistoryV5 {
-  adjustId: number;
-  adjustTime: number;
-  afterLTV: string;
-  amount: string;
-  collateralCurrency: string;
-  direction: number;
-  preLTV: string;
-  status: number;
-}
-⋮----
-export interface BorrowListV5 {
-  fixedTotalDebt: string;
-  fixedTotalDebtUSD: string;
-  flexibleHourlyInterestRate: string;
-  flexibleTotalDebt: string;
-  flexibleTotalDebtUSD: string;
-  loanCurrency: string;
-}
-⋮----
-export interface CollateralListV5 {
-  amount: string;
-  amountUSD: string;
-  currency: string;
-  ltv: string;
-}
-⋮----
-export interface SupplyListV5 {
-  amount: string;
-  amountUSD: string;
-  currency: string;
-}
-⋮----
-export interface CryptoLoanPositionV5 {
-  borrowList: BorrowListV5[];
-  collateralList: CollateralListV5[];
-  supplyList: SupplyListV5[];
-  totalCollateral: string;
-  totalDebt: string;
-  totalSupply: string;
-  colRes?: string;
-}
-⋮----
-// Flexible Loan Types
-⋮----
-export interface BorrowFlexibleV5 {
-  orderId: string;
-}
-⋮----
-export interface RepayFlexibleV5 {
-  repayId: string;
-}
-⋮----
-export interface OngoingFlexibleLoanV5 {
-  hourlyInterestRate: string;
-  loanCurrency: string;
-  totalDebt: string;
-  unpaidAmount: string;
-  unpaidInterest: string;
-}
-⋮----
-export interface BorrowHistoryFlexibleV5 {
-  borrowTime: number;
-  initialLoanAmount: string;
-  loanCurrency: string;
-  orderId: string;
-  status: number;
-}
-⋮----
-export interface RepaymentHistoryFlexibleV5 {
-  loanCurrency: string;
-  repayAmount: string;
-  repayId: string;
-  repayStatus: number;
-  repayTime: number;
-  repayType: number;
-}
-⋮----
-// Fixed Loan Types
-⋮----
-export interface SupplyOrderQuoteFixedV5 {
-  orderCurrency: string;
-  term: number;
-  annualRate: string;
-  qty: string;
-}
-⋮----
-export interface BorrowOrderQuoteFixedV5 {
-  orderCurrency: string;
-  term: number;
-  annualRate: string;
-  qty: string;
-}
-⋮----
-export interface CreateBorrowOrderFixedV5 {
-  orderId: string;
-}
-⋮----
-export interface CreateSupplyOrderFixedV5 {
-  orderId: string;
-}
-⋮----
-export interface BorrowContractInfoFixedV5 {
-  annualRate: string;
-  autoRepay: string; // Deprecated
-  borrowCurrency: string;
-  borrowTime: string;
-  interestPaid: string;
-  loanId: string;
-  orderId: string;
-  repayType: string; // 1: Auto Repayment; 2: Transfer to flexible loan; 0: No Automatic Repayment
-  repaymentTime: string;
-  residualPenaltyInterest: string;
-  residualPrincipal: string;
-  status: number;
-  term: string;
-}
-⋮----
-autoRepay: string; // Deprecated
-⋮----
-repayType: string; // 1: Auto Repayment; 2: Transfer to flexible loan; 0: No Automatic Repayment
-⋮----
-export interface SupplyContractInfoFixedV5 {
-  annualRate: string;
-  supplyCurrency: string;
-  supplyTime: string;
-  supplyAmount: string;
-  interestPaid: string;
-  supplyId: string;
-  orderId: string;
-  redemptionTime: string;
-  penaltyInterest: string;
-  actualRedemptionTime: string;
-  status: number;
-  term: string;
-}
-⋮----
-export interface BorrowOrderInfoFixedV5 {
-  annualRate: string;
-  orderId: number;
-  orderTime: string;
-  filledQty: string;
-  orderQty: string;
-  orderCurrency: string;
-  state: number;
-  term: number;
-  repayType: string; // 1: Auto Repayment; 2: Transfer to flexible loan; 0: No Automatic Repayment
-  strategyType?: 'PARTIAL' | 'FULL' | string;
-}
-⋮----
-repayType: string; // 1: Auto Repayment; 2: Transfer to flexible loan; 0: No Automatic Repayment
-⋮----
-export interface FixedLoanAvailableInventoryV5 {
-  currency: string;
-  term: string;
-  annualRate: string;
-  availableInventory: string;
-  updateTime: string;
-}
-⋮----
-export interface FlexibleLoanAvailableInventoryV5 {
-  currency: string;
-  availableInventory: string;
-  updateTime: string;
-}
-⋮----
-export interface SupplyOrderInfoFixedV5 {
-  annualRate: string;
-  orderId: number;
-  orderTime: string;
-  filledQty: string;
-  orderQty: string;
-  orderCurrency: string;
-  state: number;
-  term: number;
-}
-⋮----
-export interface RepayFixedV5 {
-  repayId: string;
-}
-⋮----
-export interface RepaymentHistoryFixedV5 {
-  details: {
-    loanCurrency: string;
-    loanId: string;
-    repayAmount: string;
-  }[];
-  loanCurrency: string;
-  repayAmount: string;
-  repayId: string;
-  repayStatus: number;
-  repayTime: number;
-  repayType: number;
-}
-⋮----
-export interface RenewBorrowOrderFixedV5 {
-  orderId: string;
-}
-⋮----
-export interface RenewOrderInfoFixedV5 {
-  amount: string;
-  autoRepay: number;
-  borrowCurrency: string;
-  contractNo: string;
-  dueTime: string;
-  loanId: string;
-  orderId: number;
-  renewLoanNo: string;
-  time: string;
-}
-⋮----
-// Institutional Loan Types
-⋮----
-export interface InstitutionalLendingProductInfoV5 {
-  productId: string;
-  leverage: string;
-  supportSpot: number;
-  supportContract: number;
-  supportMarginTrading: number;
-  withdrawLine: string;
-  transferLine: string;
-  spotBuyLine: string;
-  spotSellLine: string;
-  contractOpenLine: string;
-  liquidationLine: string;
-  stopLiquidationLine: string;
-  contractLeverage: string;
-  transferRatio: string;
-  spotSymbols: unknown[];
-  contractSymbols: unknown[];
-  supportUSDCContract: number;
-  supportUSDCOptions: number;
-  USDTPerpetualOpenLine?: string;
-  USDCContractOpenLine?: string;
-  USDCOptionsOpenLine?: string;
-  USDTPerpetualCloseLine?: string;
-  USDCContractCloseLine?: string;
-  USDCOptionsCloseLine?: string;
-  USDTPerpetualLeverage?: { symbol: string; leverage: string }[];
-  USDCContractLeverage?: { symbol: string; leverage: string }[];
-  deferredLiquidationLine?: string;
-  deferredLiquidationTime?: string;
-  marginLeverage?: string;
-  /** `0`: Default, `1`: CTA, `2`: Hedge */
-  productType?: '0' | '1' | '2' | string;
-}
-⋮----
-/** `0`: Default, `1`: CTA, `2`: Hedge */
-⋮----
-export interface InstitutionalLendingCoinDeltaItemV5 {
-  coin: string;
-  coinDeltaSize: string;
-  coinDeltaAvailableAmount: string;
-  coinDeltaAmount: string;
-}
-⋮----
-export interface InstitutionalLendingCoinDeltaAmountV5 {
-  riskUnitDeltaAmount: string;
-  riskUnitDeltaAvailableAmount: string;
-  riskUnitDelta?: string;
-  list: InstitutionalLendingCoinDeltaItemV5[];
-}
-⋮----
-export interface InstitutionalLendingDelayLiquidationStatusV5 {
-  ltv: string;
-  /** 0 normal, 1 passive liquidation, 2 callback liquidation, 3 delay liquidation */
-  liquidationStatus: 0 | 1 | 2 | 3;
-  delayLiqStartTime: string;
-  delayLiqRemainingSec: string;
-}
-⋮----
-/** 0 normal, 1 passive liquidation, 2 callback liquidation, 3 delay liquidation */
-⋮----
-export interface UnpaidInfoV5 {
-  token: string; // Coin
-  unpaidQty: string; // Unpaid principle
-  unpaidInterest: string; // Unpaid interest
-}
-⋮----
-token: string; // Coin
-unpaidQty: string; // Unpaid principle
-unpaidInterest: string; // Unpaid interest
-⋮----
-export interface BalanceInfoV5 {
-  token: string; // Margin coin
-  price: string; // Margin coin price
-  qty: string; // Margin coin quantity
-  convertedAmount: string; // Margin conversion amount
-}
-⋮----
-token: string; // Margin coin
-price: string; // Margin coin price
-qty: string; // Margin coin quantity
-convertedAmount: string; // Margin conversion amount
-⋮----
-export interface LTVInfoV5 {
-  ltv: string; // Risk rate (when liqStatus != 0, returns empty string)
-  rst: string; // Remaining liquidation time in UTC seconds (when liqStatus != 0, returns empty string)
-  parentUid: string; // The designated Risk Unit ID
-  subAccountUids: string[]; // Bound user IDs
-  unpaidAmount: string; // Total debt in USDT (when liqStatus != 0, returns empty string)
-  unpaidInfo: UnpaidInfoV5[]; // Debt details (when liqStatus != 0, returns empty array)
-  balance: string; // Total asset in USDT (when liqStatus != 0, returns empty string)
-  balanceInfo: BalanceInfoV5[]; // Asset details (when liqStatus != 0, returns empty array)
-  liqStatus?: number; // Liquidation status: 0=Normal, 1=Under liquidation, 2=Manual repayment in progress, 3=Transfer in progress
-}
-⋮----
-ltv: string; // Risk rate (when liqStatus != 0, returns empty string)
-rst: string; // Remaining liquidation time in UTC seconds (when liqStatus != 0, returns empty string)
-parentUid: string; // The designated Risk Unit ID
-subAccountUids: string[]; // Bound user IDs
-unpaidAmount: string; // Total debt in USDT (when liqStatus != 0, returns empty string)
-unpaidInfo: UnpaidInfoV5[]; // Debt details (when liqStatus != 0, returns empty array)
-balance: string; // Total asset in USDT (when liqStatus != 0, returns empty string)
-balanceInfo: BalanceInfoV5[]; // Asset details (when liqStatus != 0, returns empty array)
-liqStatus?: number; // Liquidation status: 0=Normal, 1=Under liquidation, 2=Manual repayment in progress, 3=Transfer in progress
-⋮----
-export interface InstitutionalLoanLTVV5 {
-  ltvInfo: LTVInfoV5[]; // LTV info array
-  liqStatus?: number; // Liquidation status: 0=Normal, 1=Under liquidation, 2=Manual repayment in progress, 3=Transfer in progress
-}
-⋮----
-ltvInfo: LTVInfoV5[]; // LTV info array
-liqStatus?: number; // Liquidation status: 0=Normal, 1=Under liquidation, 2=Manual repayment in progress, 3=Transfer in progress
-⋮----
-export interface RepayInstitutionalLoanResultV5 {
-  repayOrderStatus: string; // P: processing
-}
-⋮----
-repayOrderStatus: string; // P: processing
-⋮----
-// Max Loan Amount Response Types
-⋮----
-export interface MaxLoanAmountV5 {
-  currency: string; // Coin to borrow
-  maxLoan: string; // Maximum borrowable amount based on current collateral
-  notionalUsd: string; // Notional USD value
-  remainingQuota: string; // Remaining individual platform borrowing limit (shared between main and sub accounts)
-}
-⋮----
-currency: string; // Coin to borrow
-maxLoan: string; // Maximum borrowable amount based on current collateral
-notionalUsd: string; // Notional USD value
-remainingQuota: string; // Remaining individual platform borrowing limit (shared between main and sub accounts)
-
-================
-File: src/websocket-client.ts
-================
-/* eslint-disable @typescript-eslint/no-unused-vars */
-⋮----
-import {
-  MessageEventLike,
-  WSCategoryV5,
-  WSClientConfigurableOptions,
-  WsKey,
-  WsMarket,
-  WsTopic,
-} from './types';
-import {
-  Exact,
-  WSAPIOperation,
-  WsAPIOperationResponseMap,
-  WSAPIRequest,
-  WsAPITopicRequestParamMap,
-  WsAPIWsKeyTopicMap,
-  WsOperation,
-  WsRequestOperationBybit,
-} from './types/websockets/ws-api';
-import {
-  APIID,
-  DefaultLogger,
-  getMaxTopicsPerSubscribeEvent,
-  getNormalisedTopicRequests,
-  getPromiseRefForWSAPIRequest,
-  getTopicsPerWSKey,
-  getWsKeyForTopic,
-  getWsUrl,
-  isPrivateWsTopic,
-  isTopicSubscriptionConfirmation,
-  isTopicSubscriptionSuccess,
-  isWSAPIResponse,
-  isWsPong,
-  neverGuard,
-  WS_AUTH_ON_CONNECT_KEYS,
-  WS_KEY_MAP,
-  WSConnectedResult,
-  WsTopicRequest,
-} from './util';
-import {
-  BaseWebsocketClient,
-  EmittableEvent,
-  MidflightWsRequestEvent,
-} from './util/BaseWSClient';
-import { SignAlgorithm, signMessage } from './util/webCryptoAPI';
-⋮----
-export interface WSAPIRequestFlags {
-  /** If true, will skip auth requirement for WS API connection */
-  authIsOptional?: boolean | undefined;
-}
-⋮----
-/** If true, will skip auth requirement for WS API connection */
-⋮----
-export class WebsocketClient extends BaseWebsocketClient<
-⋮----
-constructor(options?: WSClientConfigurableOptions, logger?: DefaultLogger)
-⋮----
-/**
-   * Request connection of all dependent (public & private) websockets, instead of waiting
-   * for automatic connection by SDK.
-   */
-public connectAll(): Promise<WSConnectedResult | undefined>[]
-⋮----
-/**
-   * Ensures the WS API connection is active and ready.
-   *
-   * You do not need to call this, but if you call this before making any WS API requests,
-   * it can accelerate the first request (by preparing the connection in advance).
-   */
-public connectWSAPI(): Promise<unknown>
-⋮----
-/** This call automatically ensures the connection is active AND authenticated before resolving */
-⋮----
-public connectPublic(): Promise<WSConnectedResult | undefined>[]
-⋮----
-public connectPrivate(): Promise<WSConnectedResult | undefined>
-⋮----
-/**
-   * Subscribe to V5 topics & track/persist them.
-   * @param wsTopics - topic or list of topics
-   * @param category - the API category this topic is for (e.g. "linear", or "event" for Event Contract public topics).
-   * The value is only important when connecting to public topics and will be ignored for private topics.
-   * @param isPrivateTopic - optional - the library will try to detect private topics, you can use this
-   * to mark a topic as private (if the topic isn't recognised yet)
-   */
-public subscribeV5(
-    wsTopics: WsTopic[] | WsTopic,
-    category: WSCategoryV5,
-    isPrivateTopic?: boolean,
-  ): Promise<unknown>[]
-⋮----
-// Sort into per-WsKey batches, in case there is a mix of topics here
-⋮----
-// Prevent duplicate requests to the same topic
-⋮----
-// Batch sub topics per ws key
-⋮----
-// Return promise to resolve midflight WS request (only works if already connected before request)
-⋮----
-/**
-   * Unsubscribe from V5 topics & remove them from memory. They won't be re-subscribed to if the
-   * connection reconnects.
-   *
-   * @param wsTopics - topic or list of topics
-   * @param category - the API category this topic is for (e.g. "linear", or "event" for Event Contract public topics). The value is only
-   * important when connecting to public topics and will be ignored for private topics.
-   * @param isPrivateTopic - optional - the library will try to detect private topics, you can
-   * use this to mark a topic as private (if the topic isn't recognised yet)
-   */
-public unsubscribeV5(
-    wsTopics: WsTopic[] | WsTopic,
-    category: WSCategoryV5,
-    isPrivateTopic?: boolean,
-  ): Promise<unknown>[]
-⋮----
-// Sort into per-WsKey batches, in case there is a mix of topics here
-⋮----
-// Batch sub topics per ws key
-⋮----
-// Return promise to resolve midflight WS request (only works if already connected before request)
-⋮----
-/**
-   * Note: subscribeV5() might be simpler to use. The end result is the same.
-   *
-   * Request subscription to one or more topics. Pass topics as either an array of strings,
-   * or array of objects (if the topic has parameters).
-   *
-   * Objects should be formatted as {topic: string, params: object, category: WSCategoryV5}.
-   *
-   * - Subscriptions are automatically routed to the correct websocket connection.
-   * - Authentication/connection is automatic.
-   * - Resubscribe after network issues is automatic.
-   *
-   * Call `unsubscribe(topics)` to remove topics
-   */
-public subscribe(
-    requests:
-      | (WsTopicRequest<WsTopic> | WsTopic)
-      | (WsTopicRequest<WsTopic> | WsTopic)[],
-    requestedWsKey?: WsKey,
-  )
-⋮----
-// Batch sub topics per ws key
-⋮----
-/**
-   * Note: unsubscribe() might be simpler to use. The end result is the same.
-   * Unsubscribe from one or more topics. Similar to subscribe() but in reverse.
-   *
-   * - Requests are automatically routed to the correct websocket connection.
-   * - These topics will be removed from the topic cache, so they won't be subscribed to again.
-   */
-public unsubscribe(
-    requests:
-      | (WsTopicRequest<WsTopic> | WsTopic)
-      | (WsTopicRequest<WsTopic> | WsTopic)[],
-    wsKey?: WsKey,
-  )
-⋮----
-// Batch sub topics per ws key
-⋮----
-/**
-   *
-   *
-   *
-   * WS API Methods - similar to the REST API, but via WebSockets
-   * https://bybit-exchange.github.io/docs/v5/websocket/trade/guideline
-   *
-   *
-   *
-   */
-⋮----
-/**
-   * Send a Websocket API command/request on a connection. Returns a promise that resolves on reply.
-   *
-   * WS API Documentation for list of operations and parameters:
-   * https://bybit-exchange.github.io/docs/v5/websocket/trade/guideline
-   *
-   * Returned promise is rejected if:
-   * - an exception is detected in the reply, OR
-   * - the connection disconnects for any reason (even if automatic reconnect will happen).
-   *
-   * Authentication is automatic. If you didn't request authentication yourself, there might
-   * be a small delay after your first request, while the SDK automatically authenticates.
-   *
-   * @param wsKey - The connection this event is for. Currently only "v5PrivateTrade" is supported
-   * for Bybit, since that is the dedicated WS API connection.
-   * @param operation - The command being sent, e.g. "order.create" to submit a new order.
-   * @param params - Any request parameters for the command. E.g. `OrderParamsV5` to submit a new
-   * order. Only send parameters for the request body. Everything else is automatically handled.
-   * @returns Promise - tries to resolve with async WS API response. Rejects if disconnected or exception is seen in async WS API response
-   */
-⋮----
-// This overload allows the caller to omit the 3rd param, if it isn't required
-sendWSAPIRequest<
-    TWSKey extends keyof WsAPIWsKeyTopicMap,
-    TWSOperation extends WsAPIWsKeyTopicMap[TWSKey],
-    TWSParams extends Exact<WsAPITopicRequestParamMap[TWSOperation]>,
-  >(
-    wsKey: TWSKey,
-    operation: TWSOperation,
-    params?: TWSParams extends void | never ? undefined : TWSParams,
-    requestFlags?: WSAPIRequestFlags,
-  ): Promise<WsAPIOperationResponseMap[TWSOperation]>;
-⋮----
-// These overloads give stricter types than mapped generics, since generic constraints
-// do not trigger excess property checks
-// Without these overloads, TypeScript won't complain if you include an
-// unexpected property with your request (if it doesn't clash with an existing property)
-sendWSAPIRequest<TWSOperation extends WSAPIOperation = 'order.create'>(
-    wsKey: typeof WS_KEY_MAP.v5PrivateTrade,
-    operation: TWSOperation,
-    params: WsAPITopicRequestParamMap[TWSOperation],
-    requestFlags?: WSAPIRequestFlags,
-  ): Promise<WsAPIOperationResponseMap[TWSOperation]>;
-⋮----
-sendWSAPIRequest<TWSOperation extends WSAPIOperation = 'order.amend'>(
-    wsKey: typeof WS_KEY_MAP.v5PrivateTrade,
-    operation: TWSOperation,
-    params: WsAPITopicRequestParamMap[TWSOperation],
-    requestFlags?: WSAPIRequestFlags,
-  ): Promise<WsAPIOperationResponseMap[TWSOperation]>;
-⋮----
-sendWSAPIRequest<TWSOperation extends WSAPIOperation = 'order.cancel'>(
-    wsKey: typeof WS_KEY_MAP.v5PrivateTrade,
-    operation: TWSOperation,
-    params: WsAPITopicRequestParamMap[TWSOperation],
-    requestFlags?: WSAPIRequestFlags,
-  ): Promise<WsAPIOperationResponseMap[TWSOperation]>;
-⋮----
-async sendWSAPIRequest<
-    TWSKey extends keyof WsAPIWsKeyTopicMap,
-    TWSOperation extends WsAPIWsKeyTopicMap[TWSKey],
-    TWSParams extends Exact<WsAPITopicRequestParamMap[TWSOperation]>,
-    TWSAPIResponse extends
-      WsAPIOperationResponseMap[TWSOperation] = WsAPIOperationResponseMap[TWSOperation],
-  >(
-    wsKey: WsKey = WS_KEY_MAP.v5PrivateTrade,
-    operation: TWSOperation,
-    params: TWSParams,
-    requestFlags?: WSAPIRequestFlags,
-  ): Promise<WsAPIOperationResponseMap[TWSOperation]>
-⋮----
-// Some commands don't require authentication.
-⋮----
-// Sign, if needed
-⋮----
-// Store deferred promise, resolved within the "resolveEmittableEvents" method while parsing incoming events
-⋮----
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-⋮----
-// Enrich returned promise with request context for easier debugging
-⋮----
-// throw e;
-⋮----
-// Send event
-⋮----
-// Return deferred promise, so caller can await this call
-⋮----
-/**
-   *
-   *
-   * Internal methods - not intended for public use
-   *
-   *
-   */
-⋮----
-/**
-   * Note: implementing this method will wipe the WsStore state for this WsKey, once this method returns
-   */
-protected isCustomReconnectionNeeded(): boolean
-⋮----
-protected async triggerCustomReconnectionWorkflow(): Promise<void>
-⋮----
-/**
-   * @returns The WS URL to connect to for this WS key
-   */
-protected async getWsUrl(wsKey: WsKey): Promise<string>
-⋮----
-// If auth is needed for this wsKey URL, this returns a suffix
-⋮----
-/**
-   * Return params required to make authorized request
-   */
-private async getWsAuthURLSuffix(): Promise<string>
-⋮----
-private async signMessage(
-    paramsStr: string,
-    secret: string,
-    method?: 'hex' | 'base64',
-    algorithm: SignAlgorithm = 'SHA-256',
-  ): Promise<string>
-⋮----
-protected async getWsAuthRequestEvent(
-    wsKey: WsKey,
-  ): Promise<WsRequestOperationBybit<string>>
-⋮----
-private async getWsAuthSignature(
-    wsKey: WsKey,
-  ): Promise<{ expiresAt: number; signature: string }>
-⋮----
-undefined, // Let the function automatically determine encoding based on key type
-⋮----
-private async signWSAPIRequest<TRequestParams = object>(
-    requestEvent: WSAPIRequest<TRequestParams>,
-  ): Promise<WSAPIRequest<TRequestParams>>
-⋮----
-// Not needed for Bybit. Auth happens only on connection open, automatically.
-⋮----
-protected sendPingEvent(wsKey: WsKey)
-⋮----
-protected sendPongEvent(wsKey: WsKey)
-⋮----
-/** Force subscription requests to be sent in smaller batches, if a number is returned */
-protected getMaxTopicsPerSubscribeEvent(wsKey: WsKey): number | null
-⋮----
-protected authPrivateConnectionsOnConnect(_wsKey: WsKey): boolean
-⋮----
-/**
-   * @returns one or more correctly structured request events for performing a operations over WS. This can vary per exchange spec.
-   */
-protected async getWsRequestEvents(
-    market: WsMarket,
-    operation: WsOperation,
-    requests: WsTopicRequest<WsTopic>[],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-    _wsKey: WsKey,
-  ): Promise<MidflightWsRequestEvent<WsRequestOperationBybit<WsTopic>>[]>
-⋮----
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-⋮----
-// Previously used to track topics in a request. Keeping this for subscribe/unsubscribe requests, no need for incremental values
-⋮----
-protected getPrivateWSKeys(): WsKey[]
-⋮----
-protected isAuthOnConnectWsKey(wsKey: WsKey): boolean
-⋮----
-/**
-   * Determines if a topic is for a private channel, using a hardcoded list of strings
-   */
-protected isPrivateTopicRequest(request: WsTopicRequest<WsTopic>): boolean
-⋮----
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-protected isWsPing(msg: any): boolean
-⋮----
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-protected isWsPong(msg: any): boolean
-⋮----
-// public ws connections
-⋮----
-// private ws connections
-⋮----
-/**
-   * Abstraction called to sort ws events into emittable event types (response to a request, data update, etc)
-   */
-protected resolveEmittableEvents(
-    wsKey: WsKey,
-    event: MessageEventLike,
-  ): EmittableEvent[]
-⋮----
-// this.logger.trace('resolveEmittableEvents', {
-//   ...WS_LOGGER_CATEGORY,
-//   wsKey,
-//   parsed: JSON.stringify(parsed),
-// });
-⋮----
-// Only applies to the V5 WS topics
-⋮----
-// WS API response
-⋮----
-// eslint-disable-next-line max-len
-⋮----
-// WS API Exception
-⋮----
-// WS API Success
-⋮----
-// Messages for a subscribed topic all include the "topic" property
-⋮----
-// Messages that are a "reply" to a request/command (e.g. subscribe to these topics) typically include the "op" property
-⋮----
-// Failed request
-⋮----
-// These are r  equest/reply pattern events (e.g. after subscribing to topics or authenticating)
-⋮----
-// Request/reply pattern for authentication success
-⋮----
-// In case of catastrophic failure, fallback to noisy emit update
 
 ================
 File: src/types/request/v5-earn.ts
@@ -11929,6 +11050,494 @@ export interface TradeInfoForAnalysisResultV5 {
 }
 
 ================
+File: src/types/response/v5-crypto-loan.ts
+================
+export interface CollateralCoinV5 {
+  collateralAccuracy: number;
+  initialLTV: string;
+  liquidationLTV: string;
+  marginCallLTV: string;
+  maxLimit: string;
+}
+⋮----
+export interface VipCollateralCoinsV5 {
+  list: CollateralCoinV5[];
+  vipLevel: string;
+}
+⋮----
+export interface BorrowableCoinV5 {
+  borrowingAccuracy: number;
+  currency: string;
+  flexibleHourlyInterestRate: string;
+  hourlyInterestRate7D: string;
+  hourlyInterestRate14D: string;
+  hourlyInterestRate30D: string;
+  hourlyInterestRate90D: string;
+  hourlyInterestRate180D: string;
+  maxBorrowingAmount: string;
+  minBorrowingAmount: string;
+}
+⋮----
+export interface VipBorrowableCoinsV5 {
+  list: BorrowableCoinV5[];
+  vipLevel: string;
+}
+⋮----
+export interface AccountBorrowCollateralLimitV5 {
+  collateralCurrency: string;
+  loanCurrency: string;
+  maxCollateralAmount: string;
+  maxLoanAmount: string;
+  minCollateralAmount: string;
+  minLoanAmount: string;
+}
+⋮----
+export interface UnpaidLoanOrderV5 {
+  collateralAmount: string;
+  collateralCurrency: string;
+  currentLTV: string;
+  expirationTime: string;
+  hourlyInterestRate: string;
+  loanCurrency: string;
+  loanTerm: string;
+  orderId: string;
+  residualInterest: string;
+  residualPenaltyInterest: string;
+  totalDebt: string;
+}
+⋮----
+export interface RepaymentHistoryV5 {
+  collateralCurrency: string;
+  collateralReturn: string;
+  loanCurrency: string;
+  loanTerm: string;
+  orderId: string;
+  repayAmount: string;
+  repayId: string;
+  repayStatus: number;
+  repayTime: string;
+  repayType: string;
+}
+⋮----
+export interface CompletedLoanOrderV5 {
+  borrowTime: string;
+  collateralCurrency: string;
+  expirationTime: string;
+  hourlyInterestRate: string;
+  initialCollateralAmount: string;
+  initialLoanAmount: string;
+  loanCurrency: string;
+  loanTerm: string;
+  orderId: string;
+  repaidInterest: string;
+  repaidPenaltyInterest: string;
+  status: number;
+}
+export interface LoanLTVAdjustmentHistoryV5 {
+  collateralCurrency: string;
+  orderId: string;
+  adjustId: string;
+  adjustTime: string;
+  preLTV: string;
+  afterLTV: string;
+  direction: number;
+  amount: string;
+}
+⋮----
+// New Crypto Loan Types
+⋮----
+export interface BorrowCoinV5 {
+  currency: string;
+  fixedBorrowable: boolean;
+  fixedBorrowingAccuracy: number;
+  flexibleBorrowable: boolean;
+  flexibleBorrowingAccuracy: number;
+  maxBorrowingAmount: string;
+  minFixedBorrowingAmount: string;
+  minFlexibleBorrowingAmount: string;
+  vipLevel: string;
+  flexibleAnnualizedInterestRate: string;
+  annualizedInterestRate7D: string;
+  annualizedInterestRate14D: string;
+  annualizedInterestRate30D: string;
+  annualizedInterestRate60D: string;
+  annualizedInterestRate90D: string;
+  annualizedInterestRate180D: string;
+}
+⋮----
+export interface CollateralRatioV5 {
+  collateralRatio: string;
+  maxValue: string;
+  minValue: string;
+}
+⋮----
+export interface CollateralRatioConfigV5 {
+  collateralRatioList: CollateralRatioV5[];
+  currencies: string;
+}
+⋮----
+export interface CurrencyLiquidationV5 {
+  currency: string;
+  liquidationOrder: number;
+}
+⋮----
+export interface CollateralDataV5 {
+  collateralRatioConfigList: CollateralRatioConfigV5[];
+  currencyLiquidationList: CurrencyLiquidationV5[];
+}
+⋮----
+// Additional New Crypto Loan Types
+⋮----
+export interface AdjustCollateralAmountV5 {
+  adjustId: number;
+}
+⋮----
+export interface CollateralAdjustmentHistoryV5 {
+  adjustId: number;
+  adjustTime: number;
+  afterLTV: string;
+  amount: string;
+  collateralCurrency: string;
+  direction: number;
+  preLTV: string;
+  status: number;
+}
+⋮----
+export interface BorrowListV5 {
+  fixedTotalDebt: string;
+  fixedTotalDebtUSD: string;
+  flexibleHourlyInterestRate: string;
+  flexibleTotalDebt: string;
+  flexibleTotalDebtUSD: string;
+  loanCurrency: string;
+}
+⋮----
+export interface CollateralListV5 {
+  amount: string;
+  amountUSD: string;
+  currency: string;
+  ltv: string;
+}
+⋮----
+export interface SupplyListV5 {
+  amount: string;
+  amountUSD: string;
+  currency: string;
+}
+⋮----
+export interface CryptoLoanPositionV5 {
+  borrowList: BorrowListV5[];
+  collateralList: CollateralListV5[];
+  supplyList: SupplyListV5[];
+  totalCollateral: string;
+  totalDebt: string;
+  totalSupply: string;
+  colRes?: string;
+}
+⋮----
+// Flexible Loan Types
+⋮----
+export interface BorrowFlexibleV5 {
+  orderId: string;
+}
+⋮----
+export interface RepayFlexibleV5 {
+  repayId: string;
+}
+⋮----
+export interface OngoingFlexibleLoanV5 {
+  hourlyInterestRate: string;
+  loanCurrency: string;
+  totalDebt: string;
+  unpaidAmount: string;
+  unpaidInterest: string;
+}
+⋮----
+export interface BorrowHistoryFlexibleV5 {
+  borrowTime: number;
+  initialLoanAmount: string;
+  loanCurrency: string;
+  orderId: string;
+  status: number;
+}
+⋮----
+export interface RepaymentHistoryFlexibleV5 {
+  loanCurrency: string;
+  repayAmount: string;
+  repayId: string;
+  repayStatus: number;
+  repayTime: number;
+  repayType: number;
+}
+⋮----
+// Fixed Loan Types
+⋮----
+export interface SupplyOrderQuoteFixedV5 {
+  orderCurrency: string;
+  term: number;
+  annualRate: string;
+  qty: string;
+}
+⋮----
+export interface BorrowOrderQuoteFixedV5 {
+  orderCurrency: string;
+  term: number;
+  annualRate: string;
+  qty: string;
+}
+⋮----
+export interface CreateBorrowOrderFixedV5 {
+  orderId: string;
+}
+⋮----
+export interface CreateSupplyOrderFixedV5 {
+  orderId: string;
+}
+⋮----
+export interface BorrowContractInfoFixedV5 {
+  annualRate: string;
+  autoRepay: string; // Deprecated
+  borrowCurrency: string;
+  borrowTime: string;
+  interestPaid: string;
+  loanId: string;
+  orderId: string;
+  repayType: string; // 1: Auto Repayment; 2: Transfer to flexible loan; 0: No Automatic Repayment
+  repaymentTime: string;
+  residualPenaltyInterest: string;
+  residualPrincipal: string;
+  status: number;
+  term: string;
+}
+⋮----
+autoRepay: string; // Deprecated
+⋮----
+repayType: string; // 1: Auto Repayment; 2: Transfer to flexible loan; 0: No Automatic Repayment
+⋮----
+export interface SupplyContractInfoFixedV5 {
+  annualRate: string;
+  supplyCurrency: string;
+  supplyTime: string;
+  supplyAmount: string;
+  interestPaid: string;
+  supplyId: string;
+  orderId: string;
+  redemptionTime: string;
+  penaltyInterest: string;
+  actualRedemptionTime: string;
+  status: number;
+  term: string;
+}
+⋮----
+export interface BorrowOrderInfoFixedV5 {
+  annualRate: string;
+  orderId: number;
+  orderTime: string;
+  filledQty: string;
+  orderQty: string;
+  orderCurrency: string;
+  state: number;
+  term: number;
+  repayType: string; // 1: Auto Repayment; 2: Transfer to flexible loan; 0: No Automatic Repayment
+  strategyType?: 'PARTIAL' | 'FULL' | string;
+}
+⋮----
+repayType: string; // 1: Auto Repayment; 2: Transfer to flexible loan; 0: No Automatic Repayment
+⋮----
+export interface FixedLoanAvailableInventoryV5 {
+  currency: string;
+  term: string;
+  annualRate: string;
+  availableInventory: string;
+  updateTime: string;
+}
+⋮----
+export interface FlexibleLoanAvailableInventoryV5 {
+  currency: string;
+  availableInventory: string;
+  updateTime: string;
+}
+⋮----
+export interface SupplyOrderInfoFixedV5 {
+  annualRate: string;
+  orderId: number;
+  orderTime: string;
+  filledQty: string;
+  orderQty: string;
+  orderCurrency: string;
+  state: number;
+  term: number;
+}
+⋮----
+export interface RepayFixedV5 {
+  repayId: string;
+}
+⋮----
+export interface RepaymentHistoryFixedV5 {
+  details: {
+    loanCurrency: string;
+    loanId: string;
+    repayAmount: string;
+  }[];
+  loanCurrency: string;
+  repayAmount: string;
+  repayId: string;
+  repayStatus: number;
+  repayTime: number;
+  repayType: number;
+}
+⋮----
+export interface RenewBorrowOrderFixedV5 {
+  orderId: string;
+}
+⋮----
+export interface RenewOrderInfoFixedV5 {
+  amount: string;
+  autoRepay: number;
+  borrowCurrency: string;
+  contractNo: string;
+  dueTime: string;
+  loanId: string;
+  orderId: number;
+  renewLoanNo: string;
+  time: string;
+}
+⋮----
+// Institutional Loan Types
+⋮----
+export interface InstitutionalLendingProductInfoV5 {
+  productId: string;
+  leverage: string;
+  supportSpot: number;
+  supportContract: number;
+  supportMarginTrading: number;
+  withdrawLine: string;
+  transferLine: string;
+  spotBuyLine: string;
+  spotSellLine: string;
+  contractOpenLine: string;
+  liquidationLine: string;
+  stopLiquidationLine: string;
+  contractLeverage: string;
+  transferRatio: string;
+  spotSymbols: unknown[];
+  contractSymbols: unknown[];
+  supportUSDCContract: number;
+  supportUSDCOptions: number;
+  USDTPerpetualOpenLine?: string;
+  USDCContractOpenLine?: string;
+  USDCOptionsOpenLine?: string;
+  USDTPerpetualCloseLine?: string;
+  USDCContractCloseLine?: string;
+  USDCOptionsCloseLine?: string;
+  USDTPerpetualLeverage?: { symbol: string; leverage: string }[];
+  USDCContractLeverage?: { symbol: string; leverage: string }[];
+  deferredLiquidationLine?: string;
+  deferredLiquidationTime?: string;
+  marginLeverage?: string;
+  /** `0`: Default, `1`: CTA, `2`: Hedge */
+  productType?: '0' | '1' | '2' | string;
+}
+⋮----
+/** `0`: Default, `1`: CTA, `2`: Hedge */
+⋮----
+export interface InstitutionalLendingCoinDeltaItemV5 {
+  coin: string;
+  coinDeltaSize: string;
+  coinDeltaAvailableAmount: string;
+  coinDeltaAmount: string;
+}
+⋮----
+export interface InstitutionalLendingCoinDeltaAmountV5 {
+  riskUnitDeltaAmount: string;
+  riskUnitDeltaAvailableAmount: string;
+  riskUnitDelta?: string;
+  list: InstitutionalLendingCoinDeltaItemV5[];
+}
+⋮----
+export interface InstitutionalLendingDelayLiquidationStatusV5 {
+  ltv: string;
+  /** 0 normal, 1 passive liquidation, 2 callback liquidation, 3 delay liquidation */
+  liquidationStatus: 0 | 1 | 2 | 3;
+  delayLiqStartTime: string;
+  delayLiqRemainingSec: string;
+}
+⋮----
+/** 0 normal, 1 passive liquidation, 2 callback liquidation, 3 delay liquidation */
+⋮----
+export interface UnpaidInfoV5 {
+  token: string; // Coin
+  unpaidQty: string; // Unpaid principle
+  unpaidInterest: string; // Unpaid interest
+}
+⋮----
+token: string; // Coin
+unpaidQty: string; // Unpaid principle
+unpaidInterest: string; // Unpaid interest
+⋮----
+export interface BalanceInfoV5 {
+  token: string; // Margin coin
+  price: string; // Margin coin price
+  qty: string; // Margin coin quantity
+  convertedAmount: string; // Margin conversion amount
+}
+⋮----
+token: string; // Margin coin
+price: string; // Margin coin price
+qty: string; // Margin coin quantity
+convertedAmount: string; // Margin conversion amount
+⋮----
+export interface LTVInfoV5 {
+  ltv: string; // Risk rate (when liqStatus != 0, returns empty string)
+  rst: string; // Remaining liquidation time in UTC seconds (when liqStatus != 0, returns empty string)
+  parentUid: string; // The designated Risk Unit ID
+  subAccountUids: string[]; // Bound user IDs
+  unpaidAmount: string; // Total debt in USDT (when liqStatus != 0, returns empty string)
+  unpaidInfo: UnpaidInfoV5[]; // Debt details (when liqStatus != 0, returns empty array)
+  balance: string; // Total asset in USDT (when liqStatus != 0, returns empty string)
+  balanceInfo: BalanceInfoV5[]; // Asset details (when liqStatus != 0, returns empty array)
+  liqStatus?: number; // Liquidation status: 0=Normal, 1=Under liquidation, 2=Manual repayment in progress, 3=Transfer in progress
+}
+⋮----
+ltv: string; // Risk rate (when liqStatus != 0, returns empty string)
+rst: string; // Remaining liquidation time in UTC seconds (when liqStatus != 0, returns empty string)
+parentUid: string; // The designated Risk Unit ID
+subAccountUids: string[]; // Bound user IDs
+unpaidAmount: string; // Total debt in USDT (when liqStatus != 0, returns empty string)
+unpaidInfo: UnpaidInfoV5[]; // Debt details (when liqStatus != 0, returns empty array)
+balance: string; // Total asset in USDT (when liqStatus != 0, returns empty string)
+balanceInfo: BalanceInfoV5[]; // Asset details (when liqStatus != 0, returns empty array)
+liqStatus?: number; // Liquidation status: 0=Normal, 1=Under liquidation, 2=Manual repayment in progress, 3=Transfer in progress
+⋮----
+export interface InstitutionalLoanLTVV5 {
+  ltvInfo: LTVInfoV5[]; // LTV info array
+  liqStatus?: number; // Liquidation status: 0=Normal, 1=Under liquidation, 2=Manual repayment in progress, 3=Transfer in progress
+}
+⋮----
+ltvInfo: LTVInfoV5[]; // LTV info array
+liqStatus?: number; // Liquidation status: 0=Normal, 1=Under liquidation, 2=Manual repayment in progress, 3=Transfer in progress
+⋮----
+export interface RepayInstitutionalLoanResultV5 {
+  repayOrderStatus: string; // P: processing
+}
+⋮----
+repayOrderStatus: string; // P: processing
+⋮----
+// Max Loan Amount Response Types
+⋮----
+export interface MaxLoanAmountV5 {
+  currency: string; // Coin to borrow
+  maxLoan: string; // Maximum borrowable amount based on current collateral
+  notionalUsd: string; // Notional USD value
+  remainingQuota: string; // Remaining individual platform borrowing limit (shared between main and sub accounts)
+}
+⋮----
+currency: string; // Coin to borrow
+maxLoan: string; // Maximum borrowable amount based on current collateral
+notionalUsd: string; // Notional USD value
+remainingQuota: string; // Remaining individual platform borrowing limit (shared between main and sub accounts)
+
+================
 File: src/types/response/v5-position.ts
 ================
 import {
@@ -12135,407 +11744,395 @@ export interface ClosedOptionsPositionV5 {
 }
 
 ================
-File: src/types/websockets/ws-general.ts
+File: src/websocket-client.ts
 ================
-import { AxiosRequestConfig } from 'axios';
-import type { ClientRequestArgs } from 'http';
-import WebSocket from 'isomorphic-ws';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 ⋮----
-import { APIRegion, RestClientOptions, WS_KEY_MAP } from '../../util';
+import {
+  MessageEventLike,
+  WSCategoryV5,
+  WSClientConfigurableOptions,
+  WsKey,
+  WsMarket,
+  WsTopic,
+} from './types';
+import {
+  Exact,
+  WSAPIOperation,
+  WsAPIOperationResponseMap,
+  WSAPIRequest,
+  WsAPITopicRequestParamMap,
+  WsAPIWsKeyTopicMap,
+  WsOperation,
+  WsRequestOperationBybit,
+} from './types/websockets/ws-api';
+import {
+  APIID,
+  DefaultLogger,
+  getMaxTopicsPerSubscribeEvent,
+  getNormalisedTopicRequests,
+  getPromiseRefForWSAPIRequest,
+  getTopicsPerWSKey,
+  getWsKeyForTopic,
+  getWsUrl,
+  isPrivateWsTopic,
+  isTopicSubscriptionConfirmation,
+  isTopicSubscriptionSuccess,
+  isWSAPIResponse,
+  isWsPong,
+  neverGuard,
+  WS_AUTH_ON_CONNECT_KEYS,
+  WS_KEY_MAP,
+  WSConnectedResult,
+  WsTopicRequest,
+} from './util';
+import {
+  BaseWebsocketClient,
+  EmittableEvent,
+  MidflightWsRequestEvent,
+} from './util/BaseWSClient';
+import { SignAlgorithm, signMessage } from './util/webCryptoAPI';
 ⋮----
-/** For spot markets, spotV3 is recommended */
-export type APIMarket = 'v5';
-⋮----
-// Same as inverse futures
-export type WsPublicInverseTopic =
-  | 'orderBookL2_25'
-  | 'orderBookL2_200'
-  | 'trade'
-  | 'insurance'
-  | 'instrument_info'
-  | 'klineV2';
-⋮----
-export type WsPublicUSDTPerpTopic =
-  | 'orderBookL2_25'
-  | 'orderBookL2_200'
-  | 'trade'
-  | 'insurance'
-  | 'instrument_info'
-  | 'kline';
-⋮----
-export type WsPublicSpotV1Topic =
-  | 'trade'
-  | 'realtimes'
-  | 'kline'
-  | 'depth'
-  | 'mergedDepth'
-  | 'diffDepth';
-⋮----
-export type WsPublicSpotV2Topic =
-  | 'depth'
-  | 'kline'
-  | 'trade'
-  | 'bookTicker'
-  | 'realtimes';
-⋮----
-export type WsPublicTopics =
-  | WsPublicInverseTopic
-  | WsPublicUSDTPerpTopic
-  | WsPublicSpotV1Topic
-  | WsPublicSpotV2Topic
-  | string;
-⋮----
-// Same as inverse futures
-export type WsPrivateInverseTopic =
-  | 'position'
-  | 'execution'
-  | 'order'
-  | 'stop_order';
-⋮----
-export type WsPrivateUSDTPerpTopic =
-  | 'position'
-  | 'execution'
-  | 'order'
-  | 'stop_order'
-  | 'wallet';
-⋮----
-export type WsPrivateSpotTopic =
-  | 'outboundAccountInfo'
-  | 'executionReport'
-  | 'ticketInfo';
-⋮----
-export type WsPrivateTopic =
-  | WsPrivateInverseTopic
-  | WsPrivateUSDTPerpTopic
-  | WsPrivateSpotTopic
-  | string;
-⋮----
-export type WsTopic = WsPublicTopics | WsPrivateTopic;
-⋮----
-/** This is used to differentiate between each of the available websocket streams (as bybit has multiple websockets) */
-export type WsKey = (typeof WS_KEY_MAP)[keyof typeof WS_KEY_MAP];
-export type WsMarket = 'all';
-⋮----
-export interface WSClientConfigurableOptions {
-  /** Your API key */
-  key?: string;
-
-  /** Your API secret */
-  secret?: string;
-
-  /**
-   * Set to `true` to connect to Bybit's testnet environment.
-   *
-   * Notes:
-   *
-   * - If demo trading, `testnet` should be set to false!
-   * - If testing a strategy, use demo trading instead. Testnet market data is very different from real market conditions.
-   */
-  testnet?: boolean;
-
-  /**
-   * Set to `true` to connect to Bybit's V5 demo trading: https://bybit-exchange.github.io/docs/v5/demo
-   *
-   * Only the "V5" "market" is supported here.
-   */
-  demoTrading?: boolean;
-
-  /**
-   * The API group this client should connect to. The V5 market is currently used by default.
-   *
-   * Only the "V5" "market" is supported here.
-   */
-  market?: APIMarket;
-
-  /** Define a recv window when preparing a private websocket signature. This is in milliseconds, so 5000 == 5 seconds */
-  recvWindow?: number;
-
-  /** How often to check if the connection is alive */
-  pingInterval?: number;
-
-  /** How long to wait for a pong (heartbeat reply) before assuming the connection is dead */
-  pongTimeout?: number;
-
-  /** Delay in milliseconds before respawning the connection */
-  reconnectTimeout?: number;
-
-  /**
-   * Select WebSocket routing with the same region values as REST. Uses a
-   * dedicated mainnet stream when Bybit documents one for that region.
-   * Top-level `apiRegion` takes precedence over `restOptions.apiRegion`.
-   */
-  apiRegion?: APIRegion;
-
-  /**
-   * Site ID sent as `x-site-id` during the Node.js WebSocket handshake.
-   * Brazil and Argentina internal accounts now use `stream.bybit.com` without this header.
-   * Keep passing it only if a remaining site still requires `x-site-id`.
-   */
-  siteId?: string;
-
-  /**
-   * REST options reused for WebSocket routing.
-   * Regional and site ID values are retained as fallbacks; prefer the matching
-   * top-level `apiRegion` and `siteId` options.
-   */
-  restOptions?: RestClientOptions;
-  requestOptions?: AxiosRequestConfig;
-
-  wsOptions?: {
-    protocols?: string[];
-    agent?: any;
-  } & (
-    | Omit<Partial<WebSocket.ClientOptions>, 'agent'>
-    | Omit<Partial<ClientRequestArgs>, 'agent'>
-  );
-
-  wsUrl?: string;
-
-  /**
-   * Default: false.
-   *
-   * When enabled, any calls to the subscribe method will return a promise.
-   * Note: internally, subscription requests are sent in batches. This may not behave as expected when
-   * subscribing to a large number of topics, especially if you are not yet connected when subscribing.
-   */
-  promiseSubscribeRequests?: boolean;
-
-  /**
-   * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
-   *
-   * Look in the examples folder for a demonstration on using node's createHmac instead.
-   */
-  customSignMessageFn?: (message: string, secret: string) => Promise<string>;
+export interface WSAPIRequestFlags {
+  /** If true, will skip auth requirement for WS API connection */
+  authIsOptional?: boolean | undefined;
 }
 ⋮----
-/** Your API key */
+/** If true, will skip auth requirement for WS API connection */
 ⋮----
-/** Your API secret */
+export class WebsocketClient extends BaseWebsocketClient<
+⋮----
+constructor(options?: WSClientConfigurableOptions, logger?: DefaultLogger)
 ⋮----
 /**
-   * Set to `true` to connect to Bybit's testnet environment.
+   * Request connection of all dependent (public & private) websockets, instead of waiting
+   * for automatic connection by SDK.
+   */
+public connectAll(): Promise<WSConnectedResult | undefined>[]
+⋮----
+/**
+   * Ensures the WS API connection is active and ready.
    *
-   * Notes:
+   * You do not need to call this, but if you call this before making any WS API requests,
+   * it can accelerate the first request (by preparing the connection in advance).
+   */
+public connectWSAPI(): Promise<unknown>
+⋮----
+/** This call automatically ensures the connection is active AND authenticated before resolving */
+⋮----
+public connectPublic(): Promise<WSConnectedResult | undefined>[]
+⋮----
+public connectPrivate(): Promise<WSConnectedResult | undefined>
+⋮----
+/**
+   * Subscribe to V5 topics & track/persist them.
+   * @param wsTopics - topic or list of topics
+   * @param category - the API category this topic is for (e.g. "linear", or "event" for Event Contract public topics).
+   * The value is only important when connecting to public topics and will be ignored for private topics.
+   * @param isPrivateTopic - optional - the library will try to detect private topics, you can use this
+   * to mark a topic as private (if the topic isn't recognised yet)
+   */
+public subscribeV5(
+    wsTopics: WsTopic[] | WsTopic,
+    category: WSCategoryV5,
+    isPrivateTopic?: boolean,
+  ): Promise<unknown>[]
+⋮----
+// Sort into per-WsKey batches, in case there is a mix of topics here
+⋮----
+// Prevent duplicate requests to the same topic
+⋮----
+// Batch sub topics per ws key
+⋮----
+// Return promise to resolve midflight WS request (only works if already connected before request)
+⋮----
+/**
+   * Unsubscribe from V5 topics & remove them from memory. They won't be re-subscribed to if the
+   * connection reconnects.
    *
-   * - If demo trading, `testnet` should be set to false!
-   * - If testing a strategy, use demo trading instead. Testnet market data is very different from real market conditions.
+   * @param wsTopics - topic or list of topics
+   * @param category - the API category this topic is for (e.g. "linear", or "event" for Event Contract public topics). The value is only
+   * important when connecting to public topics and will be ignored for private topics.
+   * @param isPrivateTopic - optional - the library will try to detect private topics, you can
+   * use this to mark a topic as private (if the topic isn't recognised yet)
    */
+public unsubscribeV5(
+    wsTopics: WsTopic[] | WsTopic,
+    category: WSCategoryV5,
+    isPrivateTopic?: boolean,
+  ): Promise<unknown>[]
+⋮----
+// Sort into per-WsKey batches, in case there is a mix of topics here
+⋮----
+// Batch sub topics per ws key
+⋮----
+// Return promise to resolve midflight WS request (only works if already connected before request)
 ⋮----
 /**
-   * Set to `true` to connect to Bybit's V5 demo trading: https://bybit-exchange.github.io/docs/v5/demo
+   * Note: subscribeV5() might be simpler to use. The end result is the same.
    *
-   * Only the "V5" "market" is supported here.
-   */
-⋮----
-/**
-   * The API group this client should connect to. The V5 market is currently used by default.
+   * Request subscription to one or more topics. Pass topics as either an array of strings,
+   * or array of objects (if the topic has parameters).
    *
-   * Only the "V5" "market" is supported here.
-   */
-⋮----
-/** Define a recv window when preparing a private websocket signature. This is in milliseconds, so 5000 == 5 seconds */
-⋮----
-/** How often to check if the connection is alive */
-⋮----
-/** How long to wait for a pong (heartbeat reply) before assuming the connection is dead */
-⋮----
-/** Delay in milliseconds before respawning the connection */
-⋮----
-/**
-   * Select WebSocket routing with the same region values as REST. Uses a
-   * dedicated mainnet stream when Bybit documents one for that region.
-   * Top-level `apiRegion` takes precedence over `restOptions.apiRegion`.
-   */
-⋮----
-/**
-   * Site ID sent as `x-site-id` during the Node.js WebSocket handshake.
-   * Brazil and Argentina internal accounts now use `stream.bybit.com` without this header.
-   * Keep passing it only if a remaining site still requires `x-site-id`.
-   */
-⋮----
-/**
-   * REST options reused for WebSocket routing.
-   * Regional and site ID values are retained as fallbacks; prefer the matching
-   * top-level `apiRegion` and `siteId` options.
-   */
-⋮----
-/**
-   * Default: false.
+   * Objects should be formatted as {topic: string, params: object, category: WSCategoryV5}.
    *
-   * When enabled, any calls to the subscribe method will return a promise.
-   * Note: internally, subscription requests are sent in batches. This may not behave as expected when
-   * subscribing to a large number of topics, especially if you are not yet connected when subscribing.
-   */
-⋮----
-/**
-   * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
+   * - Subscriptions are automatically routed to the correct websocket connection.
+   * - Authentication/connection is automatic.
+   * - Resubscribe after network issues is automatic.
    *
-   * Look in the examples folder for a demonstration on using node's createHmac instead.
+   * Call `unsubscribe(topics)` to remove topics
    */
+public subscribe(
+    requests:
+      | (WsTopicRequest<WsTopic> | WsTopic)
+      | (WsTopicRequest<WsTopic> | WsTopic)[],
+    requestedWsKey?: WsKey,
+  )
+⋮----
+// Batch sub topics per ws key
 ⋮----
 /**
- * WS configuration that's always defined, regardless of user configuration
- * (usually comes from defaults if there's no user-provided values)
- */
-export interface WebsocketClientOptions extends WSClientConfigurableOptions {
-  market: APIMarket;
-  pongTimeout: number;
-  pingInterval: number;
-  reconnectTimeout: number;
-  recvWindow: number;
-
-  /**
-   * If true, require a "receipt" that the connection is ready for use (e.g. a specific event type)
+   * Note: unsubscribe() might be simpler to use. The end result is the same.
+   * Unsubscribe from one or more topics. Similar to subscribe() but in reverse.
+   *
+   * - Requests are automatically routed to the correct websocket connection.
+   * - These topics will be removed from the topic cache, so they won't be subscribed to again.
    */
-  requireConnectionReadyConfirmation: boolean;
-  authPrivateConnectionsOnConnect: boolean;
-  authPrivateRequests: boolean;
-  reauthWSAPIOnReconnect: boolean;
-
-  /**
-   * Whether to use native WebSocket ping/pong frames for heartbeats
-   */
-  useNativeHeartbeats: boolean;
-}
+public unsubscribe(
+    requests:
+      | (WsTopicRequest<WsTopic> | WsTopic)
+      | (WsTopicRequest<WsTopic> | WsTopic)[],
+    wsKey?: WsKey,
+  )
 ⋮----
-/**
-   * If true, require a "receipt" that the connection is ready for use (e.g. a specific event type)
-   */
+// Batch sub topics per ws key
 ⋮----
-/**
-   * Whether to use native WebSocket ping/pong frames for heartbeats
-   */
-⋮----
-export type WsEventInternalSrc = 'event' | 'function' | 'frame';
-
-================
-File: .gitignore
-================
-!.gitkeep
-.DS_STORE
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-pids
-*.pid
-*.seed
-*.pid.lock
-node_modules/
-.npm
-.eslintcache
-.node_repl_history
-*.tgz
-.yarn-integrity
-.env
-.env.test
-.cache
-lib
-dist
-doc
-bundleReport.html
-.history/
-rawReq.ts
-localtest.sh
-localtest.ts
-privaterepotracker
-restClientRegex.ts
-repomix.sh
-
-examples/ignored
-examples/ts-testnet-private.ts
-examples/ts-testnet-trade.ts
-examples/ts-testnet.ts
-*.pem
-.issue*
-docs/research
-tmp
-
-================
-File: examples/Rest/rest-v5-custom-url.ts
-================
-import { RestClientV5 } from '../../src/index';
-⋮----
-// or
-// import { RestClientV5 } from 'bybit-api';
-⋮----
-/**
- * The first parameter of the REST client allows you to pass any configuration parameters supported by the SDK.
- *
- * These include API keys, if you wish to use private endpoints, but also expose other features such as
- * setting a custom base URL (e.g. for Turkish users).
- *
- * Refer to the API documentation for a complete list of domains: https://bybit-exchange.github.io/docs/v5/guide#authentication
- */
-⋮----
-/**
-   * You can pass a completely custom base URL,
-   * e.g. if you're trying to use a domain that hasn't been added yet (please let us know)
-   */
-// baseUrl: 'https://api5.bybit.com',
-//
-//
 /**
    *
-   * Predefined API regions are available through the `apiRegion` property.
-   * Choose the region where your Bybit account is registered:
+   *
+   *
+   * WS API Methods - similar to the REST API, but via WebSockets
+   * https://bybit-exchange.github.io/docs/v5/websocket/trade/guideline
+   *
+   *
    *
    */
-//
-//
-// default: routes to api.bybit.com
-// apiRegion: 'default',
-//
-//
-// bytick: routes to api.bytick.com
-// apiRegion: 'bytick',
-//
-//
-// NL: Bybit removed api.bybit.nl from Integration Guidance on 2026-09-22. apiRegion no longer includes NL.
-//
-//
-// TK: routes to api.bybit.tr (for Turkey users)
-// apiRegion: 'TK',
-//
-//
-// KZ: routes to api.bybit.kz (for Kazakhstan users)
-// apiRegion: 'KZ',
-//
-//
-// HK: routes to api.spark-fintech.com and adds x-refer-site-id: HKG
-// Testnet routes to api-testnet.spark-fintech.com
-// apiRegion: 'HK',
-//
-//
-// GE: routes to api.bybitgeorgia.ge (for Georgia users)
-// apiRegion: 'GE',
-//
-//
-// UAE: routes to api.bybit.ae (for United Arab Emirates users)
-// apiRegion: 'UAE',
-//
-//
-// EU: routes to api.bybit.eu (for EU and EEA users)
-// apiRegion: 'EU',
-//
-//
-// ID: routes to api.bybit.id (for Indonesian users)
-// apiRegion: 'ID',
-//
-//
-// JP: routes to api.manepa.jp (for Japan users)
-// Testnet routes to api-testnet.manepa.jp
-// apiRegion: 'JP',
-//
-//
+⋮----
 /**
-   * Brazil and Argentina international accounts use the global API domain
-   * with an x-site-id header. Choose the site ID for your account:
+   * Send a Websocket API command/request on a connection. Returns a promise that resolves on reply.
+   *
+   * WS API Documentation for list of operations and parameters:
+   * https://bybit-exchange.github.io/docs/v5/websocket/trade/guideline
+   *
+   * Returned promise is rejected if:
+   * - an exception is detected in the reply, OR
+   * - the connection disconnects for any reason (even if automatic reconnect will happen).
+   *
+   * Authentication is automatic. If you didn't request authentication yourself, there might
+   * be a small delay after your first request, while the SDK automatically authenticates.
+   *
+   * @param wsKey - The connection this event is for. Currently only "v5PrivateTrade" is supported
+   * for Bybit, since that is the dedicated WS API connection.
+   * @param operation - The command being sent, e.g. "order.create" to submit a new order.
+   * @param params - Any request parameters for the command. E.g. `OrderParamsV5` to submit a new
+   * order. Only send parameters for the request body. Everything else is automatically handled.
+   * @returns Promise - tries to resolve with async WS API response. Rejects if disconnected or exception is seen in async WS API response
    */
-// siteId: 'BRA_BTL',
-// siteId: 'ARG_BTL',
+⋮----
+// This overload allows the caller to omit the 3rd param, if it isn't required
+sendWSAPIRequest<
+    TWSKey extends keyof WsAPIWsKeyTopicMap,
+    TWSOperation extends WsAPIWsKeyTopicMap[TWSKey],
+    TWSParams extends Exact<WsAPITopicRequestParamMap[TWSOperation]>,
+  >(
+    wsKey: TWSKey,
+    operation: TWSOperation,
+    params?: TWSParams extends void | never ? undefined : TWSParams,
+    requestFlags?: WSAPIRequestFlags,
+  ): Promise<WsAPIOperationResponseMap[TWSOperation]>;
+⋮----
+// These overloads give stricter types than mapped generics, since generic constraints
+// do not trigger excess property checks
+// Without these overloads, TypeScript won't complain if you include an
+// unexpected property with your request (if it doesn't clash with an existing property)
+sendWSAPIRequest<TWSOperation extends WSAPIOperation = 'order.create'>(
+    wsKey: typeof WS_KEY_MAP.v5PrivateTrade,
+    operation: TWSOperation,
+    params: WsAPITopicRequestParamMap[TWSOperation],
+    requestFlags?: WSAPIRequestFlags,
+  ): Promise<WsAPIOperationResponseMap[TWSOperation]>;
+⋮----
+sendWSAPIRequest<TWSOperation extends WSAPIOperation = 'order.amend'>(
+    wsKey: typeof WS_KEY_MAP.v5PrivateTrade,
+    operation: TWSOperation,
+    params: WsAPITopicRequestParamMap[TWSOperation],
+    requestFlags?: WSAPIRequestFlags,
+  ): Promise<WsAPIOperationResponseMap[TWSOperation]>;
+⋮----
+sendWSAPIRequest<TWSOperation extends WSAPIOperation = 'order.cancel'>(
+    wsKey: typeof WS_KEY_MAP.v5PrivateTrade,
+    operation: TWSOperation,
+    params: WsAPITopicRequestParamMap[TWSOperation],
+    requestFlags?: WSAPIRequestFlags,
+  ): Promise<WsAPIOperationResponseMap[TWSOperation]>;
+⋮----
+async sendWSAPIRequest<
+    TWSKey extends keyof WsAPIWsKeyTopicMap,
+    TWSOperation extends WsAPIWsKeyTopicMap[TWSKey],
+    TWSParams extends Exact<WsAPITopicRequestParamMap[TWSOperation]>,
+    TWSAPIResponse extends
+      WsAPIOperationResponseMap[TWSOperation] = WsAPIOperationResponseMap[TWSOperation],
+  >(
+    wsKey: WsKey = WS_KEY_MAP.v5PrivateTrade,
+    operation: TWSOperation,
+    params: TWSParams,
+    requestFlags?: WSAPIRequestFlags,
+  ): Promise<WsAPIOperationResponseMap[TWSOperation]>
+⋮----
+// Some commands don't require authentication.
+⋮----
+// Sign, if needed
+⋮----
+// Store deferred promise, resolved within the "resolveEmittableEvents" method while parsing incoming events
+⋮----
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+⋮----
+// Enrich returned promise with request context for easier debugging
+⋮----
+// throw e;
+⋮----
+// Send event
+⋮----
+// Return deferred promise, so caller can await this call
+⋮----
+/**
+   *
+   *
+   * Internal methods - not intended for public use
+   *
+   *
+   */
+⋮----
+/**
+   * Note: implementing this method will wipe the WsStore state for this WsKey, once this method returns
+   */
+protected isCustomReconnectionNeeded(): boolean
+⋮----
+protected async triggerCustomReconnectionWorkflow(): Promise<void>
+⋮----
+/**
+   * @returns The WS URL to connect to for this WS key
+   */
+protected async getWsUrl(wsKey: WsKey): Promise<string>
+⋮----
+// If auth is needed for this wsKey URL, this returns a suffix
+⋮----
+/**
+   * Return params required to make authorized request
+   */
+private async getWsAuthURLSuffix(): Promise<string>
+⋮----
+private async signMessage(
+    paramsStr: string,
+    secret: string,
+    method?: 'hex' | 'base64',
+    algorithm: SignAlgorithm = 'SHA-256',
+  ): Promise<string>
+⋮----
+protected async getWsAuthRequestEvent(
+    wsKey: WsKey,
+  ): Promise<WsRequestOperationBybit<string>>
+⋮----
+private async getWsAuthSignature(
+    wsKey: WsKey,
+  ): Promise<{ expiresAt: number; signature: string }>
+⋮----
+undefined, // Let the function automatically determine encoding based on key type
+⋮----
+private async signWSAPIRequest<TRequestParams = object>(
+    requestEvent: WSAPIRequest<TRequestParams>,
+  ): Promise<WSAPIRequest<TRequestParams>>
+⋮----
+// Not needed for Bybit. Auth happens only on connection open, automatically.
+⋮----
+protected sendPingEvent(wsKey: WsKey)
+⋮----
+protected sendPongEvent(wsKey: WsKey)
+⋮----
+/** Force subscription requests to be sent in smaller batches, if a number is returned */
+protected getMaxTopicsPerSubscribeEvent(wsKey: WsKey): number | null
+⋮----
+protected authPrivateConnectionsOnConnect(_wsKey: WsKey): boolean
+⋮----
+/**
+   * @returns one or more correctly structured request events for performing a operations over WS. This can vary per exchange spec.
+   */
+protected async getWsRequestEvents(
+    market: WsMarket,
+    operation: WsOperation,
+    requests: WsTopicRequest<WsTopic>[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+    _wsKey: WsKey,
+  ): Promise<MidflightWsRequestEvent<WsRequestOperationBybit<WsTopic>>[]>
+⋮----
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+⋮----
+// Previously used to track topics in a request. Keeping this for subscribe/unsubscribe requests, no need for incremental values
+⋮----
+protected getPrivateWSKeys(): WsKey[]
+⋮----
+protected isAuthOnConnectWsKey(wsKey: WsKey): boolean
+⋮----
+/**
+   * Determines if a topic is for a private channel, using a hardcoded list of strings
+   */
+protected isPrivateTopicRequest(request: WsTopicRequest<WsTopic>): boolean
+⋮----
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+protected isWsPing(msg: any): boolean
+⋮----
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+protected isWsPong(msg: any): boolean
+⋮----
+// public ws connections
+⋮----
+// private ws connections
+⋮----
+/**
+   * Abstraction called to sort ws events into emittable event types (response to a request, data update, etc)
+   */
+protected resolveEmittableEvents(
+    wsKey: WsKey,
+    event: MessageEventLike,
+  ): EmittableEvent[]
+⋮----
+// this.logger.trace('resolveEmittableEvents', {
+//   ...WS_LOGGER_CATEGORY,
+//   wsKey,
+//   parsed: JSON.stringify(parsed),
+// });
+⋮----
+// Only applies to the V5 WS topics
+⋮----
+// WS API response
+⋮----
+// eslint-disable-next-line max-len
+⋮----
+// WS API Exception
+⋮----
+// WS API Success
+⋮----
+// Messages for a subscribed topic all include the "topic" property
+⋮----
+// Messages that are a "reply" to a request/command (e.g. subscribe to these topics) typically include the "op" property
+⋮----
+// Failed request
+⋮----
+// These are r  equest/reply pattern events (e.g. after subscribing to topics or authenticating)
+⋮----
+// Request/reply pattern for authentication success
+⋮----
+// In case of catastrophic failure, fallback to noisy emit update
 
 ================
 File: src/types/response/v5-earn.ts
@@ -13881,6 +13478,409 @@ export type WSRFQPublicTradeEventV5 = WSPublicTopicEventV5<
   'snapshot',
   RFQPublicTradeV5[]
 >;
+
+================
+File: src/types/websockets/ws-general.ts
+================
+import { AxiosRequestConfig } from 'axios';
+import type { ClientRequestArgs } from 'http';
+import WebSocket from 'isomorphic-ws';
+⋮----
+import { APIRegion, RestClientOptions, WS_KEY_MAP } from '../../util';
+⋮----
+/** For spot markets, spotV3 is recommended */
+export type APIMarket = 'v5';
+⋮----
+// Same as inverse futures
+export type WsPublicInverseTopic =
+  | 'orderBookL2_25'
+  | 'orderBookL2_200'
+  | 'trade'
+  | 'insurance'
+  | 'instrument_info'
+  | 'klineV2';
+⋮----
+export type WsPublicUSDTPerpTopic =
+  | 'orderBookL2_25'
+  | 'orderBookL2_200'
+  | 'trade'
+  | 'insurance'
+  | 'instrument_info'
+  | 'kline';
+⋮----
+export type WsPublicSpotV1Topic =
+  | 'trade'
+  | 'realtimes'
+  | 'kline'
+  | 'depth'
+  | 'mergedDepth'
+  | 'diffDepth';
+⋮----
+export type WsPublicSpotV2Topic =
+  | 'depth'
+  | 'kline'
+  | 'trade'
+  | 'bookTicker'
+  | 'realtimes';
+⋮----
+export type WsPublicTopics =
+  | WsPublicInverseTopic
+  | WsPublicUSDTPerpTopic
+  | WsPublicSpotV1Topic
+  | WsPublicSpotV2Topic
+  | string;
+⋮----
+// Same as inverse futures
+export type WsPrivateInverseTopic =
+  | 'position'
+  | 'execution'
+  | 'order'
+  | 'stop_order';
+⋮----
+export type WsPrivateUSDTPerpTopic =
+  | 'position'
+  | 'execution'
+  | 'order'
+  | 'stop_order'
+  | 'wallet';
+⋮----
+export type WsPrivateSpotTopic =
+  | 'outboundAccountInfo'
+  | 'executionReport'
+  | 'ticketInfo';
+⋮----
+export type WsPrivateTopic =
+  | WsPrivateInverseTopic
+  | WsPrivateUSDTPerpTopic
+  | WsPrivateSpotTopic
+  | string;
+⋮----
+export type WsTopic = WsPublicTopics | WsPrivateTopic;
+⋮----
+/** This is used to differentiate between each of the available websocket streams (as bybit has multiple websockets) */
+export type WsKey = (typeof WS_KEY_MAP)[keyof typeof WS_KEY_MAP];
+export type WsMarket = 'all';
+⋮----
+export interface WSClientConfigurableOptions {
+  /** Your API key */
+  key?: string;
+
+  /** Your API secret */
+  secret?: string;
+
+  /**
+   * Set to `true` to connect to Bybit's testnet environment.
+   *
+   * Notes:
+   *
+   * - If demo trading, `testnet` should be set to false!
+   * - If testing a strategy, use demo trading instead. Testnet market data is very different from real market conditions.
+   */
+  testnet?: boolean;
+
+  /**
+   * Set to `true` to connect to Bybit's V5 demo trading: https://bybit-exchange.github.io/docs/v5/demo
+   *
+   * Only the "V5" "market" is supported here.
+   */
+  demoTrading?: boolean;
+
+  /**
+   * The API group this client should connect to. The V5 market is currently used by default.
+   *
+   * Only the "V5" "market" is supported here.
+   */
+  market?: APIMarket;
+
+  /** Define a recv window when preparing a private websocket signature. This is in milliseconds, so 5000 == 5 seconds */
+  recvWindow?: number;
+
+  /** How often to check if the connection is alive */
+  pingInterval?: number;
+
+  /** How long to wait for a pong (heartbeat reply) before assuming the connection is dead */
+  pongTimeout?: number;
+
+  /** Delay in milliseconds before respawning the connection */
+  reconnectTimeout?: number;
+
+  /**
+   * Select WebSocket routing with the same region values as REST. Uses a
+   * dedicated mainnet stream when Bybit documents one for that region.
+   * Top-level `apiRegion` takes precedence over `restOptions.apiRegion`.
+   */
+  apiRegion?: APIRegion;
+
+  /**
+   * Site ID sent as `x-site-id` during the Node.js WebSocket handshake.
+   * Brazil and Argentina internal accounts now use `stream.bybit.com` without this header.
+   * Keep passing it only if a remaining site still requires `x-site-id`.
+   */
+  siteId?: string;
+
+  /**
+   * REST options reused for WebSocket routing.
+   * Regional and site ID values are retained as fallbacks; prefer the matching
+   * top-level `apiRegion` and `siteId` options.
+   */
+  restOptions?: RestClientOptions;
+  requestOptions?: AxiosRequestConfig;
+
+  wsOptions?: {
+    protocols?: string[];
+    agent?: any;
+  } & (
+    | Omit<Partial<WebSocket.ClientOptions>, 'agent'>
+    | Omit<Partial<ClientRequestArgs>, 'agent'>
+  );
+
+  wsUrl?: string;
+
+  /**
+   * Default: false.
+   *
+   * When enabled, any calls to the subscribe method will return a promise.
+   * Note: internally, subscription requests are sent in batches. This may not behave as expected when
+   * subscribing to a large number of topics, especially if you are not yet connected when subscribing.
+   */
+  promiseSubscribeRequests?: boolean;
+
+  /**
+   * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
+   *
+   * Look in the examples folder for a demonstration on using node's createHmac instead.
+   */
+  customSignMessageFn?: (message: string, secret: string) => Promise<string>;
+}
+⋮----
+/** Your API key */
+⋮----
+/** Your API secret */
+⋮----
+/**
+   * Set to `true` to connect to Bybit's testnet environment.
+   *
+   * Notes:
+   *
+   * - If demo trading, `testnet` should be set to false!
+   * - If testing a strategy, use demo trading instead. Testnet market data is very different from real market conditions.
+   */
+⋮----
+/**
+   * Set to `true` to connect to Bybit's V5 demo trading: https://bybit-exchange.github.io/docs/v5/demo
+   *
+   * Only the "V5" "market" is supported here.
+   */
+⋮----
+/**
+   * The API group this client should connect to. The V5 market is currently used by default.
+   *
+   * Only the "V5" "market" is supported here.
+   */
+⋮----
+/** Define a recv window when preparing a private websocket signature. This is in milliseconds, so 5000 == 5 seconds */
+⋮----
+/** How often to check if the connection is alive */
+⋮----
+/** How long to wait for a pong (heartbeat reply) before assuming the connection is dead */
+⋮----
+/** Delay in milliseconds before respawning the connection */
+⋮----
+/**
+   * Select WebSocket routing with the same region values as REST. Uses a
+   * dedicated mainnet stream when Bybit documents one for that region.
+   * Top-level `apiRegion` takes precedence over `restOptions.apiRegion`.
+   */
+⋮----
+/**
+   * Site ID sent as `x-site-id` during the Node.js WebSocket handshake.
+   * Brazil and Argentina internal accounts now use `stream.bybit.com` without this header.
+   * Keep passing it only if a remaining site still requires `x-site-id`.
+   */
+⋮----
+/**
+   * REST options reused for WebSocket routing.
+   * Regional and site ID values are retained as fallbacks; prefer the matching
+   * top-level `apiRegion` and `siteId` options.
+   */
+⋮----
+/**
+   * Default: false.
+   *
+   * When enabled, any calls to the subscribe method will return a promise.
+   * Note: internally, subscription requests are sent in batches. This may not behave as expected when
+   * subscribing to a large number of topics, especially if you are not yet connected when subscribing.
+   */
+⋮----
+/**
+   * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
+   *
+   * Look in the examples folder for a demonstration on using node's createHmac instead.
+   */
+⋮----
+/**
+ * WS configuration that's always defined, regardless of user configuration
+ * (usually comes from defaults if there's no user-provided values)
+ */
+export interface WebsocketClientOptions extends WSClientConfigurableOptions {
+  market: APIMarket;
+  pongTimeout: number;
+  pingInterval: number;
+  reconnectTimeout: number;
+  recvWindow: number;
+
+  /**
+   * If true, require a "receipt" that the connection is ready for use (e.g. a specific event type)
+   */
+  requireConnectionReadyConfirmation: boolean;
+  authPrivateConnectionsOnConnect: boolean;
+  authPrivateRequests: boolean;
+  reauthWSAPIOnReconnect: boolean;
+
+  /**
+   * Whether to use native WebSocket ping/pong frames for heartbeats
+   */
+  useNativeHeartbeats: boolean;
+}
+⋮----
+/**
+   * If true, require a "receipt" that the connection is ready for use (e.g. a specific event type)
+   */
+⋮----
+/**
+   * Whether to use native WebSocket ping/pong frames for heartbeats
+   */
+⋮----
+export type WsEventInternalSrc = 'event' | 'function' | 'frame';
+
+================
+File: .gitignore
+================
+!.gitkeep
+.DS_STORE
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+pids
+*.pid
+*.seed
+*.pid.lock
+node_modules/
+.npm
+.eslintcache
+.node_repl_history
+*.tgz
+.yarn-integrity
+.env
+.env.test
+.cache
+lib
+dist
+doc
+bundleReport.html
+.history/
+rawReq.ts
+localtest.sh
+localtest.ts
+privaterepotracker
+restClientRegex.ts
+repomix.sh
+
+examples/ignored
+examples/ts-testnet-private.ts
+examples/ts-testnet-trade.ts
+examples/ts-testnet.ts
+*.pem
+.issue*
+docs/research
+tmp
+
+================
+File: examples/Rest/rest-v5-custom-url.ts
+================
+import { RestClientV5 } from '../../src/index';
+⋮----
+// or
+// import { RestClientV5 } from 'bybit-api';
+⋮----
+/**
+ * The first parameter of the REST client allows you to pass any configuration parameters supported by the SDK.
+ *
+ * These include API keys, if you wish to use private endpoints, but also expose other features such as
+ * setting a custom base URL (e.g. for Turkish users).
+ *
+ * Refer to the API documentation for a complete list of domains: https://bybit-exchange.github.io/docs/v5/guide#authentication
+ */
+⋮----
+/**
+   * You can pass a completely custom base URL,
+   * e.g. if you're trying to use a domain that hasn't been added yet (please let us know)
+   */
+// baseUrl: 'https://api5.bybit.com',
+//
+//
+/**
+   *
+   * Predefined API regions are available through the `apiRegion` property.
+   * Choose the region where your Bybit account is registered:
+   *
+   */
+//
+//
+// default: routes to api.bybit.com
+// apiRegion: 'default',
+//
+//
+// bytick: routes to api.bytick.com
+// apiRegion: 'bytick',
+//
+//
+// NL: Bybit removed api.bybit.nl from Integration Guidance on 2026-09-22. apiRegion no longer includes NL.
+//
+//
+// TK: routes to api.bybit.tr (for Turkey users)
+// apiRegion: 'TK',
+//
+//
+// KZ: routes to api.bybit.kz (for Kazakhstan users)
+// apiRegion: 'KZ',
+//
+//
+// HK: routes to api.spark-fintech.com and adds x-refer-site-id: HKG
+// Testnet routes to api-testnet.spark-fintech.com
+// apiRegion: 'HK',
+//
+//
+// GE: routes to api.bybitgeorgia.ge (for Georgia users)
+// apiRegion: 'GE',
+//
+//
+// UAE: routes to api.bybit.ae (for United Arab Emirates users)
+// apiRegion: 'UAE',
+//
+//
+// EU: routes to api.bybit.eu (for EU and EEA users)
+// apiRegion: 'EU',
+//
+//
+// ID: routes to api.bybit.id (for Indonesian users)
+// apiRegion: 'ID',
+//
+//
+// JP: routes to api.manepa.jp (for Japan users)
+// Testnet routes to api-testnet.manepa.jp
+// apiRegion: 'JP',
+//
+//
+/**
+   * Brazil and Argentina international accounts use the global API domain
+   * with an x-site-id header. Choose the site ID for your account:
+   */
+// siteId: 'BRA_BTL',
+// siteId: 'ARG_BTL',
 
 ================
 File: src/types/request/index.ts
@@ -17481,10 +17481,11 @@ getSpreadOpenOrders(params?: GetSpreadOpenOrdersParamsV5): Promise<
    * - orderId & orderLinkId has a higher priority than startTime & endTime
    * - Fully canceled orders are stored for up to 24 hours
    * - Single leg orders can also be found with "createType"=CreateByFutureSpread via Get Order History
-   * - From 2026-11-12, omitting orderStatus excludes Cancelled, Rejected and Deactivated orders from the last 24 hours.
+   * - Planned change (postponed by Bybit, no new date yet): omitting orderStatus will exclude Cancelled, Rejected and Deactivated orders from the last 24 hours.
    *   Pass orderStatus explicitly to retrieve matching orders from that period.
    *   Undocumented in the endpoint parameter table; confirmed by Bybit's API announcement.
    * @see https://t.me/Bybit_API_Announcements/464
+   * @see https://t.me/Bybit_API_Announcements/468
    */
 getSpreadOrderHistory(params?: GetSpreadOrderHistoryParamsV5): Promise<
     APIResponseV3WithTime<{
@@ -17835,9 +17836,10 @@ cancelAllOrders(
    *
    * If you want to get real-time order information, you could query this endpoint or rely on the websocket stream (recommended).
    *
-   * From 2026-11-12, omitting orderStatus excludes Cancelled, Rejected and Deactivated orders from the last 24 hours.
+   * Planned change (postponed by Bybit, no new date yet): omitting orderStatus will exclude Cancelled, Rejected and Deactivated orders from the last 24 hours.
    * Pass orderStatus explicitly to retrieve matching orders from that period.
    * @see https://t.me/Bybit_API_Announcements/464
+   * @see https://t.me/Bybit_API_Announcements/468
    */
 getHistoricOrders(
     params: GetAccountHistoricOrdersParamsV5,
