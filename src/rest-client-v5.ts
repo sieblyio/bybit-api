@@ -923,7 +923,7 @@ export class RestClientV5 extends BaseRestClient {
    * - orderId & orderLinkId has a higher priority than startTime & endTime
    * - Fully canceled orders are stored for up to 24 hours
    * - Single leg orders can also be found with "createType"=CreateByFutureSpread via Get Order History
-   * - Planned change (postponed by Bybit, no new date yet): omitting orderStatus will exclude Cancelled, Rejected and Deactivated orders from the last 24 hours.
+   * - From 2026-12-03 (postponed from 2026-11-12), omitting orderStatus excludes Cancelled, Rejected and Deactivated orders from the last 24 hours.
    *   Pass orderStatus explicitly to retrieve matching orders from that period.
    *   Undocumented in the endpoint parameter table; confirmed by Bybit's API announcement.
    * @see https://t.me/Bybit_API_Announcements/464
@@ -1350,7 +1350,7 @@ export class RestClientV5 extends BaseRestClient {
    *
    * If you want to get real-time order information, you could query this endpoint or rely on the websocket stream (recommended).
    *
-   * Planned change (postponed by Bybit, no new date yet): omitting orderStatus will exclude Cancelled, Rejected and Deactivated orders from the last 24 hours.
+   * From 2026-12-03 (postponed from 2026-11-12), omitting orderStatus excludes Cancelled, Rejected and Deactivated orders from the last 24 hours.
    * Pass orderStatus explicitly to retrieve matching orders from that period.
    * @see https://t.me/Bybit_API_Announcements/464
    * @see https://t.me/Bybit_API_Announcements/468
