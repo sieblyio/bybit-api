@@ -921,6 +921,39 @@ ts-node ./examples/rest-spot-public.ts
 ```
 
 ================
+File: src/constants/enum.ts
+================
+/** Full take profit/stop loss mode (a single TP order and a single SL order can be placed, covering the entire position) */
+⋮----
+/** Partial take profit/stop loss mode (multiple TP and SL orders can be placed, covering portions of the position) */
+⋮----
+/** This could mean bad request, incorrect value types or even incorrect/missing values */
+⋮----
+/** API key requires specific whitelisted IPs, and this IP was not in the list */
+⋮----
+/** Account not unified margin, update required */
+⋮----
+/** Seen when placing an order */
+⋮----
+/** Seen if a conditional order is too large */
+⋮----
+/** E.g. trying to change position margin while on cross */
+⋮----
+/** E.g. USDC Options trading, trying to access a symbol that is no longer active */
+⋮----
+/** E.g. USDC Options trading when the account hasn't been opened for USDC Options yet */
+⋮----
+/**
+ * Position idx, used to identify positions in different position modes.
+ * Required if you are under One-Way Mode:
+ */
+export enum LinearPositionIdx {
+  OneWayMode = 0,
+  BuySide = 1,
+  SellSide = 2,
+}
+
+================
 File: src/types/request/account-asset.ts
 ================
 export type TransferAccountType =
@@ -4592,39 +4625,6 @@ File: tsconfig.test.json
     "allowJs": true
   },
   "include": ["test/**/*.ts", "test/**/*.js"]
-}
-
-================
-File: src/constants/enum.ts
-================
-/** Full take profit/stop loss mode (a single TP order and a single SL order can be placed, covering the entire position) */
-⋮----
-/** Partial take profit/stop loss mode (multiple TP and SL orders can be placed, covering portions of the position) */
-⋮----
-/** This could mean bad request, incorrect value types or even incorrect/missing values */
-⋮----
-/** API key requires specific whitelisted IPs, and this IP was not in the list */
-⋮----
-/** Account not unified margin, update required */
-⋮----
-/** Seen when placing an order */
-⋮----
-/** Seen if a conditional order is too large */
-⋮----
-/** E.g. trying to change position margin while on cross */
-⋮----
-/** E.g. USDC Options trading, trying to access a symbol that is no longer active */
-⋮----
-/** E.g. USDC Options trading when the account hasn't been opened for USDC Options yet */
-⋮----
-/**
- * Position idx, used to identify positions in different position modes.
- * Required if you are under One-Way Mode:
- */
-export enum LinearPositionIdx {
-  OneWayMode = 0,
-  BuySide = 1,
-  SellSide = 2,
 }
 
 ================
@@ -17481,7 +17481,7 @@ getSpreadOpenOrders(params?: GetSpreadOpenOrdersParamsV5): Promise<
    * - orderId & orderLinkId has a higher priority than startTime & endTime
    * - Fully canceled orders are stored for up to 24 hours
    * - Single leg orders can also be found with "createType"=CreateByFutureSpread via Get Order History
-   * - Planned change (postponed by Bybit, no new date yet): omitting orderStatus will exclude Cancelled, Rejected and Deactivated orders from the last 24 hours.
+   * - From 2026-12-03 (postponed from 2026-11-12), omitting orderStatus excludes Cancelled, Rejected and Deactivated orders from the last 24 hours.
    *   Pass orderStatus explicitly to retrieve matching orders from that period.
    *   Undocumented in the endpoint parameter table; confirmed by Bybit's API announcement.
    * @see https://t.me/Bybit_API_Announcements/464
@@ -17836,7 +17836,7 @@ cancelAllOrders(
    *
    * If you want to get real-time order information, you could query this endpoint or rely on the websocket stream (recommended).
    *
-   * Planned change (postponed by Bybit, no new date yet): omitting orderStatus will exclude Cancelled, Rejected and Deactivated orders from the last 24 hours.
+   * From 2026-12-03 (postponed from 2026-11-12), omitting orderStatus excludes Cancelled, Rejected and Deactivated orders from the last 24 hours.
    * Pass orderStatus explicitly to retrieve matching orders from that period.
    * @see https://t.me/Bybit_API_Announcements/464
    * @see https://t.me/Bybit_API_Announcements/468
