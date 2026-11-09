@@ -164,6 +164,11 @@ export interface AutoRepayModeResultV5 {
   data: AutoRepayModeItemV5[];
 }
 
+export interface TradeAutoRepayResultV5 {
+  /** Saved switch state. 1: enabled; 0: disabled */
+  autoRepay: '0' | '1';
+}
+
 export interface SpotMarginLiabilityInfoV5 {
   currency: string;
   totalBorrowAmount: string;
@@ -211,6 +216,16 @@ export interface FixedRateBorrowQuoteV5 {
   term: number;
   annualRate: string;
   qty: string;
+}
+
+export interface FixedRateBorrowInterestAccruedV5 {
+  refId: string;
+  currency: string;
+  orderId: string;
+  loanAmt: string;
+  interest: string;
+  interestRate: string;
+  ts: string;
 }
 
 export interface FlexibleAvailableInventoryV5 {

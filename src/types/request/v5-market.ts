@@ -204,3 +204,11 @@ export interface GetOptionBaseCoinsParamsV5 {
    */
   underlyingType?: string;
 }
+
+export interface GetCorporateActionsParamsV5 {
+  category?: 'option';
+  baseCoin?: string;
+  actionType?: 'ForwardSplit' | 'ReverseSplit' | 'Dividend';
+  limit?: number;
+  cursor?: string;
+}

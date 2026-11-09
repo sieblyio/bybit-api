@@ -58,7 +58,10 @@ export interface CreateStrategyOrderParamsV5 {
   depthReference?: string;
 }
 
-/** GET /v5/strategy/list */
+/**
+ * GET /v5/strategy/list
+ * The range between beginTimeE0 and endTimeE0 (Unix timestamps in seconds) cannot exceed one year.
+ */
 export interface GetStrategyListParamsV5 {
   strategyId?: string;
   symbol?: string;
@@ -72,7 +75,10 @@ export interface GetStrategyListParamsV5 {
   cursor?: string;
 }
 
-/** GET /v5/strategy/order-list */
+/**
+ * GET /v5/strategy/order-list
+ * The range between beginTimeE0 and endTimeE0 (Unix timestamps in seconds) cannot exceed one year.
+ */
 export interface GetStrategyOrderListParamsV5 {
   strategyId: string;
   /** 2: created, 3: create failed, 4: partially filled, 5: fully filled, 6: rejected, 7: canceled */

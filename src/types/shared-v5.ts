@@ -434,6 +434,8 @@ export interface PermissionsV5 {
   FiatConvertBroker?: string[];
   BitCard?: string[];
   ByXPost?: string[];
+  /** ComplianceAppeal: TM Onchain appeals. Bybit global master read-write API keys only; [] revokes permission */
+  Compliance?: string[];
 }
 
 export interface CategoryCursorListV5<

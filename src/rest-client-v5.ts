@@ -87,10 +87,13 @@ import {
   BrokerRateLimitCapItemV5,
   BrokerRateLimitSetResultItemV5,
   BrokerVoucherSpecV5,
+  CancelAllEventQuotesParamsV5,
+  CancelAllEventQuotesResultV5,
   CancelAllOrdersParamsV5,
   CancelAllRFQResultV5,
   CancelBorrowOrderFixedParamsV5,
   CancelEventQuoteParamsV5,
+  CancelFixedRateBorrowOrderParamsV5,
   CancelOrderParamsV5,
   CancelRFQParamsV5,
   CancelRFQQuoteItemV5,
@@ -126,6 +129,7 @@ import {
   ConvertHistoryRecordV5,
   ConvertQuoteV5,
   ConvertStatusV5,
+  CorporateActionV5,
   CreateBorrowOrderFixedParamsV5,
   CreateBorrowOrderFixedV5,
   CreateP2PAdParamsV5,
@@ -202,6 +206,7 @@ import {
   FixedLoanAvailableInventoryV5,
   FixedRateAvailableInventoryV5,
   FixedRateBorrowContractInfoV5,
+  FixedRateBorrowInterestAccruedV5,
   FixedRateBorrowOrderInfoV5,
   FixedRateBorrowParamsV5,
   FixedRateBorrowQuoteV5,
@@ -279,6 +284,7 @@ import {
   GetCollateralCoinsParamsV5,
   GetCompletedLoanOrderHistoryParamsV5,
   GetConvertHistoryParamsV5,
+  GetCorporateActionsParamsV5,
   GetDeliveryPriceParamsV5,
   GetDeliveryRecordParamsV5,
   GetDepositRecordParamsV5,
@@ -309,6 +315,7 @@ import {
   GetFixedLoanAvailableInventoryParamsV5,
   GetFixedRateAvailableInventoryParamsV5,
   GetFixedRateBorrowContractInfoParamsV5,
+  GetFixedRateBorrowInterestAccruedParamsV5,
   GetFixedRateBorrowOrderInfoParamsV5,
   GetFixedRateBorrowOrderQuoteParamsV5,
   GetFixedTermEarnOrderListParamsV5,
@@ -586,6 +593,7 @@ import {
   SettlePwmFundProfitParamsV5,
   SettlePwmFundProfitResultV5,
   SetTPSLModeParamsV5,
+  SetTradeAutoRepayParamsV5,
   SetTradingStopParamsV5,
   SignAgreementParamsV5,
   SmallBalanceListV5,
@@ -630,6 +638,7 @@ import {
   TokenSplashUserActivityResultV5,
   TotalMembersAssetsResultV5,
   TPSLModeV5,
+  TradeAutoRepayResultV5,
   TradeInfoForAnalysisResultV5,
   TransactionLogV5,
   UnifiedAccountUpgradeResultV5,
@@ -914,6 +923,11 @@ export class RestClientV5 extends BaseRestClient {
    * - orderId & orderLinkId has a higher priority than startTime & endTime
    * - Fully canceled orders are stored for up to 24 hours
    * - Single leg orders can also be found with "createType"=CreateByFutureSpread via Get Order History
+   * - From 2026-12-03 (postponed from 2026-11-12), omitting orderStatus excludes Cancelled, Rejected and Deactivated orders from the last 24 hours.
+   *   Pass orderStatus explicitly to retrieve matching orders from that period.
+   *   Undocumented in the endpoint parameter table; confirmed by Bybit's API announcement.
+   * @see https://t.me/Bybit_API_Announcements/464
+   * @see https://t.me/Bybit_API_Announcements/468
    */
   getSpreadOrderHistory(params?: GetSpreadOrderHistoryParamsV5): Promise<
     APIResponseV3WithTime<{
@@ -1281,6 +1295,15 @@ export class RestClientV5 extends BaseRestClient {
     return this.get('/v5/market/option-base-coins', params);
   }
 
+  getCorporateActions(params?: GetCorporateActionsParamsV5): Promise<
+    APIResponseV3WithTime<{
+      list: CorporateActionV5[];
+      nextPageCursor: string;
+    }>
+  > {
+    return this.get('/v5/market/corporate-action', params);
+  }
+
   /**
    *
    ****** Trade APIs
@@ -1326,6 +1349,11 @@ export class RestClientV5 extends BaseRestClient {
    * Query order history. As order creation/cancellation is asynchronous, the data returned from this endpoint may delay.
    *
    * If you want to get real-time order information, you could query this endpoint or rely on the websocket stream (recommended).
+   *
+   * From 2026-12-03 (postponed from 2026-11-12), omitting orderStatus excludes Cancelled, Rejected and Deactivated orders from the last 24 hours.
+   * Pass orderStatus explicitly to retrieve matching orders from that period.
+   * @see https://t.me/Bybit_API_Announcements/464
+   * @see https://t.me/Bybit_API_Announcements/468
    */
   getHistoricOrders(
     params: GetAccountHistoricOrdersParamsV5,
@@ -3663,7 +3691,9 @@ export class RestClientV5 extends BaseRestClient {
    * Set spot automatic repayment mode.
    *
    * INFO:
-   * - If currency is not passed, spot automatic repayment will be enabled for all currencies
+   * - If currency is not passed, autoRepayMode sets the global automatic repayment switch.
+   *   When enabled, it also applies to currencies that become borrowable later.
+   * - If currency is passed, only that currency is updated; single-currency behavior is unchanged.
    * - If autoRepayMode of a currency is set to 1, the system will automatically make repayments
    *   without asset conversion to that currency at 0 and 30 minutes every hour
    * - The amount of repayments is the minimum of available spot balance and liability
@@ -3673,6 +3703,32 @@ export class RestClientV5 extends BaseRestClient {
   ): Promise<APIResponseV3WithTime<AutoRepayModeResultV5>> {
     return this.postPrivate(
       '/v5/spot-margin-trade/set-auto-repay-mode',
+      params,
+    );
+  }
+
+  /**
+   * Get the Unified account's trade auto repayment switch.
+   *
+   * Applies only in Cross and Portfolio margin modes; has no effect in Isolated mode.
+   * Separate from scheduled automatic repayment configured through setAutoRepayMode.
+   */
+  getTradeAutoRepay(): Promise<APIResponseV3WithTime<TradeAutoRepayResultV5>> {
+    return this.getPrivate('/v5/spot-margin-trade/get-trade-auto-repay');
+  }
+
+  /**
+   * Set the Unified account's trade auto repayment switch. Disabled by default.
+   * Repays a credited coin's own flexible-rate liability after an eligible spot trade, without asset conversion.
+   *
+   * Runs only in Cross and Portfolio margin modes. Isolated mode can save the setting, but repayment does not run.
+   * Separate from scheduled automatic repayment configured through setAutoRepayMode.
+   */
+  setTradeAutoRepay(
+    params: SetTradeAutoRepayParamsV5,
+  ): Promise<APIResponseV3WithTime<TradeAutoRepayResultV5>> {
+    return this.postPrivate(
+      '/v5/spot-margin-trade/set-trade-auto-repay',
       params,
     );
   }
@@ -3748,6 +3804,29 @@ export class RestClientV5 extends BaseRestClient {
     params: RenewFixedRateBorrowParamsV5,
   ): Promise<APIResponseV3WithTime<string>> {
     return this.postPrivate('/v5/spot-margin-trade/fixedborrow-renew', params);
+  }
+
+  getFixedRateBorrowInterestAccrued(
+    params?: GetFixedRateBorrowInterestAccruedParamsV5,
+  ): Promise<
+    APIResponseV3WithTime<{
+      list: FixedRateBorrowInterestAccruedV5[];
+      nextPageCursor: string;
+    }>
+  > {
+    return this.getPrivate(
+      '/v5/spot-margin-trade/fixedborrow-interest-accrued',
+      params,
+    );
+  }
+
+  cancelFixedRateBorrowOrder(
+    params: CancelFixedRateBorrowOrderParamsV5,
+  ): Promise<APIResponseV3WithTime<{}>> {
+    return this.postPrivate(
+      '/v5/spot-margin-trade/fixedborrow-order-cancel',
+      params,
+    );
   }
 
   getFlexibleAvailableInventory(
@@ -6309,5 +6388,16 @@ export class RestClientV5 extends BaseRestClient {
     params?: CancelEventQuoteParamsV5,
   ): Promise<APIResponseV3WithTime<EventQuoteResultV5>> {
     return this.postPrivate('/v5/event/cancel', params);
+  }
+
+  /**
+   * Cancel all active Event Contract quotes for a symbol.
+   *
+   * INFO: Event Contract maker accounts only.
+   */
+  cancelAllEventQuotes(
+    params: CancelAllEventQuotesParamsV5,
+  ): Promise<APIResponseV3WithTime<CancelAllEventQuotesResultV5>> {
+    return this.postPrivate('/v5/event/cancel-all', params);
   }
 }

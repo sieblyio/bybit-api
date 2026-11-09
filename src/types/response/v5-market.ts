@@ -538,3 +538,27 @@ export interface OptionBaseCoinV5 {
 export interface OptionBaseCoinsResultV5 {
   list: OptionBaseCoinV5[];
 }
+
+export interface CorporateActionV5 {
+  category?: 'option';
+  symbol: string;
+  baseCoin: string;
+  actionType: 'ForwardSplit' | 'ReverseSplit' | 'Dividend';
+  status: string;
+  effectiveTime: number;
+  details: {
+    splitFactor?: string;
+    splitType?: 'FORWARD' | 'REVERSE';
+    dividendAmountPerShare?: string;
+    dividendCurrency?: string;
+    installmentCount?: number;
+    installmentAmountPerShare?: string;
+    installmentCoin?: string;
+    firstSettlementTimeUtc?: number;
+    installments?: {
+      installmentNo: number;
+      settlementTimeUtc: number;
+      status: string;
+    }[];
+  };
+}

@@ -44,6 +44,11 @@ export interface GetSpreadOrderHistoryParamsV5 {
   baseCoin?: string;
   orderId?: string;
   orderLinkId?: string;
+  /**
+   * Filter by order status. Undocumented in the endpoint parameter table; confirmed by Bybit's API announcement.
+   * @see https://t.me/Bybit_API_Announcements/464
+   */
+  orderStatus?: 'Rejected' | 'Cancelled' | 'Filled';
   startTime?: number;
   endTime?: number;
   limit?: number;

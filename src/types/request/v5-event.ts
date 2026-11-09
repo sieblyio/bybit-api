@@ -59,9 +59,15 @@ export interface SubmitEventQuoteParamsV5 {
   orderLinkId: string;
   grossPayoutRatio: string;
   amount: string;
+  /** Automatically cancel after this many milliseconds. 0 uses quoteMaxValidMs; non-zero values must not exceed quoteMaxValidMs */
+  cancelAfterMs?: number;
 }
 
 export interface CancelEventQuoteParamsV5 {
   orderLinkId?: string;
   orderId?: string;
+}
+
+export interface CancelAllEventQuotesParamsV5 {
+  symbol: string;
 }
