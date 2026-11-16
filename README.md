@@ -7,7 +7,7 @@
 [![last commit](https://img.shields.io/github/last-commit/sieblyio/bybit-api)][1]
 [![CodeFactor](https://www.codefactor.io/repository/github/sieblyio/bybit-api/badge)](https://www.codefactor.io/repository/github/sieblyio/bybit-api)
 [![Telegram](https://img.shields.io/badge/chat-on%20telegram-blue.svg)](https://t.me/nodetraders)
-[![Bybit Tutorial](https://img.shields.io/badge/Bybit%20Tutorial-siebly.io-blue)](https://siebly.io/sdk/bybit/javascript/tutorial)
+[![Bybit Documentation](https://img.shields.io/badge/Bybit%20Documentation-siebly.io-blue)](https://sieblyio.github.io/docs/bybit/)
 
 <p align="center">
   <a href="https://www.npmjs.com/package/bybit-api">
@@ -61,8 +61,8 @@ Professional Node.js, JavaScript & TypeScript SDK for the Bybit REST APIs, WebSo
      - Responses to commands will arrive via the `response` and `error` events emitted by the client.
      - See example for more details: [examples/ws-api-raw-events.ts](./examples/ws-api-raw-events.ts)
 - Active community support & collaboration in telegram: [Node.js Algo Traders](https://t.me/nodetraders).
-- QuickStart Guide: https://siebly.io/sdk/bybit/javascript
-- Bybit JavaScript Tutorial: [Bybit JavaScript REST API & WebSocket Tutorial](https://siebly.io/sdk/bybit/javascript/tutorial)
+- QuickStart Guide: https://sieblyio.github.io/docs/bybit/getting-started
+- [Bybit SDK Documentation](https://sieblyio.github.io/docs/bybit/)
 
 # Table of Contents
 
@@ -148,7 +148,7 @@ Most methods accept JS objects. These can be populated using parameters specifie
 
 - [Bybit API Docs](https://bybit-exchange.github.io/docs/v5/intro)
 - [REST Endpoint Function List](./docs/endpointFunctionList.md)
-- [TSDoc Documentation (generated using typedoc via npm module)](https://tsdocs.dev/docs/bybit-api)
+- [API reference](https://sieblyio.github.io/docs/bybit/reference)
 
 ## Structure
 
