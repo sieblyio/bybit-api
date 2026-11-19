@@ -1489,15 +1489,15 @@ export class RestClientV5 extends BaseRestClient {
   }
 
   /**
-   * This endpoint allows you to set the disconnection protect time window. Covers: option (unified account).
+   * This endpoint allows you to set the disconnection protect time window. Covers: options, spot and derivatives.
    *
    * If you need to turn it on/off, you can contact your client manager for consultation and application.
-   * The default time window is 10 seconds.
+   * The default time window is 10 seconds. The default product is OPTIONS.
    *
    * Only for institutional clients!
    */
   setDisconnectCancelAllWindowV2(params: {
-    product?: 'OPTION' | 'SPOT' | 'DERIVATIVES';
+    product?: 'OPTIONS' | 'SPOT' | 'DERIVATIVES';
     timeWindow: number;
   }): Promise<APIResponseV3<undefined>> {
     return this.postPrivate('/v5/order/disconnected-cancel-all', params);
