@@ -23,7 +23,9 @@
 > [!TIP]
 > Upcoming change: As part of the [Siebly.io](https://siebly.io/) brand, this SDK is now hosted under our [Siebly.io GitHub organisation](https://github.com/sieblyio). The migration is seamless and requires no user changes.
 
-Professional Node.js, JavaScript & TypeScript SDK for the Bybit REST APIs, WebSocket APIs & WebSocket Events:
+Professional Node.js, JavaScript & TypeScript SDK for the Bybit REST APIs, WebSocket APIs & WebSocket Events.
+
+Take a look at our dedicated [Bybit API quickstart guides for major frameworks and JavaScript runtimes](#frameworks--quickstart-guides).
 
 - Complete integration with all Bybit REST APIs & WebSockets, including the WebSocket API.
 - Actively maintained with a modern, promise-driven interface.
@@ -69,6 +71,7 @@ Professional Node.js, JavaScript & TypeScript SDK for the Bybit REST APIs, WebSo
 ## Overview
 
 - [Installation](#installation)
+  - [Frameworks & Quickstart Guides](#frameworks--quickstart-guides)
 - [Issues & Discussion](#issues--discussion)
 - [Related Projects](#related-projects)
 - [Documentation](#documentation)
@@ -112,6 +115,20 @@ Professional Node.js, JavaScript & TypeScript SDK for the Bybit REST APIs, WebSo
 
 `npm install --save bybit-api`
 
+### Frameworks & Quickstart Guides
+
+Our complete Bybit SDK supports all the major JavaScript runtimes. For maximum convenience, we've included guides to quickly get you started with the most popular runtimes. If you're not sure how to use this SDK with a runtime or framework not listed here, feel free to [open an issue on GitHub](https://github.com/sieblyio/bybit-api/issues).
+
+| Runtime                    | Details                                                                                                                                                                                                                                                                                                                                                                                              |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend (trading bots)     | Using [Node.js and JavaScript](https://sieblyio.github.io/docs/bybit/environments/node.html), [Node.js and TypeScript](https://sieblyio.github.io/docs/bybit/environments/typescript.html), [Bun](https://sieblyio.github.io/docs/bybit/environments/bun.html), or [Deno](https://sieblyio.github.io/docs/bybit/environments/deno.html). This is the recommendation for algorithmic trading systems. |
+| Frontend / Web Development | Using [React with Vite](https://sieblyio.github.io/docs/bybit/environments/react.html) or [Vite with plain JavaScript](https://sieblyio.github.io/docs/bybit/environments/vite.html). Display REST and WebSocket prices in the browser.                                                                                                                                                              |
+| Next.js App Router         | Using the [Next.js App Router](https://sieblyio.github.io/docs/bybit/environments/next.html) to serve the price from a Route Handler running on Node.js.                                                                                                                                                                                                                                             |
+| Mobile (iOS & Android)     | Using [React Native with Expo for iOS and Android](https://sieblyio.github.io/docs/bybit/environments/expo.html). The example guides you to display the current BTCUSDT price from Bybit and stream updates over WebSockets.                                                                                                                                                                         |
+| Cloudflare Workers         | [Cloudflare Workers](https://sieblyio.github.io/docs/bybit/environments/cloudflare-workers.html). Return a public price from a Worker, with a separate example for authenticated orders.                                                                                                                                                                                                             |
+
+Refer to [runtime compatibility](https://sieblyio.github.io/docs/bybit/compatibility.html) for a complete list of runtimes that we've actively tested, including setup guides.
+
 ## Issues & Discussion
 
 - Issues? Check the [issues tab](https://github.com/sieblyio/bybit-api/issues).
@@ -144,9 +161,11 @@ Check out our JavaScript/TypeScript/Node.js SDKs & Projects:
 
 ## Documentation
 
+The [Bybit SDK documentation](https://sieblyio.github.io/docs/bybit/) covers installation, client setup, public market data, authenticated trading, and WebSocket subscriptions.
+
 Most methods accept JS objects. These can be populated using parameters specified by Bybit's API documentation, or check the type definition in each class within the github repository (see table below for convenient links to each class). TypeScript is definitely recommended, but not required.
 
-- [Bybit API Docs](https://bybit-exchange.github.io/docs/v5/intro)
+- [Bybit exchange API reference](https://bybit-exchange.github.io/docs/v5/intro)
 - [REST Endpoint Function List](./docs/endpointFunctionList.md)
 - [TSDoc Documentation (generated using typedoc via npm module)](https://tsdocs.dev/docs/bybit-api)
 
