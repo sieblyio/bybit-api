@@ -3,6 +3,16 @@
  * Authenticated; API key permission per Bybit (often card-related).
  */
 
+export interface QueryCardListParamsV5 {
+  /** Include cancelled and invalid cards. Omitted, false or null uses default filtering. */
+  includeFinalCards?: boolean | null;
+}
+
+export interface QueryCardLimitParamsV5 {
+  /** Card ID belonging to the authenticated user. Must not be blank. */
+  cardId: string;
+}
+
 export interface QueryCardAssetRecordsParamsV5 {
   /** 0: Pending, 1: Cleared, 2: Declined */
   statusCode?: string;

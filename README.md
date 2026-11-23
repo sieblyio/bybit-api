@@ -96,9 +96,11 @@ Professional Node.js, JavaScript & TypeScript SDK for the Bybit REST APIs, WebSo
 - [Logging](#logging)
   - [Customise Logging](#customise-logging)
   - [Debug HTTP Requests](#debug-http-requests)
-- [Browser Usage](#browser-usage)
-  - [Import](#import)
-  - [Webpack](#webpack)
+- [Browser/Frontend Usage](#browserfrontend-usage)
+  - [Vite and React](#vite-and-react)
+  - [Next.js and server-side requests](#nextjs-and-server-side-requests)
+  - [React Native and Expo](#react-native-and-expo)
+  - [Standalone Webpack bundle](#standalone-webpack-bundle)
 - [Use with LLMs & AI](#use-with-llms--ai)
 - [Used By](#used-by)
 
@@ -711,42 +713,39 @@ const wsClient = new WebsocketClient(
 
 In rare situations, you may want to see the raw HTTP requets being built as well as the API response. These can be enabled by setting the `BYBITTRACE` env var to `true`.
 
-## Browser Usage
+## Browser/Frontend Usage
 
-### Import
+The npm package can be imported directly into frontend projects. You do not need to build the SDK's standalone Webpack bundle to use it in a frontend project. Choose the setup for your application below.
 
-This is the "modern" way, allowing the package to be directly imported into frontend projects with full typescript support.
+### Vite and React
 
-1. Install these dependencies
-   ```sh
-   npm install stream-browserify
-   ```
-2. Add this to your `tsconfig.json`
-   ```json
-   {
-     "compilerOptions": {
-       "paths": {
-         "stream": [
-           "./node_modules/stream-browserify"
-         ]
-   }
-   ```
-3. Declare this in the global context of your application (ex: in polyfills for angular)
-   ```js
-   (window as any).global = window;
-   ```
+Use the [Vite guide](https://sieblyio.github.io/docs/bybit/environments/vite.html) or [React guide](https://sieblyio.github.io/docs/bybit/environments/react.html) for a complete public market-data project that imports `bybit-api` from npm.
 
-### Webpack
+Keep the supplied bundler configuration with the example: it provides EventEmitter through the `events` package. These browser examples use public Bybit market data. Keep private keys and API credentials in a secure server-side environment and make authenticated calls there.
 
-This is the "old" way of using this package on webpages. This will build a minified js bundle that can be pulled in using a script tag on a website.
+Browser REST requests also depend on Bybit's CORS policy. If a request is blocked, call the SDK through your application's server route instead. A development proxy does not solve CORS for a deployed application.
 
-Build a bundle using webpack:
+### Next.js and server-side requests
 
-- `npm install`
-- `npm build`
-- `npm pack`
+The [Next.js guide](https://sieblyio.github.io/docs/bybit/environments/next.html) runs the SDK in a Node.js Route Handler and returns the result to the frontend. Use this pattern when requests need credentials or cannot be made directly from the browser.
 
-The bundle can be found in `dist/`. Altough usage should be largely consistent, smaller differences will exist. Documentation is still TODO - contributions welcome.
+### React Native and Expo
+
+Follow the [Expo guide](https://sieblyio.github.io/docs/bybit/environments/expo.html) for its Metro configuration and required dependencies, including `events`, `buffer`, `https-browserify`, `stream-http` and `url`. The Metro helper maps Node-style HTTP, HTTPS and URL imports to their polyfills. Browser bundler configuration is not interchangeable with Metro configuration. The example uses public Bybit market data; keep authenticated operations on your server.
+
+### Standalone Webpack bundle
+
+If you need a standalone UMD bundle rather than npm imports in your application, the SDK repository includes a [Webpack configuration](./webpack/webpack.config.js). From a checkout of this repository:
+
+```sh
+npm install
+npm run build
+npm run pack
+```
+
+The configuration writes `dist/bybitapi.js` with the `bybitapi` global name. This is a separate packaging option, not a required step for the framework guides above. Browser-specific configuration and API access restrictions still apply.
+
+The previous browser setup required `stream-browserify` for Node's `stream` module. If your bundler needs that polyfill, install it with `npm install stream-browserify` and configure your bundler to resolve `stream` to it. The repository's standalone Webpack configuration disables the Node-only `http` and `https` modules; its REST client cannot use Node's `https.Agent` in a browser.
 
 ## Use with LLMs & AI
 
