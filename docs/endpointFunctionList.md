@@ -417,8 +417,8 @@ This table includes all endpoints from the official Exchange API docs and corres
 | [createPwmFundSubAccount()](https://github.com/sieblyio/bybit-api/blob/master/src/rest-client-v5.ts#L5605) | :closed_lock_with_key:  | POST | `/v5/earn/pwm/asset-manager/create-sub-account` |
 | [pwmFundTransfer()](https://github.com/sieblyio/bybit-api/blob/master/src/rest-client-v5.ts#L5617) | :closed_lock_with_key:  | POST | `/v5/earn/pwm/fund-transfer` |
 | [getPwmFundTransferRecords()](https://github.com/sieblyio/bybit-api/blob/master/src/rest-client-v5.ts#L5626) | :closed_lock_with_key:  | GET | `/v5/earn/pwm/query-fund-transfer-result` |
-| [queryCardList()](https://github.com/sieblyio/bybit-api/blob/master/src/rest-client-v5.ts#L5643) | :closed_lock_with_key:  | POST | `/v5/card/list` |
-| [queryCardLimit()](https://github.com/sieblyio/bybit-api/blob/master/src/rest-client-v5.ts#L5654) | :closed_lock_with_key:  | POST | `/v5/card/limit/get` |
+| [getCardList()](https://github.com/sieblyio/bybit-api/blob/master/src/rest-client-v5.ts#L5643) | :closed_lock_with_key:  | POST | `/v5/card/list` |
+| [getCardLimit()](https://github.com/sieblyio/bybit-api/blob/master/src/rest-client-v5.ts#L5654) | :closed_lock_with_key:  | POST | `/v5/card/limit/get` |
 | [queryCardAssetRecords()](https://github.com/sieblyio/bybit-api/blob/master/src/rest-client-v5.ts#L5663) | :closed_lock_with_key:  | POST | `/v5/card/transaction/query-asset-records` |
 | [queryCardPointsBalance()](https://github.com/sieblyio/bybit-api/blob/master/src/rest-client-v5.ts#L5672) | :closed_lock_with_key:  | POST | `/v5/card/reward/points/balance` |
 | [queryCardPointsRecords()](https://github.com/sieblyio/bybit-api/blob/master/src/rest-client-v5.ts#L5679) | :closed_lock_with_key:  | POST | `/v5/card/reward/points/records` |

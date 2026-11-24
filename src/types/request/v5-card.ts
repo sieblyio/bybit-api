@@ -3,12 +3,12 @@
  * Authenticated; API key permission per Bybit (often card-related).
  */
 
-export interface QueryCardListParamsV5 {
+export interface GetCardListParamsV5 {
   /** Include cancelled and invalid cards. Omitted, false or null uses default filtering. */
   includeFinalCards?: boolean | null;
 }
 
-export interface QueryCardLimitParamsV5 {
+export interface GetCardLimitParamsV5 {
   /** Card ID belonging to the authenticated user. Must not be blank. */
   cardId: string;
 }

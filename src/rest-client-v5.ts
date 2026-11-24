@@ -276,6 +276,8 @@ import {
   GetBorrowOrderQuoteFixedParamsV5,
   GetBrokerIssuedVoucherParamsV5,
   GetBrokerSubAccountDepositsV5,
+  GetCardLimitParamsV5,
+  GetCardListParamsV5,
   GetClassicTransactionLogsParamsV5,
   GetClosedOptionsPositionsParamsV5,
   GetClosedPnLParamsV5,
@@ -533,8 +535,6 @@ import {
   PwmPendingInvestmentPlanDetailV5,
   PwmSubscribableProductInfoResultV5,
   QueryCardAssetRecordsParamsV5,
-  QueryCardLimitParamsV5,
-  QueryCardListParamsV5,
   QueryCardMallItemListParamsV5,
   QueryCardPointCashbackDetailParamsV5,
   QueryCardPointRecordsParamsV5,
@@ -5636,23 +5636,23 @@ export class RestClientV5 extends BaseRestClient {
    */
 
   /**
-   * Query the authenticated user's virtual and physical cards.
+   * Get the authenticated user's virtual and physical cards.
    *
    * @see https://bybit-exchange.github.io/docs/v5/bybit-card/card-list
    */
-  queryCardList(
-    params?: QueryCardListParamsV5,
+  getCardList(
+    params?: GetCardListParamsV5,
   ): Promise<APIResponseV3WithTime<CardListResultV5 | null>> {
     return this.postPrivate('/v5/card/list', params);
   }
 
   /**
-   * Query system limits, user-configured limits and current usage for a card.
+   * Get system limits, user-configured limits and current usage for a card.
    *
    * @see https://bybit-exchange.github.io/docs/v5/bybit-card/card-limit
    */
-  queryCardLimit(
-    params: QueryCardLimitParamsV5,
+  getCardLimit(
+    params: GetCardLimitParamsV5,
   ): Promise<APIResponseV3WithTime<CardLimitResultV5 | null>> {
     return this.postPrivate('/v5/card/limit/get', params);
   }

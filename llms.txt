@@ -5575,14 +5575,14 @@ File: src/types/request/v5-card.ts
  * Authenticated; API key permission per Bybit (often card-related).
  */
 ⋮----
-export interface QueryCardListParamsV5 {
+export interface GetCardListParamsV5 {
   /** Include cancelled and invalid cards. Omitted, false or null uses default filtering. */
   includeFinalCards?: boolean | null;
 }
 ⋮----
 /** Include cancelled and invalid cards. Omitted, false or null uses default filtering. */
 ⋮----
-export interface QueryCardLimitParamsV5 {
+export interface GetCardLimitParamsV5 {
   /** Card ID belonging to the authenticated user. Must not be blank. */
   cardId: string;
 }
@@ -18854,6 +18854,8 @@ import {
   GetBorrowOrderQuoteFixedParamsV5,
   GetBrokerIssuedVoucherParamsV5,
   GetBrokerSubAccountDepositsV5,
+  GetCardLimitParamsV5,
+  GetCardListParamsV5,
   GetClassicTransactionLogsParamsV5,
   GetClosedOptionsPositionsParamsV5,
   GetClosedPnLParamsV5,
@@ -19111,8 +19113,6 @@ import {
   PwmPendingInvestmentPlanDetailV5,
   PwmSubscribableProductInfoResultV5,
   QueryCardAssetRecordsParamsV5,
-  QueryCardLimitParamsV5,
-  QueryCardListParamsV5,
   QueryCardMallItemListParamsV5,
   QueryCardPointCashbackDetailParamsV5,
   QueryCardPointRecordsParamsV5,
@@ -23267,29 +23267,29 @@ getPwmFundTransferRecords(
    */
 ⋮----
 /**
-   * Query the authenticated user's virtual and physical cards.
+   * Get the authenticated user's virtual and physical cards.
    *
    * @see https://bybit-exchange.github.io/docs/v5/bybit-card/card-list
    */
-queryCardList(
-    params?: QueryCardListParamsV5,
-  ): Promise<APIResponseV3WithTime<CardListResultV5 | null>>
+getCardList(
+    params?: GetCardListParamsV5,
+): Promise<APIResponseV3WithTime<CardListResultV5 | null>>
 ⋮----
 /**
-   * Query system limits, user-configured limits and current usage for a card.
+   * Get system limits, user-configured limits and current usage for a card.
    *
    * @see https://bybit-exchange.github.io/docs/v5/bybit-card/card-limit
    */
-queryCardLimit(
-    params: QueryCardLimitParamsV5,
-  ): Promise<APIResponseV3WithTime<CardLimitResultV5 | null>>
+getCardLimit(
+    params: GetCardLimitParamsV5,
+): Promise<APIResponseV3WithTime<CardLimitResultV5 | null>>
 ⋮----
 /**
    * Bybit Card — query card transaction / asset history (filter by status, card digits, merchant, time, type, …).
    */
 queryCardAssetRecords(
     params?: QueryCardAssetRecordsParamsV5,
-  ): Promise<APIResponseV3WithTime<CardAssetRecordsResultV5>>
+): Promise<APIResponseV3WithTime<CardAssetRecordsResultV5>>
 ⋮----
 /**
    * Bybit Card — point balance (available, pending, account status, …).
