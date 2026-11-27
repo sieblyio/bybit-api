@@ -102,6 +102,8 @@ import {
   CancelRFQResultV5,
   CancelSupplyOrderFixedParamsV5,
   CardAssetRecordsResultV5,
+  CardLimitResultV5,
+  CardListResultV5,
   CardMallItemListResultV5,
   CardPointBalanceV5,
   CardPointCashbackDetailV5,
@@ -274,6 +276,8 @@ import {
   GetBorrowOrderQuoteFixedParamsV5,
   GetBrokerIssuedVoucherParamsV5,
   GetBrokerSubAccountDepositsV5,
+  GetCardLimitParamsV5,
+  GetCardListParamsV5,
   GetClassicTransactionLogsParamsV5,
   GetClosedOptionsPositionsParamsV5,
   GetClosedPnLParamsV5,
@@ -443,6 +447,7 @@ import {
   InstitutionalLendingDelayLiquidationStatusV5,
   InstitutionalLendingProductInfoV5,
   InstitutionalLoanLTVV5,
+  InstitutionConnectionLimitV5,
   InstrumentInfoResponseV5,
   InstrumentSummaryResponseV5,
   InsuranceResponseV5,
@@ -4650,6 +4655,24 @@ export class RestClientV5 extends BaseRestClient {
 
   /**
    *
+   ****** Institution Connection
+   *
+   */
+
+  /**
+   * Get institution connection limits and current usage for each dedicated endpoint.
+   * Requires a master account API key. API rate limit: 1 req per minute.
+   *
+   * @see https://bybit-exchange.github.io/docs/v5/institution/connection-limit
+   */
+  getInstitutionConnectionLimit(): Promise<
+    APIResponseV3WithTime<InstitutionConnectionLimitV5[]>
+  > {
+    return this.getPrivate('/v5/ins/connection-limit');
+  }
+
+  /**
+   *
    ****** Institutional Lending
    *
    */
@@ -5611,6 +5634,28 @@ export class RestClientV5 extends BaseRestClient {
    ****** Bybit Card APIs
    *
    */
+
+  /**
+   * Get the authenticated user's virtual and physical cards.
+   *
+   * @see https://bybit-exchange.github.io/docs/v5/bybit-card/card-list
+   */
+  getCardList(
+    params?: GetCardListParamsV5,
+  ): Promise<APIResponseV3WithTime<CardListResultV5 | null>> {
+    return this.postPrivate('/v5/card/list', params);
+  }
+
+  /**
+   * Get system limits, user-configured limits and current usage for a card.
+   *
+   * @see https://bybit-exchange.github.io/docs/v5/bybit-card/card-limit
+   */
+  getCardLimit(
+    params: GetCardLimitParamsV5,
+  ): Promise<APIResponseV3WithTime<CardLimitResultV5 | null>> {
+    return this.postPrivate('/v5/card/limit/get', params);
+  }
 
   /**
    * Bybit Card — query card transaction / asset history (filter by status, card digits, merchant, time, type, …).
